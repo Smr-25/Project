@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="src/HRManagementApp/HRManagementApp.csproj" />
+  <Project Path="src/HRManagementApp.Core/HRManagementApp.Core.csproj" />
+  <Project Path="src/HRManagementApp.Business/HRManagementApp.Business.csproj" />
+  <Project Path="src/HRManagementApp.DataAccess/HRManagementApp.DataAccess.csproj" />
+</Solution>
