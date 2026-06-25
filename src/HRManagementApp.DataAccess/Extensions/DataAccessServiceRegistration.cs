@@ -9,7 +9,7 @@ public static class DataAccessServiceRegistration
     public static IServiceCollection AddDataAccessServices(this IServiceCollection services, string connectionString)
     {
         services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlServer(connectionString));
+            options.UseNpgsql(connectionString));
             
         return services;
     }
