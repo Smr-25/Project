@@ -11,6 +11,6 @@ public class EditEmployeeViewModel
     public string Position { get; set; } = null!;
     
     [Required(ErrorMessage = "Salary is required.")]
-    [Range(250, double.MaxValue, ErrorMessage = "Salary cannot be less than 250.")]
-    public double Salary { get; set; }
+    [Range(typeof(decimal), "250", "1000000000", ErrorMessage = "Salary cannot be less than 250.")]
+    public decimal Salary { get; set; }
 }

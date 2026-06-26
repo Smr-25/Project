@@ -5,17 +5,17 @@ namespace HRManagementApp.Core.Interfaces;
 
 public interface IHumanResourceManager
 {
-    List<Department> Departments { get; }
-
-    void AddDepartment(string name, int workerLimit, double salaryLimit);
+    void AddDepartment(string name, int workerLimit, decimal salaryLimit);
     List<Department> GetDepartments();
-    void EditDepartments(string oldName, string newName);
-    void RemoveDepartment(string name);
+    Department? GetDepartment(int id);
+    void EditDepartment(int id, string newName);
+    void RemoveDepartment(int id);
     List<Department> SearchDepartments(string query);
 
-    void AddEmployee(string fullName, string position, double salary, string departmentName);
-    void RemoveEmployee(string no, string departmentName);
-    void EditEmployee(string no, string position, double salary);
-    
+    void AddEmployee(string fullName, string position, decimal salary, int departmentId);
+    Employee? GetEmployee(int id);
+    void RemoveEmployee(int id);
+    void EditEmployee(int id, string position, decimal salary);
+    List<Employee> GetEmployees();
     List<Employee> Search(string query);
 }
