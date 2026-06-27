@@ -3,40 +3,40 @@ using Microsoft.EntityFrameworkCore;
 
 namespace HRManagementApp.DataAccess.Context;
 
-public class AppDbContext : DbContext
+public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(options)
 {
-    public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
-    {
-    }
-
-    public DbSet<Department> Departments { get; set; } = null!;
-    public DbSet<Employee> Employees { get; set; } = null!;
+    public DbSet<Department> Departments => Set<Department>();
+    public DbSet<Employee> Employees => Set<Employee>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Department>().HasKey(d => d.Name);
-        modelBuilder.Entity<Employee>().HasKey(e => e.No);
+        modelBuilder.Entity<Department>(entity =>
+        {
+            entity.HasKey(department => department.Id);
+            entity.Property(department => department.Name)
+                .HasColumnType("citext")
+                .HasMaxLength(100)
+                .IsRequired();
+            entity.HasIndex(department => department.Name).IsUnique();
+            entity.Property(department => department.SalaryLimit)
+                .HasPrecision(12, 2);
+            entity.HasCheckConstraint("CK_Departments_WorkerLimit", "\"WorkerLimit\" >= 1");
+            entity.HasCheckConstraint("CK_Departments_SalaryLimit", "\"SalaryLimit\" >= 250");
+        });
 
-        modelBuilder.Entity<Employee>()
-            .HasOne<Department>()
-            .WithMany(d => d.Employees)
-            .HasForeignKey(e => e.DepartmentName)
-            .OnDelete(DeleteBehavior.Cascade);
-
-        // Seed Data 
-        modelBuilder.Entity<Department>().HasData(
-            new Department { Name = "IT", WorkerLimit = 10, SalaryLimit = 25000 },
-            new Department { Name = "HR", WorkerLimit = 5, SalaryLimit = 10000 },
-            new Department { Name = "Marketing", WorkerLimit = 8, SalaryLimit = 12000 }
-        );
-
-        modelBuilder.Entity<Employee>().HasData(
-            new Employee { No = "IT1001", FullName = "Samir Həsənov", Position = "Senior Backend Developer", Salary = 3500, DepartmentName = "IT" },
-            new Employee { No = "IT1002", FullName = "Leyla Əliyeva", Position = "Frontend Developer", Salary = 2000, DepartmentName = "IT" },
-            new Employee { No = "HR1003", FullName = "Vüqar Kərimov", Position = "HR Specialist", Salary = 1500, DepartmentName = "HR" },
-            new Employee { No = "MA1004", FullName = "Nigar Rüstəmova", Position = "Marketing Manager", Salary = 2500, DepartmentName = "Marketing" }
-        );
-
-        base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<Employee>(entity =>
+        {
+            entity.HasKey(employee => employee.Id);
+            entity.Property(employee => employee.No).HasMaxLength(32);
+            entity.HasIndex(employee => employee.No).IsUnique();
+            entity.Property(employee => employee.FullName).HasMaxLength(150).IsRequired();
+            entity.Property(employee => employee.Position).HasMaxLength(100).IsRequired();
+            entity.Property(employee => employee.Salary).HasPrecision(12, 2);
+            entity.HasCheckConstraint("CK_Employees_Salary", "\"Salary\" >= 250");
+            entity.HasOne(employee => employee.Department)
+                .WithMany(department => department.Employees)
+                .HasForeignKey(employee => employee.DepartmentId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
     }
 }
