@@ -1,172 +1,187 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using Microsoft.EntityFrameworkCore;
+using System.Data;
 using HRManagementApp.Core.Entities;
 using HRManagementApp.Core.Interfaces;
 using HRManagementApp.DataAccess.Context;
+using Microsoft.EntityFrameworkCore;
 
 namespace HRManagementApp.Business.Services;
 
 public class HumanResourceManager(AppDbContext context) : IHumanResourceManager
 {
-    public List<Department> Departments => context.Departments.Include(d => d.Employees).ToList();
+    public List<Department> GetDepartments() => context.Departments
+        .AsNoTracking()
+        .Include(department => department.Employees)
+        .OrderBy(department => department.Name)
+        .ToList();
 
-    public void AddDepartment(string name, int workerLimit, double salaryLimit)
+    public Department? GetDepartment(int id) => context.Departments
+        .AsNoTracking()
+        .Include(department => department.Employees)
+        .FirstOrDefault(department => department.Id == id);
+
+    public List<Department> SearchDepartments(string query)
     {
-        if (context.Departments.Any(d => d.Name.ToLower() == name.ToLower()))
-            throw new Exception("Department with this name already exists!");
+        if (string.IsNullOrWhiteSpace(query)) return GetDepartments();
 
-        var department = new Department
+        var pattern = $"%{query.Trim()}%";
+        return context.Departments.AsNoTracking()
+            .Include(department => department.Employees)
+            .Where(department => EF.Functions.ILike(department.Name, pattern))
+            .OrderBy(department => department.Name)
+            .ToList();
+    }
+
+    public void AddDepartment(string name, int workerLimit, decimal salaryLimit)
+    {
+        name = ValidateDepartment(name, workerLimit, salaryLimit);
+        if (context.Departments.Any(department => department.Name == name))
+            throw new BusinessRuleException("A department with this name already exists.");
+
+        context.Departments.Add(new Department
         {
             Name = name,
             WorkerLimit = workerLimit,
             SalaryLimit = salaryLimit
-        };
-
-        context.Departments.Add(department);
+        });
         context.SaveChanges();
     }
 
-    public List<Department> GetDepartments()
+    public void EditDepartment(int id, string newName)
     {
-        return Departments;
+        newName = newName?.Trim() ?? "";
+        if (newName.Length is < 2 or > 100)
+            throw new BusinessRuleException("Department name must be between 2 and 100 characters.");
+
+        var department = context.Departments.Find(id)
+            ?? throw new BusinessRuleException("Department not found.");
+        if (context.Departments.Any(other => other.Id != id && other.Name == newName))
+            throw new BusinessRuleException("A department with this name already exists.");
+
+        department.Name = newName;
+        context.SaveChanges();
     }
 
-    public void EditDepartments(string oldName, string newName)
+    public void RemoveDepartment(int id)
     {
-        var department = context.Departments.Include(d => d.Employees)
-            .FirstOrDefault(d => d.Name.ToLower() == oldName.ToLower());
-            
-        if (department == null)
-            throw new Exception("Department not found!");
-            
-        if (!oldName.Equals(newName, StringComparison.OrdinalIgnoreCase) && 
-            context.Departments.Any(d => d.Name.ToLower() == newName.ToLower()))
-            throw new Exception("Department with this new name already exists!");
-
-        if (!oldName.Equals(newName, StringComparison.OrdinalIgnoreCase))
-        {
-            var newDept = new Department
-            {
-                Name = newName,
-                WorkerLimit = department.WorkerLimit,
-                SalaryLimit = department.SalaryLimit
-            };
-            
-            context.Departments.Add(newDept);
-            
-            foreach (var emp in department.Employees.ToList())
-            {
-                emp.DepartmentName = newName;
-            }
-            
-            context.Departments.Remove(department);
-            context.SaveChanges();
-        }
-    }
-
-    public void RemoveDepartment(string name)
-    {
-        var department = context.Departments.FirstOrDefault(d => d.Name.ToLower() == name.ToLower());
-        if (department == null)
-            throw new Exception("Department not found!");
-
+        var department = context.Departments.Find(id)
+            ?? throw new BusinessRuleException("Department not found.");
         context.Departments.Remove(department);
         context.SaveChanges();
     }
 
-    public List<Department> SearchDepartments(string query)
-    {
-        if (string.IsNullOrWhiteSpace(query))
-            return context.Departments.Include(d => d.Employees).ToList();
+    public List<Employee> GetEmployees() => context.Employees
+        .AsNoTracking()
+        .Include(employee => employee.Department)
+        .OrderBy(employee => employee.Id)
+        .ToList();
 
-        query = query.ToLower();
-        return context.Departments.Include(d => d.Employees)
-            .Where(d => d.Name.ToLower().Contains(query))
+    public Employee? GetEmployee(int id) => context.Employees
+        .AsNoTracking()
+        .Include(employee => employee.Department)
+        .FirstOrDefault(employee => employee.Id == id);
+
+    public List<Employee> Search(string query)
+    {
+        if (string.IsNullOrWhiteSpace(query)) return GetEmployees();
+
+        var pattern = $"%{query.Trim()}%";
+        return context.Employees.AsNoTracking()
+            .Include(employee => employee.Department)
+            .Where(employee => EF.Functions.ILike(employee.FullName, pattern)
+                || EF.Functions.ILike(employee.No ?? "", pattern)
+                || EF.Functions.ILike(employee.Position, pattern)
+                || EF.Functions.ILike(employee.Department.Name, pattern))
+            .OrderBy(employee => employee.Id)
             .ToList();
     }
 
-    public void AddEmployee(string fullName, string position, double salary, string departmentName)
+    public void AddEmployee(string fullName, string position, decimal salary, int departmentId)
     {
-        var department = context.Departments.Include(d => d.Employees)
-            .FirstOrDefault(d => d.Name.ToLower() == departmentName.ToLower());
-            
-        if (department == null)
-            throw new Exception("Specified department not found!");
+        ValidateEmployee(fullName, position, salary);
+        using var transaction = context.Database.BeginTransaction(IsolationLevel.Serializable);
+
+        var department = context.Departments
+            .Include(item => item.Employees)
+            .FirstOrDefault(item => item.Id == departmentId)
+            ?? throw new BusinessRuleException("Select an existing department.");
 
         if (department.Employees.Count >= department.WorkerLimit)
-            throw new Exception("Worker limit in the department has been reached!");
-
-        if (department.Employees.Sum(e => e.Salary) + salary > department.SalaryLimit)
-            throw new Exception("Department salary limit has been exceeded!");
-
-        int currentTotalEmployees = context.Employees.Count() + 1000 + 1;
-        
-        string prefix = department.Name.Length >= 2 
-            ? department.Name.Substring(0, 2).ToUpper() 
-            : department.Name.ToUpper();
-            
-        string employeeNo = $"{prefix}{currentTotalEmployees}";
+            throw new BusinessRuleException("The department worker limit has been reached.");
+        if (department.Employees.Sum(employee => employee.Salary) + salary > department.SalaryLimit)
+            throw new BusinessRuleException("The department salary budget would be exceeded.");
 
         var employee = new Employee
         {
-            No = employeeNo,
-            FullName = fullName,
-            Position = position,
+            FullName = fullName.Trim(),
+            Position = position.Trim(),
             Salary = salary,
-            DepartmentName = department.Name
+            DepartmentId = departmentId
         };
-
         context.Employees.Add(employee);
         context.SaveChanges();
+
+        var prefix = new string(department.Name
+            .Where(char.IsLetterOrDigit)
+            .Take(2)
+            .ToArray()).ToUpperInvariant();
+        employee.No = $"{(prefix.Length == 0 ? "EM" : prefix)}{employee.Id + 1000}";
+        context.SaveChanges();
+        transaction.Commit();
     }
 
-    public void RemoveEmployee(string no, string departmentName)
+    public void EditEmployee(int id, string position, decimal salary)
     {
-        var employee = context.Employees.FirstOrDefault(e => 
-            e.No.ToLower() == no.ToLower() && 
-            e.DepartmentName.ToLower() == departmentName.ToLower());
-            
-        if (employee == null)
-            throw new Exception("Employee not found in the specified department!");
+        ValidatePositionAndSalary(position, salary);
+        using var transaction = context.Database.BeginTransaction(IsolationLevel.Serializable);
 
+        var employee = context.Employees
+            .Include(item => item.Department)
+            .ThenInclude(department => department.Employees)
+            .FirstOrDefault(item => item.Id == id)
+            ?? throw new BusinessRuleException("Employee not found.");
+
+        var total = employee.Department.Employees.Sum(item => item.Salary) - employee.Salary + salary;
+        if (total > employee.Department.SalaryLimit)
+            throw new BusinessRuleException("The department salary budget would be exceeded.");
+
+        employee.Position = position.Trim();
+        employee.Salary = salary;
+        context.SaveChanges();
+        transaction.Commit();
+    }
+
+    public void RemoveEmployee(int id)
+    {
+        var employee = context.Employees.Find(id)
+            ?? throw new BusinessRuleException("Employee not found.");
         context.Employees.Remove(employee);
         context.SaveChanges();
     }
 
-    public void EditEmployee(string no, string position, double salary)
+    private static string ValidateDepartment(string? name, int workerLimit, decimal salaryLimit)
     {
-        var employee = context.Employees.FirstOrDefault(e => e.No.ToLower() == no.ToLower());
-        if (employee == null)
-            throw new Exception("Employee with the specified number not found!");
-
-        if (salary != employee.Salary)
-        {
-            var department = context.Departments.Include(d => d.Employees)
-                .First(d => d.Name == employee.DepartmentName);
-                
-            double newTotalSalary = department.Employees.Sum(e => e.Salary) - employee.Salary + salary;
-            if (newTotalSalary > department.SalaryLimit)
-                throw new Exception("Salary increase exceeds the department's salary limit!");
-        }
-        
-        employee.Position = position;
-        employee.Salary = salary;
-        context.SaveChanges();
+        name = name?.Trim() ?? "";
+        if (name.Length is < 2 or > 100)
+            throw new BusinessRuleException("Department name must be between 2 and 100 characters.");
+        if (workerLimit < 1)
+            throw new BusinessRuleException("Worker limit must be at least one.");
+        if (salaryLimit < 250)
+            throw new BusinessRuleException("Salary limit must be at least 250 AZN.");
+        return name;
     }
 
-    public List<Employee> Search(string query)
+    private static void ValidateEmployee(string? fullName, string? position, decimal salary)
     {
-        if (string.IsNullOrWhiteSpace(query))
-            return new List<Employee>();
+        if (string.IsNullOrWhiteSpace(fullName) || fullName.Length > 150)
+            throw new BusinessRuleException("Employee name is required and must be at most 150 characters.");
+        ValidatePositionAndSalary(position, salary);
+    }
 
-        query = query.ToLower();
-        return context.Employees
-            .Where(e => e.FullName.ToLower().Contains(query) || 
-                        e.No.ToLower().Contains(query) || 
-                        e.Position.ToLower().Contains(query) || 
-                        e.DepartmentName.ToLower().Contains(query))
-            .ToList();
+    private static void ValidatePositionAndSalary(string? position, decimal salary)
+    {
+        if (string.IsNullOrWhiteSpace(position) || position.Trim().Length is < 2 or > 100)
+            throw new BusinessRuleException("Position must be between 2 and 100 characters.");
+        if (salary < 250)
+            throw new BusinessRuleException("Salary must be at least 250 AZN.");
     }
 }
