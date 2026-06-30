@@ -9,7 +9,8 @@ public class DepartmentDtoValidator : AbstractValidator<DepartmentDto>
     {
         RuleFor(x => x.Name)
             .NotEmpty().WithMessage("Department name cannot be empty.")
-            .MinimumLength(2).WithMessage("Department name must be at least 2 characters long.");
+            .MinimumLength(2).WithMessage("Department name must be at least 2 characters long.")
+            .MaximumLength(100);
 
         RuleFor(x => x.WorkerLimit)
             .GreaterThanOrEqualTo(1).WithMessage("Worker limit in the department must be at least 1.");
