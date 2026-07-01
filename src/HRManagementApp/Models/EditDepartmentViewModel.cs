@@ -4,6 +4,7 @@ namespace HRManagementApp.Models;
 
 public class EditDepartmentViewModel
 {
+    public int Id { get; set; }
     public string OldName { get; set; } = null!;
     
     [Required(ErrorMessage = "New name is required.")]

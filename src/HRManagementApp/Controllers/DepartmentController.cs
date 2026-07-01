@@ -1,102 +1,96 @@
-using System.Linq;
-using Microsoft.AspNetCore.Mvc;
-using HRManagementApp.Core.Interfaces;
+using FluentValidation;
 using HRManagementApp.Business.DTOs;
+using HRManagementApp.Business.Services;
+using HRManagementApp.Core.Interfaces;
 using HRManagementApp.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace HRManagementApp.Controllers;
 
-public class DepartmentController(IHumanResourceManager manager) : Controller
+public class DepartmentController(
+    IHumanResourceManager manager,
+    IValidator<DepartmentDto> validator) : Controller
 {
-    public IActionResult Index(string search = null)
+    public IActionResult Index(string? search)
     {
         ViewData["SearchQuery"] = search;
-
-        var departments = string.IsNullOrWhiteSpace(search) 
-            ? manager.GetDepartments() 
+        var departments = string.IsNullOrWhiteSpace(search)
+            ? manager.GetDepartments()
             : manager.SearchDepartments(search);
-            
         return View(departments);
     }
 
     [HttpGet]
-    public IActionResult Create()
-    {
-        return View(new DepartmentDto());
-    }
+    public IActionResult Create() => View(new DepartmentDto());
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public IActionResult Create(DepartmentDto dto)
     {
-        if (!ModelState.IsValid)
-        {
-            return View(dto);
-        }
+        var validation = validator.Validate(dto);
+        foreach (var error in validation.Errors)
+            ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
+        if (!ModelState.IsValid) return View(dto);
 
         try
         {
             manager.AddDepartment(dto.Name, dto.WorkerLimit, dto.SalaryLimit);
-            TempData["SuccessMessage"] = "Department created successfully!";
+            TempData["SuccessMessage"] = "Department created successfully.";
             return RedirectToAction(nameof(Index));
         }
-        catch (System.Exception ex)
+        catch (BusinessRuleException exception)
         {
-            ModelState.AddModelError(string.Empty, ex.Message);
+            ModelState.AddModelError(string.Empty, exception.Message);
             return View(dto);
         }
     }
 
     [HttpGet]
-    public IActionResult Edit(string name)
+    public IActionResult Edit(int id)
     {
-        if (string.IsNullOrEmpty(name)) return BadRequest();
+        var department = manager.GetDepartment(id);
+        if (department is null) return NotFound();
 
-        var dept = manager.GetDepartments().FirstOrDefault(d => d.Name.Equals(name, System.StringComparison.OrdinalIgnoreCase));
-        if (dept == null)
+        return View(new EditDepartmentViewModel
         {
-            return NotFound();
-        }
-
-        var model = new EditDepartmentViewModel
-        {
-            OldName = dept.Name,
-            NewName = dept.Name
-        };
-
-        return View(model);
+            Id = department.Id,
+            OldName = department.Name,
+            NewName = department.Name
+        });
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public IActionResult Edit(EditDepartmentViewModel model)
     {
         if (!ModelState.IsValid) return View(model);
 
         try
         {
-            manager.EditDepartments(model.OldName, model.NewName);
-            TempData["SuccessMessage"] = $"Department name updated to: {model.NewName}";
+            manager.EditDepartment(model.Id, model.NewName);
+            TempData["SuccessMessage"] = "Department name updated successfully.";
             return RedirectToAction(nameof(Index));
         }
-        catch (System.Exception ex)
+        catch (BusinessRuleException exception)
         {
-            ModelState.AddModelError(string.Empty, ex.Message);
+            ModelState.AddModelError(string.Empty, exception.Message);
             return View(model);
         }
     }
 
     [HttpPost]
-    public IActionResult Delete(string name)
+    [ValidateAntiForgeryToken]
+    public IActionResult Delete(int id)
     {
         try
         {
-            manager.RemoveDepartment(name);
-            TempData["SuccessMessage"] = "Department deleted successfully!";
+            manager.RemoveDepartment(id);
+            TempData["SuccessMessage"] = "Department deleted successfully.";
         }
-        catch (System.Exception ex)
+        catch (BusinessRuleException exception)
         {
-            TempData["ErrorMessage"] = ex.Message;
+            TempData["ErrorMessage"] = exception.Message;
         }
-        
         return RedirectToAction(nameof(Index));
     }
 }

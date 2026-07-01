@@ -43,18 +43,18 @@
             <tr>
                 <td class="fw-bold text-primary">@dept.Name</td>
                 <td>@dept.WorkerLimit</td>
-                <td>@dept.SalaryLimit.ToString("C2")</td>
+                <td>@dept.SalaryLimit.ToString("N2") AZN</td>
                 <td>
                     <span class="badge @(dept.Employees.Count == dept.WorkerLimit ? "bg-danger" : "bg-success")">
                         @dept.Employees.Count / @dept.WorkerLimit
                     </span>
                 </td>
-                <td>@dept.CalcSalaryAverage().ToString("C2")</td>
+                <td>@dept.CalcSalaryAverage().ToString("N2") AZN</td>
                 <td>
                     <div class="d-flex gap-2">
-                        <a asp-action="Edit" asp-route-name="@dept.Name" class="btn btn-sm btn-warning shadow-sm">Edit Name</a>
+                        <a asp-action="Edit" asp-route-id="@dept.Id" class="btn btn-sm btn-warning shadow-sm">Edit Name</a>
                         <form asp-action="Delete" method="post" onsubmit="return confirm('Are you sure you want to delete this department?\nAll employees inside will be deleted as well!');">
-                            <input type="hidden" name="name" value="@dept.Name" />
+                            <input type="hidden" name="id" value="@dept.Id" />
                             <button type="submit" class="btn btn-sm btn-danger shadow-sm">Delete</button>
                         </form>
                     </div>
