@@ -4,6 +4,7 @@ namespace HRManagementApp.Models;
 
 public class EditEmployeeViewModel
 {
+    public int Id { get; set; }
     public string No { get; set; } = null!;
     
     [Required(ErrorMessage = "Position is required.")]

@@ -1,128 +1,110 @@
-using System.Linq;
+using FluentValidation;
+using HRManagementApp.Business.DTOs;
+using HRManagementApp.Business.Services;
+using HRManagementApp.Core.Interfaces;
+using HRManagementApp.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using HRManagementApp.Core.Interfaces;
-using HRManagementApp.Business.DTOs;
-using HRManagementApp.Models;
-using HRManagementApp.Core.Entities;
-using System.Collections.Generic;
 
 namespace HRManagementApp.Controllers;
 
-public class EmployeeController : Controller
+public class EmployeeController(
+    IHumanResourceManager manager,
+    IValidator<EmployeeDto> validator) : Controller
 {
-    private readonly IHumanResourceManager _manager;
-
-    public EmployeeController(IHumanResourceManager manager)
-    {
-        _manager = manager;
-    }
-
     public IActionResult Index(string? query)
     {
-        List<Employee> employees;
-
-        if (string.IsNullOrWhiteSpace(query))
-        {
-            employees = _manager.GetDepartments().SelectMany(d => d.Employees).ToList();
-        }
-        else
-        {
-            employees = _manager.Search(query);
-            ViewBag.SearchQuery = query;
-        }
-
+        ViewBag.SearchQuery = query;
+        var employees = string.IsNullOrWhiteSpace(query)
+            ? manager.GetEmployees()
+            : manager.Search(query);
         return View(employees);
     }
 
     [HttpGet]
     public IActionResult Create()
     {
-        var departments = _manager.GetDepartments();
-        ViewBag.Departments = new SelectList(departments, "Name", "Name");
+        SetDepartments();
         return View(new EmployeeDto());
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public IActionResult Create(EmployeeDto dto)
     {
+        var validation = validator.Validate(dto);
+        foreach (var error in validation.Errors)
+            ModelState.AddModelError(error.PropertyName, error.ErrorMessage);
         if (!ModelState.IsValid)
         {
-            var departments = _manager.GetDepartments();
-            ViewBag.Departments = new SelectList(departments, "Name", "Name");
+            SetDepartments();
             return View(dto);
         }
 
         try
         {
-            _manager.AddEmployee(dto.FullName, dto.Position, dto.Salary, dto.DepartmentName);
-            TempData["SuccessMessage"] = "Employee created successfully!";
+            manager.AddEmployee(dto.FullName, dto.Position, dto.Salary, dto.DepartmentId);
+            TempData["SuccessMessage"] = "Employee created successfully.";
             return RedirectToAction(nameof(Index));
         }
-        catch (System.Exception ex)
+        catch (BusinessRuleException exception)
         {
-            ModelState.AddModelError(string.Empty, ex.Message);
-            var departments = _manager.GetDepartments();
-            ViewBag.Departments = new SelectList(departments, "Name", "Name");
+            ModelState.AddModelError(string.Empty, exception.Message);
+            SetDepartments();
             return View(dto);
         }
     }
 
     [HttpGet]
-    public IActionResult Edit(string no)
+    public IActionResult Edit(int id)
     {
-        if (string.IsNullOrEmpty(no)) return BadRequest();
+        var employee = manager.GetEmployee(id);
+        if (employee is null) return NotFound();
 
-        var employee = _manager.GetDepartments()
-            .SelectMany(d => d.Employees)
-            .FirstOrDefault(e => e.No.Equals(no, System.StringComparison.OrdinalIgnoreCase));
-
-        if (employee == null)
+        return View(new EditEmployeeViewModel
         {
-            return NotFound();
-        }
-
-        var model = new EditEmployeeViewModel
-        {
-            No = employee.No,
+            Id = employee.Id,
+            No = employee.No ?? "",
             Position = employee.Position,
             Salary = employee.Salary
-        };
-
-        return View(model);
+        });
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public IActionResult Edit(EditEmployeeViewModel model)
     {
         if (!ModelState.IsValid) return View(model);
 
         try
         {
-            _manager.EditEmployee(model.No, model.Position, model.Salary);
-            TempData["SuccessMessage"] = $"Employee data updated successfully for ID: {model.No}";
+            manager.EditEmployee(model.Id, model.Position, model.Salary);
+            TempData["SuccessMessage"] = "Employee updated successfully.";
             return RedirectToAction(nameof(Index));
         }
-        catch (System.Exception ex)
+        catch (BusinessRuleException exception)
         {
-            ModelState.AddModelError(string.Empty, ex.Message);
+            ModelState.AddModelError(string.Empty, exception.Message);
             return View(model);
         }
     }
 
     [HttpPost]
-    public IActionResult Delete(string no, string departmentName)
+    [ValidateAntiForgeryToken]
+    public IActionResult Delete(int id)
     {
         try
         {
-            _manager.RemoveEmployee(no, departmentName);
-            TempData["SuccessMessage"] = "Employee deleted successfully!";
+            manager.RemoveEmployee(id);
+            TempData["SuccessMessage"] = "Employee deleted successfully.";
         }
-        catch (System.Exception ex)
+        catch (BusinessRuleException exception)
         {
-            TempData["ErrorMessage"] = ex.Message;
+            TempData["ErrorMessage"] = exception.Message;
         }
-
         return RedirectToAction(nameof(Index));
     }
+
+    private void SetDepartments() => ViewBag.Departments = new SelectList(
+        manager.GetDepartments(), "Id", "Name");
 }
