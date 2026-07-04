@@ -1,11 +1,10 @@
 using FluentValidation;
+using HRManagementApp.DataAccess.Context;
 using HRManagementApp.DataAccess.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Configuration.AddJsonFile("appsettings.Mac.json", optional: true, reloadOnChange: true);
-
 builder.Services.AddControllersWithViews();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") 
@@ -19,11 +18,17 @@ builder.Services.AddValidatorsFromAssemblyContaining<HRManagementApp.Business.Va
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    await DatabaseInitializer.InitializeAsync(context);
+}
+
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // app.UseHsts();
+    app.UseHsts();
 }
 
 app.UseHttpsRedirection();
@@ -35,5 +40,7 @@ app.UseAuthorization();
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.MapGet("/healthz", () => Results.Ok(new { status = "ok" }));
 
 app.Run();
