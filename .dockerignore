@@ -1,0 +1,11 @@
+.git
+.DS_Store
+**/bin/
+**/obj/
+**/.vs/
+**/.idea/
+**/.vscode/
+**/*.user
+**/*.suo
+**/*.log
+appsettings.Mac.json
