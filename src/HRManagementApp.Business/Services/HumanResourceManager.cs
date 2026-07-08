@@ -105,9 +105,9 @@ public class HumanResourceManager(AppDbContext context) : IHumanResourceManager
             .FirstOrDefault(item => item.Id == departmentId)
             ?? throw new BusinessRuleException("Select an existing department.");
 
-        if (department.Employees.Count >= department.WorkerLimit)
+        if (!DepartmentPolicy.HasAvailablePosition(department))
             throw new BusinessRuleException("The department worker limit has been reached.");
-        if (department.Employees.Sum(employee => employee.Salary) + salary > department.SalaryLimit)
+        if (!DepartmentPolicy.FitsSalaryBudget(department, salary))
             throw new BusinessRuleException("The department salary budget would be exceeded.");
 
         var employee = new Employee
@@ -140,8 +140,7 @@ public class HumanResourceManager(AppDbContext context) : IHumanResourceManager
             .FirstOrDefault(item => item.Id == id)
             ?? throw new BusinessRuleException("Employee not found.");
 
-        var total = employee.Department.Employees.Sum(item => item.Salary) - employee.Salary + salary;
-        if (total > employee.Department.SalaryLimit)
+        if (!DepartmentPolicy.FitsSalaryBudget(employee.Department, salary, employee.Salary))
             throw new BusinessRuleException("The department salary budget would be exceeded.");
 
         employee.Position = position.Trim();
