@@ -3,13 +3,13 @@
     ViewData["Title"] = "Employees";
 }
 
-<div class="d-flex justify-content-between align-items-center mb-4">
+<div class="d-flex flex-wrap gap-3 justify-content-between align-items-center mb-4">
     <h2>Employees</h2>
     <a asp-action="Create" class="btn btn-primary">New Employee</a>
 </div>
 
-<form method="get" asp-action="Index" class="mb-4 d-flex">
-    <input type="text" name="query" value="@ViewBag.SearchQuery" class="form-control me-2" placeholder="Search by name, no, position or department..." />
+<form method="get" asp-action="Index" class="mb-4 d-flex flex-wrap gap-2">
+    <input type="text" name="query" value="@ViewBag.SearchQuery" class="form-control flex-grow-1" placeholder="Search by name, no, position or department..." aria-label="Search employees" />
     <button type="submit" class="btn btn-outline-primary">Search</button>
     @if (!string.IsNullOrEmpty(ViewBag.SearchQuery))
     {
@@ -18,6 +18,7 @@
 </form>
 
 
+<div class="table-responsive">
 <table class="table table-bordered table-striped shadow-sm bg-white">
     <thead class="table-dark">
         <tr>
@@ -54,3 +55,4 @@
         }
     </tbody>
 </table>
+</div>

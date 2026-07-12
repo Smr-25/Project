@@ -3,13 +3,13 @@
     ViewData["Title"] = "Departments";
 }
 
-<div class="row align-items-center justify-content-between mb-4">
+<div class="row align-items-center justify-content-between g-3 mb-4">
     <div class="col-md-4">
         <h2>Departments</h2>
     </div>
     <div class="col-md-5">
         <form method="get" asp-action="Index" class="d-flex">
-            <input type="text" name="search" value="@ViewData["SearchQuery"]" class="form-control me-2 shadow-sm" placeholder="Search departments...">
+            <input type="text" name="search" value="@ViewData["SearchQuery"]" class="form-control me-2 shadow-sm" placeholder="Search departments..." aria-label="Search departments">
             <button type="submit" class="btn btn-outline-primary shadow-sm"><i class="bi bi-search">Search</i></button>
             @if (!string.IsNullOrEmpty(ViewData["SearchQuery"]?.ToString()))
             {
@@ -23,6 +23,7 @@
 </div>
 
 
+<div class="table-responsive">
 <table class="table table-bordered table-striped shadow-sm bg-white">
     <thead class="table-dark">
         <tr>
@@ -63,3 +64,4 @@
         }
     </tbody>
 </table>
+</div>
