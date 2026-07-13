@@ -10,6 +10,8 @@ public static class DatabaseInitializer
         await context.Database.MigrateAsync(cancellationToken);
         if (await context.Departments.AnyAsync(cancellationToken)) return;
 
+        await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
+
         var it = new Department { Name = "IT", WorkerLimit = 10, SalaryLimit = 25_000m };
         var hr = new Department { Name = "HR", WorkerLimit = 5, SalaryLimit = 10_000m };
         var marketing = new Department { Name = "Marketing", WorkerLimit = 8, SalaryLimit = 12_000m };
@@ -33,5 +35,6 @@ public static class DatabaseInitializer
             employee.No = $"{prefix}{employee.Id + 1000}";
         }
         await context.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
     }
 }
