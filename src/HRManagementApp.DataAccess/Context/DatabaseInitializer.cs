@@ -1,5 +1,6 @@
 using HRManagementApp.Core.Entities;
 using Microsoft.EntityFrameworkCore;
+using Npgsql;
 
 namespace HRManagementApp.DataAccess.Context;
 
@@ -8,6 +9,19 @@ public static class DatabaseInitializer
     public static async Task InitializeAsync(AppDbContext context, CancellationToken cancellationToken = default)
     {
         await context.Database.MigrateAsync(cancellationToken);
+
+        // A fresh migration creates citext after Npgsql's first type lookup.
+        // Refresh the connection's type map before inserting demo departments.
+        await context.Database.OpenConnectionAsync(cancellationToken);
+        try
+        {
+            await ((NpgsqlConnection)context.Database.GetDbConnection()).ReloadTypesAsync(cancellationToken);
+        }
+        finally
+        {
+            await context.Database.CloseConnectionAsync();
+        }
+
         if (await context.Departments.AnyAsync(cancellationToken)) return;
 
         await using var transaction = await context.Database.BeginTransactionAsync(cancellationToken);
