@@ -15,8 +15,6 @@ builder.Services.AddScoped<RestaurantApp.BBL.Interfaces.ICategoryService, Restau
 builder.Services.AddScoped<RestaurantApp.BBL.Interfaces.IMenuItemService, RestaurantApp.BBL.Services.MenuItemService>();
 builder.Services.AddScoped<RestaurantApp.BBL.Interfaces.IOrderService, RestaurantApp.BBL.Services.OrderService>();
 
-builder.Services.AddAutoMapper(typeof(RestaurantApp.BBL.Profiles.MappingProfile).Assembly);
-
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

@@ -7,13 +7,13 @@
         {
         }
 
-        public DbSet<Order> Orders { get; set; }
+        public DbSet<Order> Orders => Set<Order>();
 
-        public DbSet<OrderItem> OrderItems { get; set; }
+        public DbSet<OrderItem> OrderItems => Set<OrderItem>();
 
-        public DbSet<MenuItem> MenuItems { get; set; }
+        public DbSet<MenuItem> MenuItems => Set<MenuItem>();
 
-        public DbSet<Category> Categories { get; set; }
+        public DbSet<Category> Categories => Set<Category>();
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

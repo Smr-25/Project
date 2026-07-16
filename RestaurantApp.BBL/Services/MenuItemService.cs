@@ -1,5 +1,4 @@
 namespace RestaurantApp.BBL.Services;
-using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using RestaurantApp.BBL.Dtos.MenuItems;
 using RestaurantApp.BBL.Exceptions;
@@ -9,7 +8,7 @@ using RestaurantApp.DDL.Repositories.Interfaces;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
-public class MenuItemService(IRepository<MenuItem> repository, IRepository<Category> categoryRepository, IMapper mapper) : IMenuItemService
+public class MenuItemService(IRepository<MenuItem> repository, IRepository<Category> categoryRepository) : IMenuItemService
 {
     public async Task AddAsync(MenuItemCreateDto dto)
     {
@@ -19,7 +18,12 @@ public class MenuItemService(IRepository<MenuItem> repository, IRepository<Categ
         if (!await categoryRepository.IsExistAsync(x => x.Id == dto.CategoryId))
             throw new EntityNotFoundException("Category not found.");
             
-        var entity = mapper.Map<MenuItem>(dto);
+        var entity = new MenuItem
+        {
+            Name = dto.Name.Trim(),
+            Price = dto.Price,
+            CategoryId = dto.CategoryId
+        };
         await repository.AddAsync(entity);
         await repository.SaveChangesAsync();
     }
@@ -33,7 +37,8 @@ public class MenuItemService(IRepository<MenuItem> repository, IRepository<Categ
         if (entity.Name.ToLower() != dto.Name.ToLower().Trim() && await repository.IsExistAsync(x => x.Name.ToLower() == dto.Name.ToLower().Trim() && x.Id != id))
             throw new EntityAlreadyExistException("Already exists.");
             
-        mapper.Map(dto, entity);
+        entity.Name = dto.Name.Trim();
+        entity.Price = dto.Price;
         await repository.UpdateAsync(entity);
         await repository.SaveChangesAsync();
     }
@@ -50,24 +55,24 @@ public class MenuItemService(IRepository<MenuItem> repository, IRepository<Categ
     public async Task<List<MenuItemReturnDto>> GetAllAsync()
     {
         var data = await repository.GetAllAsync(null, "Category").ToListAsync();
-        return mapper.Map<List<MenuItemReturnDto>>(data);
+        return data.Select(item => item.ToDto()).ToList();
     }
     
     public async Task<List<MenuItemReturnDto>> GetByCategoryAsync(int categoryId)
     {
         var data = await repository.GetAllAsync(x => x.CategoryId == categoryId, "Category").ToListAsync();
-        return mapper.Map<List<MenuItemReturnDto>>(data);
+        return data.Select(item => item.ToDto()).ToList();
     }
     
     public async Task<List<MenuItemReturnDto>> GetByPriceIntervalAsync(decimal minPrice, decimal maxPrice)
     {
         var data = await repository.GetAllAsync(x => x.Price >= minPrice && x.Price <= maxPrice, "Category").ToListAsync();
-        return mapper.Map<List<MenuItemReturnDto>>(data);
+        return data.Select(item => item.ToDto()).ToList();
     }
     
     public async Task<List<MenuItemReturnDto>> SearchByNameAsync(string searchText)
     {
         var data = await repository.GetAllAsync(x => x.Name.ToLower().Contains(searchText.ToLower().Trim()), "Category").ToListAsync();
-        return mapper.Map<List<MenuItemReturnDto>>(data);
+        return data.Select(item => item.ToDto()).ToList();
     }
 }

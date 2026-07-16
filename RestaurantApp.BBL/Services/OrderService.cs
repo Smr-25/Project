@@ -1,5 +1,4 @@
 namespace RestaurantApp.BBL.Services;
-using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using RestaurantApp.BBL.Dtos.Orders;
 using RestaurantApp.BBL.Exceptions;
@@ -11,7 +10,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 
-public class OrderService(IRepository<Order> repository, IRepository<MenuItem> menuRepository, IMapper mapper) : IOrderService
+public class OrderService(IRepository<Order> repository, IRepository<MenuItem> menuRepository) : IOrderService
 {
     public async Task AddAsync(OrderCreateDto dto)
     {
@@ -54,25 +53,25 @@ public class OrderService(IRepository<Order> repository, IRepository<MenuItem> m
     public async Task<List<OrderReturnDto>> GetAllAsync()
     {
         var data = await repository.GetAllAsync(null, "OrderItems.MenuItem").ToListAsync();
-        return mapper.Map<List<OrderReturnDto>>(data);
+        return data.Select(item => item.ToDto()).ToList();
     }
     
     public async Task<List<OrderReturnDto>> GetByDateIntervalAsync(DateTime startDate, DateTime endDate)
     {
         var data = await repository.GetAllAsync(x => x.Date >= startDate && x.Date <= endDate, "OrderItems.MenuItem").ToListAsync();
-        return mapper.Map<List<OrderReturnDto>>(data);
+        return data.Select(item => item.ToDto()).ToList();
     }
     
     public async Task<List<OrderReturnDto>> GetByPriceIntervalAsync(decimal minAmount, decimal maxAmount)
     {
         var data = await repository.GetAllAsync(x => x.TotalAmount >= minAmount && x.TotalAmount <= maxAmount, "OrderItems.MenuItem").ToListAsync();
-        return mapper.Map<List<OrderReturnDto>>(data);
+        return data.Select(item => item.ToDto()).ToList();
     }
     
     public async Task<List<OrderReturnDto>> GetByDateAsync(DateTime date)
     {
         var data = await repository.GetAllAsync(x => x.Date.Date == date.Date, "OrderItems.MenuItem").ToListAsync();
-        return mapper.Map<List<OrderReturnDto>>(data);
+        return data.Select(item => item.ToDto()).ToList();
     }
     
     public async Task<OrderReturnDto> GetByNoAsync(int id)
@@ -80,6 +79,6 @@ public class OrderService(IRepository<Order> repository, IRepository<MenuItem> m
         var data = await repository.GetAsync(x => x.Id == id, "OrderItems.MenuItem");
         if (data == null) throw new EntityNotFoundException("Not found.");
             
-        return mapper.Map<OrderReturnDto>(data);
+        return data.ToDto();
     }
 }
