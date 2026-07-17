@@ -1,0 +1,50 @@
+@model RestaurantApp.Application.Dtos.Orders.OrderReturnDto
+
+@{
+    ViewData["Title"] = "Order Details";
+}
+
+<div class="container mt-5">
+    <h2>Order Details #@Model.Id</h2>
+    <hr />
+
+    <div class="card mb-4">
+        <div class="card-header bg-dark text-white">
+            General Info
+        </div>
+        <div class="card-body">
+            <p><strong>Order No (ID):</strong> @Model.Id</p>
+            <p><strong>Date:</strong> @Model.Date.ToString("yyyy-MM-dd HH:mm:ss")</p>
+            <p><strong>Total Amount:</strong> @Model.TotalAmount.ToString("C")</p>
+            <p><strong>Total Items in Cart:</strong> @Model.TotalItemCount</p>
+        </div>
+    </div>
+
+    <h4>Order Items</h4>
+    <table class="table table-bordered table-striped">
+        <thead class="table-light">
+            <tr>
+                <th>Item Name</th>
+                <th>Price (at time of order)</th>
+                <th>Count</th>
+                <th>Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.OrderItems)
+            {
+                <tr>
+                    <td>@item.MenuItemName</td>
+                    <td>@item.Price.ToString("C")</td>
+                    <td>@item.Count</td>
+                    <td>@((item.Price * item.Count).ToString("C"))</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="mt-4">
+        <a asp-action="List" class="btn btn-secondary">Back to Orders</a>
+    </div>
+</div>
+

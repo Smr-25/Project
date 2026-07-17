@@ -1,0 +1,56 @@
+@model RestaurantApp.Application.Dtos.Orders.OrderCreateDto
+
+@{
+    ViewData["Title"] = "Add New Order";
+    var menuItems = ViewBag.MenuItems as List<RestaurantApp.Application.Dtos.MenuItems.MenuItemReturnDto> ?? new List<RestaurantApp.Application.Dtos.MenuItems.MenuItemReturnDto>();
+    // Pre-populate 5 rows for convenience
+    for(int i=0; i<5; i++) {
+        Model.OrderItems.Add(new RestaurantApp.Application.Dtos.OrderItems.OrderItemCreateDto());
+    }
+}
+
+<div class="container mt-5">
+    <h2>Add New Order</h2>
+    <hr />
+
+    <form asp-action="Create" method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+        <h4>Order Items</h4>
+        <p class="text-muted">Select an item and enter count. Leave empty to ignore row.</p>
+        
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Menu Item</th>
+                    <th>Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for (int i = 0; i < Model.OrderItems.Count; i++)
+                {
+                    <tr>
+                        <td>
+                            <select asp-for="OrderItems[i].MenuItemId" class="form-select">
+                                <option value="0">-- Select Menu Item --</option>
+                                @foreach (var item in menuItems)
+                                {
+                                    <option value="@item.Id">@item.Name (@item.Price.ToString("C"))</option>
+                                }
+                            </select>
+                        </td>
+                        <td>
+                            <input asp-for="OrderItems[i].Count" type="number" min="0" class="form-control" value="0" />
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="form-group mt-3">
+            <button type="submit" class="btn btn-primary">Create Order</button>
+            <a asp-action="Index" class="btn btn-secondary">Back to Order Operations</a>
+        </div>
+    </form>
+</div>
+

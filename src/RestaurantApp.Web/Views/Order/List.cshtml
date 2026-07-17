@@ -1,0 +1,112 @@
+@model IEnumerable<RestaurantApp.Application.Dtos.Orders.OrderReturnDto>
+
+@{
+    ViewData["Title"] = "Orders List";
+}
+
+<div class="container mt-5">
+    <h2>Orders List</h2>
+    <hr />
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <!-- Filters Section -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Filters & Search</h5>
+            <div class="row">
+                <!-- Date Interval -->
+                <div class="col-md-4 mb-2">
+                    <form asp-action="List" method="get" class="d-flex">
+                        <input type="date" name="startDate" class="form-control me-2" value="@ViewContext.HttpContext.Request.Query["startDate"]" required />
+                        <input type="date" name="endDate" class="form-control me-2" value="@ViewContext.HttpContext.Request.Query["endDate"]" required />
+                        <button type="submit" class="btn btn-outline-primary">By Interval</button>
+                    </form>
+                </div>
+                <!-- Amount Interval -->
+                <div class="col-md-4 mb-2">
+                    <form asp-action="List" method="get" class="d-flex">
+                        <input type="number" name="minAmount" class="form-control me-2" step="0.01" placeholder="Min Amount" value="@ViewContext.HttpContext.Request.Query["minAmount"]" required />
+                        <input type="number" name="maxAmount" class="form-control me-2" step="0.01" placeholder="Max Amount" value="@ViewContext.HttpContext.Request.Query["maxAmount"]" required />
+                        <button type="submit" class="btn btn-outline-success">By Amount</button>
+                    </form>
+                </div>
+                <!-- Exact Date -->
+                <div class="col-md-4 mb-2">
+                    <form asp-action="List" method="get" class="d-flex">
+                        <input type="date" name="exactDate" class="form-control me-2" value="@ViewContext.HttpContext.Request.Query["exactDate"]" required />
+                        <button type="submit" class="btn btn-outline-warning">Exact Date</button>
+                    </form>
+                </div>
+            </div>
+            <!-- By No (direct Details jump) -->
+            <div class="row mt-2">
+                <div class="col-md-12">
+                    <form asp-action="Details" method="get" class="d-flex">
+                        <input type="number" name="id" class="form-control me-2 w-auto" placeholder="Order No (ID)" required />
+                        <button type="submit" class="btn btn-outline-info">Show Details by No</button>
+                    </form>
+                </div>
+            </div>
+
+            @if (ViewContext.HttpContext.Request.Query.Count > 0)
+            {
+                <div class="mt-3 text-end">
+                    <a asp-action="List" class="btn btn-sm btn-secondary">Clear Filters</a>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Data Table -->
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>Order No (ID)</th>
+                <th>Total Item Count</th>
+                <th>Total Amount</th>
+                <th>Date</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var order in Model)
+                {
+                    <tr>
+                        <td>@order.Id</td>
+                        <td>@order.TotalItemCount</td>
+                        <td>@order.TotalAmount.ToString("C")</td>
+                        <td>@order.Date.ToString("yyyy-MM-dd HH:mm")</td>
+                        <td>
+                            <a asp-action="Details" asp-route-id="@order.Id" class="btn btn-sm btn-info">Details</a>
+                            
+                            <form asp-action="Delete" asp-route-id="@order.Id" method="post" style="display:inline;" onsubmit="return confirm('Are you sure you want to cancel this order?');">
+                                <button type="submit" class="btn btn-sm btn-danger">Cancel</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5" class="text-center">No orders found.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="mt-4">
+        <a asp-action="Index" class="btn btn-secondary">Back to Order Operations</a>
+    </div>
+</div>
+

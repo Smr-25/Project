@@ -1,0 +1,115 @@
+@model IEnumerable<RestaurantApp.Application.Dtos.MenuItems.MenuItemReturnDto>
+
+@{
+    ViewData["Title"] = "Menu Items List";
+    var categories = ViewBag.Categories as List<RestaurantApp.Application.Dtos.Categories.CategoryReturnDto> ?? new List<RestaurantApp.Application.Dtos.Categories.CategoryReturnDto>();
+}
+
+<div class="container mt-5">
+    <h2>Menu Items List</h2>
+    <hr />
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="alert alert-success">@TempData["Success"]</div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    <!-- Filters Section -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <h5 class="card-title">Filters & Search</h5>
+            <div class="row">
+                <!-- Search by name -->
+                <div class="col-md-4 mb-2">
+                    <form asp-action="List" method="get" class="d-flex">
+                        <input type="text" name="searchText" class="form-control me-2" placeholder="Search by name..." value="@ViewContext.HttpContext.Request.Query["searchText"]" />
+                        <button type="submit" class="btn btn-outline-primary">Search</button>
+                    </form>
+                </div>
+                <!-- Filter by category -->
+                <div class="col-md-4 mb-2">
+                    <form asp-action="List" method="get" class="d-flex">
+                        <select name="categoryId" class="form-select me-2">
+                            <option value="">-- All Categories --</option>
+                            @foreach (var cat in categories)
+                            {
+                                if (ViewContext.HttpContext.Request.Query["categoryId"] == cat.Id.ToString())
+                                {
+                                    <option value="@cat.Id" selected>@cat.Name</option>
+                                }
+                                else
+                                {
+                                    <option value="@cat.Id">@cat.Name</option>
+                                }
+                            }
+                        </select>
+                        <button type="submit" class="btn btn-outline-success">Filter</button>
+                    </form>
+                </div>
+                <!-- Filter by price -->
+                <div class="col-md-4 mb-2">
+                    <form asp-action="List" method="get" class="d-flex">
+                        <input type="number" name="minPrice" class="form-control me-2" placeholder="Min" step="0.01" value="@ViewContext.HttpContext.Request.Query["minPrice"]" required />
+                        <input type="number" name="maxPrice" class="form-control me-2" placeholder="Max" step="0.01" value="@ViewContext.HttpContext.Request.Query["maxPrice"]" required />
+                        <button type="submit" class="btn btn-outline-warning">Filter</button>
+                    </form>
+                </div>
+            </div>
+            @if (ViewContext.HttpContext.Request.Query.Count > 0)
+            {
+                <div class="mt-2 text-end">
+                    <a asp-action="List" class="btn btn-sm btn-secondary">Clear Filters</a>
+                </div>
+            }
+        </div>
+    </div>
+
+    <!-- Data Table -->
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Price</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null && Model.Any())
+            {
+                foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@item.Id</td>
+                        <td>@item.Name</td>
+                        <td>@item.CategoryName</td>
+                        <td>@item.Price.ToString("C")</td>
+                        <td>
+                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Edit</a>
+                            
+                            <form asp-action="Delete" asp-route-id="@item.Id" method="post" style="display:inline;" onsubmit="return confirm('Are you sure you want to delete this menu item?');">
+                                <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5" class="text-center">No menu items found.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <div class="mt-4">
+        <a asp-action="Index" class="btn btn-secondary">Back to Menu Operations</a>
+    </div>
+</div>
+

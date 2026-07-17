@@ -1,0 +1,9 @@
+global using RestaurantApp.Application.Dtos.Categories;
+global using RestaurantApp.Application.Dtos.MenuItems;
+global using RestaurantApp.Application.Dtos.OrderItems;
+global using RestaurantApp.Application.Dtos.Orders;
+global using RestaurantApp.Application.Mappings;
+global using RestaurantApp.Domain.Models;
+global using System;
+global using System.Collections.Generic;
+global using System.Linq;
