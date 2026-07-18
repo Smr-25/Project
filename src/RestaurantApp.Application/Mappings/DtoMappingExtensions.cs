@@ -26,16 +26,22 @@ internal static class DtoMappingExtensions
     {
         Id = orderItem.Id,
         MenuItemName = orderItem.MenuItem.Name,
-        Count = orderItem.Count,
-        Price = orderItem.Price
+        Quantity = orderItem.Quantity,
+        UnitPrice = orderItem.UnitPrice,
+        SpecialInstructions = orderItem.SpecialInstructions
     };
 
     internal static OrderReturnDto ToDto(this Order order) => new()
     {
         Id = order.Id,
+        Number = order.Number,
         TotalAmount = order.TotalAmount,
-        Date = order.Date,
-        TotalItemCount = order.OrderItems.Sum(item => item.Count),
+        CreatedAtUtc = order.CreatedAtUtc,
+        Status = order.Status,
+        TableNumber = order.DiningTable?.Number,
+        Notes = order.Notes,
+        CancellationReason = order.CancellationReason,
+        TotalItemCount = order.OrderItems.Sum(item => item.Quantity),
         OrderItems = order.OrderItems.Select(item => item.ToDto()).ToList()
     };
 }

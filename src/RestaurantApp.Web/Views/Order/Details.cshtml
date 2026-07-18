@@ -14,7 +14,9 @@
         </div>
         <div class="card-body">
             <p><strong>Order No (ID):</strong> @Model.Id</p>
-            <p><strong>Date:</strong> @Model.Date.ToString("yyyy-MM-dd HH:mm:ss")</p>
+            <p><strong>Order number:</strong> @Model.Number</p>
+            <p><strong>Status:</strong> @Model.Status</p>
+            <p><strong>Date:</strong> @Model.CreatedAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm:ss")</p>
             <p><strong>Total Amount:</strong> @Model.TotalAmount.ToString("C")</p>
             <p><strong>Total Items in Cart:</strong> @Model.TotalItemCount</p>
         </div>
@@ -35,9 +37,9 @@
             {
                 <tr>
                     <td>@item.MenuItemName</td>
-                    <td>@item.Price.ToString("C")</td>
-                    <td>@item.Count</td>
-                    <td>@((item.Price * item.Count).ToString("C"))</td>
+                    <td>@item.UnitPrice.ToString("C")</td>
+                    <td>@item.Quantity</td>
+                    <td>@((item.UnitPrice * item.Quantity).ToString("C"))</td>
                 </tr>
             }
         </tbody>
@@ -47,4 +49,3 @@
         <a asp-action="List" class="btn btn-secondary">Back to Orders</a>
     </div>
 </div>
-
