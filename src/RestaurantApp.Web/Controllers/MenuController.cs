@@ -1,10 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using RestaurantApp.Application.Security;
 using RestaurantApp.Application.Interfaces;
 using RestaurantApp.Application.Dtos.MenuItems;
 using RestaurantApp.Application.Exceptions;
 
 namespace RestaurantApp.Web.Controllers;
 
+[Authorize(Roles = RestaurantRoles.Management)]
 public class MenuController(IMenuItemService menuService, ICategoryService categoryService) : Controller
 {
     public IActionResult Index()

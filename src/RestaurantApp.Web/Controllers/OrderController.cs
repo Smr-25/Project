@@ -1,10 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using RestaurantApp.Application.Security;
 using RestaurantApp.Application.Interfaces;
 using RestaurantApp.Application.Dtos.Orders;
 using RestaurantApp.Application.Exceptions;
 
 namespace RestaurantApp.Web.Controllers;
 
+[Authorize(Roles = RestaurantRoles.OrderStaff)]
 public class OrderController(IOrderService orderService, IMenuItemService menuService) : Controller
 {
     public IActionResult Index()

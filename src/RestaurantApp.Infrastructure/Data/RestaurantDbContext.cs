@@ -1,6 +1,9 @@
-﻿namespace RestaurantApp.Infrastructure.Data
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using RestaurantApp.Infrastructure.Identity;
+
+namespace RestaurantApp.Infrastructure.Data
 {
-    public class RestaurantDbContext : DbContext
+    public class RestaurantDbContext : IdentityDbContext<ApplicationUser>
     {
         public RestaurantDbContext(DbContextOptions<RestaurantDbContext> options)
             : base(options)
@@ -14,6 +17,8 @@
         public DbSet<MenuItem> MenuItems => Set<MenuItem>();
 
         public DbSet<Category> Categories => Set<Category>();
+
+        public DbSet<DiningTable> DiningTables => Set<DiningTable>();
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
