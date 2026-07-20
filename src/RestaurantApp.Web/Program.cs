@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
+using RestaurantApp.Application.Security;
+using RestaurantApp.Infrastructure.Data;
 using RestaurantApp.Infrastructure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -9,8 +11,8 @@ builder.Configuration.AddJsonFile("appsettings.Mac.json", optional: true, reload
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddDbContext<RestaurantApp.Infrastructure.Data.RestaurantDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<RestaurantDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services
     .AddIdentity<ApplicationUser, IdentityRole>(options =>
@@ -41,6 +43,19 @@ builder.Services.AddScoped<RestaurantApp.Application.Interfaces.IMenuItemService
 builder.Services.AddScoped<RestaurantApp.Application.Interfaces.IOrderService, RestaurantApp.Application.Services.OrderService>();
 
 var app = builder.Build();
+
+await using (var scope = app.Services.CreateAsyncScope())
+{
+    var services = scope.ServiceProvider;
+    await DatabaseInitializer.InitializeAsync(services.GetRequiredService<RestaurantDbContext>());
+    await IdentitySeeder.SeedAsync(
+        services.GetRequiredService<RoleManager<IdentityRole>>(),
+        services.GetRequiredService<UserManager<ApplicationUser>>(),
+        RestaurantRoles.All,
+        builder.Configuration["BootstrapAdmin:Email"],
+        builder.Configuration["BootstrapAdmin:Password"],
+        builder.Configuration["BootstrapAdmin:DisplayName"]);
+}
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())

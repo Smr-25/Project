@@ -6,8 +6,13 @@ public class OrderItemConfiguration : IEntityTypeConfiguration<OrderItem>
     {
         builder.HasKey(oi => oi.Id);
         builder.Property(oi => oi.Quantity).IsRequired();
-        builder.Property(oi => oi.UnitPrice).HasColumnType("decimal(18,2)");
+        builder.Property(oi => oi.UnitPrice).HasPrecision(10, 2);
         builder.Property(oi => oi.SpecialInstructions).HasMaxLength(300);
+        builder.ToTable(table =>
+        {
+            table.HasCheckConstraint("CK_OrderItems_Quantity_Positive", "\"Quantity\" > 0");
+            table.HasCheckConstraint("CK_OrderItems_UnitPrice_Positive", "\"UnitPrice\" > 0");
+        });
         
         builder.HasOne(oi => oi.Order)
                .WithMany(o => o.OrderItems)
