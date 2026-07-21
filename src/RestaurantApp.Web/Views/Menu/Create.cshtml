@@ -21,8 +21,14 @@
                 </div>
 
                 <div class="form-group mb-3">
+                    <label asp-for="Description" class="control-label"></label>
+                    <textarea asp-for="Description" class="form-control" rows="3" placeholder="Describe the dish"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
                     <label asp-for="Price" class="control-label">Price</label>
-                    <input asp-for="Price" type="number" step="0.01" class="form-control" placeholder="Enter price" required />
+                    <input asp-for="Price" type="number" min="0.01" step="0.01" class="form-control" placeholder="Enter price" required />
                     <span asp-validation-for="Price" class="text-danger"></span>
                 </div>
 
@@ -30,12 +36,23 @@
                     <label asp-for="CategoryId" class="control-label">Category</label>
                     <select asp-for="CategoryId" class="form-select" required>
                         <option value="">-- Select Category --</option>
-                        @foreach (var cat in categories)
+                        @foreach (var cat in categories.Where(category => category.IsActive))
                         {
                             <option value="@cat.Id">@cat.Name</option>
                         }
                     </select>
                     <span asp-validation-for="CategoryId" class="text-danger"></span>
+                </div>
+
+                <div class="form-group mb-3">
+                    <label asp-for="ImageUrl" class="control-label">Image URL</label>
+                    <input asp-for="ImageUrl" class="form-control" placeholder="https://..." />
+                    <span asp-validation-for="ImageUrl" class="text-danger"></span>
+                </div>
+
+                <div class="form-check mb-4">
+                    <input asp-for="IsAvailable" class="form-check-input" />
+                    <label asp-for="IsAvailable" class="form-check-label">Available for new orders</label>
                 </div>
 
                 <div class="form-group">
@@ -46,4 +63,3 @@
         </div>
     </div>
 </div>
-

@@ -11,14 +11,21 @@ internal static class DtoMappingExtensions
     internal static CategoryReturnDto ToDto(this Category category) => new()
     {
         Id = category.Id,
-        Name = category.Name
+        Name = category.Name,
+        Description = category.Description,
+        DisplayOrder = category.DisplayOrder,
+        IsActive = category.IsActive
     };
 
     internal static MenuItemReturnDto ToDto(this MenuItem menuItem) => new()
     {
         Id = menuItem.Id,
         Name = menuItem.Name,
+        Description = menuItem.Description,
         Price = menuItem.Price,
+        ImageUrl = menuItem.ImageUrl,
+        IsAvailable = menuItem.IsAvailable,
+        CategoryId = menuItem.CategoryId,
         CategoryName = menuItem.Category.Name
     };
 

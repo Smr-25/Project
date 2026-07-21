@@ -35,7 +35,7 @@ public class MenuController(IMenuItemService menuService, ICategoryService categ
         {
             await menuService.AddAsync(dto);
             TempData["Success"] = "Menu item added successfully.";
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction(nameof(List));
         }
         catch (EntityAlreadyExistException ex)
         {
@@ -72,18 +72,28 @@ public class MenuController(IMenuItemService menuService, ICategoryService categ
     [HttpGet]
     public async Task<IActionResult> Edit(int id)
     {
-        var items = await menuService.GetAllAsync();
-        var item = items.FirstOrDefault(x => x.Id == id);
-        if (item == null) return NotFound();
-        
-        var dto = new MenuItemUpdateDto { Name = item.Name, Price = item.Price };
+        var item = await menuService.GetByIdAsync(id);
+        ViewBag.Categories = await categoryService.GetAllAsync();
+        var dto = new MenuItemUpdateDto
+        {
+            Name = item.Name,
+            Description = item.Description,
+            Price = item.Price,
+            ImageUrl = item.ImageUrl,
+            CategoryId = item.CategoryId,
+            IsAvailable = item.IsAvailable
+        };
         return View(dto);
     }
 
     [HttpPost]
     public async Task<IActionResult> Edit(int id, MenuItemUpdateDto dto)
     {
-        if (!ModelState.IsValid) return View(dto);
+        if (!ModelState.IsValid)
+        {
+            ViewBag.Categories = await categoryService.GetAllAsync();
+            return View(dto);
+        }
 
         try
         {
@@ -93,18 +103,21 @@ public class MenuController(IMenuItemService menuService, ICategoryService categ
         }
         catch (Exception ex)
         {
+            ViewBag.Categories = await categoryService.GetAllAsync();
             ModelState.AddModelError("", ex.Message);
             return View(dto);
         }
     }
 
     [HttpPost]
-    public async Task<IActionResult> Delete(int id)
+    public async Task<IActionResult> SetAvailability(int id, bool isAvailable)
     {
         try
         {
-            await menuService.RemoveAsync(id);
-            TempData["Success"] = "Menu item deleted successfully.";
+            await menuService.SetAvailabilityAsync(id, isAvailable);
+            TempData["Success"] = isAvailable
+                ? "Menu item is available again."
+                : "Menu item was archived without changing order history.";
         }
         catch (Exception ex)
         {
