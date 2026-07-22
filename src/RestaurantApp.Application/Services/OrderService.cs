@@ -9,27 +9,37 @@ using System.Collections.Generic;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Security.Cryptography;
 
-public class OrderService(IRepository<Order> repository, IRepository<MenuItem> menuRepository) : IOrderService
+public class OrderService(
+    IRepository<Order> repository,
+    IRepository<MenuItem> menuRepository,
+    IUnitOfWork unitOfWork) : IOrderService
 {
     public async Task AddAsync(OrderCreateDto dto)
     {
         if (dto.OrderItems == null || !dto.OrderItems.Any()) throw new CountZeroException("No items.");
             
-        var order = Order.Create($"ORD-{DateTimeOffset.UtcNow:yyyyMMddHHmmssfff}");
-        
-        foreach (var itemDto in dto.OrderItems)
+        var selectedItems = dto.OrderItems.Where(item => item.MenuItemId > 0 && item.Quantity > 0).ToList();
+        if (selectedItems.Count == 0)
+            throw new CountZeroException("Select at least one menu item.");
+
+        var menuItemIds = selectedItems.Select(item => item.MenuItemId).Distinct().ToArray();
+        var menuItems = await menuRepository
+            .GetAllAsync(item => menuItemIds.Contains(item.Id), Array.Empty<string>())
+            .ToListAsync();
+        if (menuItems.Count != menuItemIds.Length)
+            throw new EntityNotFoundException("One or more menu items no longer exist.");
+
+        var order = Order.Create(CreateOrderNumber(), notes: dto.Notes);
+
+        foreach (var itemDto in selectedItems)
         {
-            if (itemDto.Count <= 0) throw new CountZeroException("Count > 0 required.");
-                
-            var menuItem = await menuRepository.GetByIdAsync(itemDto.MenuItemId, new string[0]);
-            if (menuItem == null) throw new EntityNotFoundException("Menu item missing.");
-                
-            order.AddItem(menuItem, itemDto.Count);
+            var menuItem = menuItems.Single(item => item.Id == itemDto.MenuItemId);
+            order.AddItem(menuItem, itemDto.Quantity, itemDto.SpecialInstructions);
         }
-        
-        await repository.AddAsync(order);
-        await repository.SaveChangesAsync();
+
+        await unitOfWork.ExecuteInTransactionAsync(async _ => await repository.AddAsync(order));
     }
     
     public async Task RemoveAsync(int id)
@@ -84,5 +94,11 @@ public class OrderService(IRepository<Order> repository, IRepository<MenuItem> m
         if (data == null) throw new EntityNotFoundException("Not found.");
             
         return data.ToDto();
+    }
+
+    private static string CreateOrderNumber()
+    {
+        var suffix = RandomNumberGenerator.GetInt32(100000, 1000000);
+        return $"ORD-{DateTimeOffset.UtcNow:yyyyMMdd}-{suffix}";
     }
 }

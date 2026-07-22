@@ -84,6 +84,16 @@ public class MenuItemService(IRepository<MenuItem> repository, IRepository<Categ
         var data = await repository.GetAllAsync(null, "Category").ToListAsync();
         return data.Select(item => item.ToDto()).ToList();
     }
+
+    public async Task<List<MenuItemReturnDto>> GetAvailableAsync()
+    {
+        var data = await repository
+            .GetAllAsync(item => item.IsAvailable && item.Category.IsActive, "Category")
+            .OrderBy(item => item.Category.DisplayOrder)
+            .ThenBy(item => item.Name)
+            .ToListAsync();
+        return data.Select(item => item.ToDto()).ToList();
+    }
     
     public async Task<List<MenuItemReturnDto>> GetByCategoryAsync(int categoryId)
     {

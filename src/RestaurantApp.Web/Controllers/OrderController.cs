@@ -18,7 +18,7 @@ public class OrderController(IOrderService orderService, IMenuItemService menuSe
     [HttpGet]
     public async Task<IActionResult> Create()
     {
-        ViewBag.MenuItems = await menuService.GetAllAsync();
+        ViewBag.MenuItems = await menuService.GetAvailableAsync();
         return View(new OrderCreateDto());
     }
 
@@ -27,11 +27,11 @@ public class OrderController(IOrderService orderService, IMenuItemService menuSe
     {
         if (!ModelState.IsValid)
         {
-            ViewBag.MenuItems = await menuService.GetAllAsync();
+            ViewBag.MenuItems = await menuService.GetAvailableAsync();
             return View(dto);
         }
 
-        dto.OrderItems = dto.OrderItems.Where(x => x.Count > 0 && x.MenuItemId > 0).ToList();
+        dto.OrderItems = dto.OrderItems.Where(x => x.Quantity > 0 && x.MenuItemId > 0).ToList();
 
         try
         {
@@ -41,19 +41,19 @@ public class OrderController(IOrderService orderService, IMenuItemService menuSe
         }
         catch (CountZeroException ex)
         {
-            ViewBag.MenuItems = await menuService.GetAllAsync();
+            ViewBag.MenuItems = await menuService.GetAvailableAsync();
             ModelState.AddModelError("", ex.Message);
             return View(dto);
         }
         catch (EntityNotFoundException ex)
         {
-            ViewBag.MenuItems = await menuService.GetAllAsync();
+            ViewBag.MenuItems = await menuService.GetAvailableAsync();
             ModelState.AddModelError("", ex.Message);
             return View(dto);
         }
         catch (Exception ex)
         {
-            ViewBag.MenuItems = await menuService.GetAllAsync();
+            ViewBag.MenuItems = await menuService.GetAvailableAsync();
             ModelState.AddModelError("", "An unexpected error occurred: " + ex.Message);
             return View(dto);
         }

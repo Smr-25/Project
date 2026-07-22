@@ -38,6 +38,7 @@ builder.Services.ConfigureApplicationCookie(options =>
 });
 
 builder.Services.AddScoped(typeof(RestaurantApp.Application.Abstractions.IRepository<>), typeof(RestaurantApp.Infrastructure.Repositories.Concretes.Repository<>));
+builder.Services.AddScoped<RestaurantApp.Application.Abstractions.IUnitOfWork, EfUnitOfWork>();
 builder.Services.AddScoped<RestaurantApp.Application.Interfaces.ICategoryService, RestaurantApp.Application.Services.CategoryService>();
 builder.Services.AddScoped<RestaurantApp.Application.Interfaces.IMenuItemService, RestaurantApp.Application.Services.MenuItemService>();
 builder.Services.AddScoped<RestaurantApp.Application.Interfaces.IOrderService, RestaurantApp.Application.Services.OrderService>();

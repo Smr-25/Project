@@ -11,6 +11,7 @@ public interface IMenuItemService
     Task<MenuItemReturnDto> GetByIdAsync(int id);
     Task SetAvailabilityAsync(int id, bool isAvailable);
     Task<List<MenuItemReturnDto>> GetAllAsync();
+    Task<List<MenuItemReturnDto>> GetAvailableAsync();
     Task<List<MenuItemReturnDto>> GetByCategoryAsync(int categoryId);
     Task<List<MenuItemReturnDto>> GetByPriceIntervalAsync(decimal minPrice, decimal maxPrice);
     Task<List<MenuItemReturnDto>> SearchByNameAsync(string searchText);
