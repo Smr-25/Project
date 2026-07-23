@@ -34,6 +34,17 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-controller="Menu" asp-action="List">Menu</a>
                         </li>
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-controller="Table" asp-action="Index">Tables</a>
+                        </li>
+                    }
+                    @if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Waiter"))
+                    {
+                        <li class="nav-item"><a class="nav-link text-dark" asp-controller="Order" asp-action="List">Orders</a></li>
+                    }
+                    @if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Kitchen"))
+                    {
+                        <li class="nav-item"><a class="nav-link text-dark" asp-controller="Kitchen" asp-action="Index">Kitchen</a></li>
                     }
                 </ul>
                 <ul class="navbar-nav">

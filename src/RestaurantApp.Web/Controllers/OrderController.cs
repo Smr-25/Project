@@ -8,7 +8,10 @@ using RestaurantApp.Application.Exceptions;
 namespace RestaurantApp.Web.Controllers;
 
 [Authorize(Roles = RestaurantRoles.OrderStaff)]
-public class OrderController(IOrderService orderService, IMenuItemService menuService) : Controller
+public class OrderController(
+    IOrderService orderService,
+    IMenuItemService menuService,
+    IDiningTableService tableService) : Controller
 {
     public IActionResult Index()
     {
@@ -18,7 +21,7 @@ public class OrderController(IOrderService orderService, IMenuItemService menuSe
     [HttpGet]
     public async Task<IActionResult> Create()
     {
-        ViewBag.MenuItems = await menuService.GetAvailableAsync();
+        await LoadOrderOptionsAsync();
         return View(new OrderCreateDto());
     }
 
@@ -27,7 +30,7 @@ public class OrderController(IOrderService orderService, IMenuItemService menuSe
     {
         if (!ModelState.IsValid)
         {
-            ViewBag.MenuItems = await menuService.GetAvailableAsync();
+            await LoadOrderOptionsAsync();
             return View(dto);
         }
 
@@ -41,19 +44,19 @@ public class OrderController(IOrderService orderService, IMenuItemService menuSe
         }
         catch (CountZeroException ex)
         {
-            ViewBag.MenuItems = await menuService.GetAvailableAsync();
+            await LoadOrderOptionsAsync();
             ModelState.AddModelError("", ex.Message);
             return View(dto);
         }
         catch (EntityNotFoundException ex)
         {
-            ViewBag.MenuItems = await menuService.GetAvailableAsync();
+            await LoadOrderOptionsAsync();
             ModelState.AddModelError("", ex.Message);
             return View(dto);
         }
         catch (Exception ex)
         {
-            ViewBag.MenuItems = await menuService.GetAvailableAsync();
+            await LoadOrderOptionsAsync();
             ModelState.AddModelError("", "An unexpected error occurred: " + ex.Message);
             return View(dto);
         }
@@ -95,8 +98,8 @@ public class OrderController(IOrderService orderService, IMenuItemService menuSe
     {
         try
         {
-            await orderService.RemoveAsync(id);
-            TempData["Success"] = "Order deleted successfully.";
+            await orderService.CancelAsync(id, "Cancelled by staff from the order list.");
+            TempData["Success"] = "Order cancelled without deleting its history.";
         }
         catch (Exception ex)
         {
@@ -104,5 +107,11 @@ public class OrderController(IOrderService orderService, IMenuItemService menuSe
         }
         
         return RedirectToAction(nameof(List));
+    }
+
+    private async Task LoadOrderOptionsAsync()
+    {
+        ViewBag.MenuItems = await menuService.GetAvailableAsync();
+        ViewBag.DiningTables = await tableService.GetAvailableAsync();
     }
 }

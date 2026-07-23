@@ -1,0 +1,41 @@
+@model IReadOnlyCollection<RestaurantApp.Application.Dtos.DiningTables.DiningTableReturnDto>
+@{
+    ViewData["Title"] = "Dining tables";
+}
+
+<div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+    <div>
+        <p class="text-uppercase text-muted small mb-1">Floor setup</p>
+        <h1 class="h2 mb-0">Dining tables</h1>
+    </div>
+    <a asp-action="Create" class="btn btn-dark">Add table</a>
+</div>
+
+@if (TempData["Success"] is string success)
+{
+    <div class="alert alert-success">@success</div>
+}
+
+<div class="row g-3">
+    @foreach (var table in Model)
+    {
+        <div class="col-sm-6 col-lg-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between">
+                        <h2 class="h4">Table @table.Number</h2>
+                        <span class="badge @(table.IsOccupied ? "text-bg-warning" : table.IsActive ? "text-bg-success" : "text-bg-secondary")">
+                            @(table.IsOccupied ? "Occupied" : table.IsActive ? "Available" : "Inactive")
+                        </span>
+                    </div>
+                    <p class="text-muted">@table.Capacity seats</p>
+                    @if (table.ActiveOrderNumber is not null)
+                    {
+                        <p class="small mb-2">Active order: <strong>@table.ActiveOrderNumber</strong></p>
+                    }
+                    <a asp-action="Edit" asp-route-id="@table.Id" class="btn btn-sm btn-outline-dark">Edit</a>
+                </div>
+            </div>
+        </div>
+    }
+</div>

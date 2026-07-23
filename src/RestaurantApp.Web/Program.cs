@@ -42,6 +42,7 @@ builder.Services.AddScoped<RestaurantApp.Application.Abstractions.IUnitOfWork, E
 builder.Services.AddScoped<RestaurantApp.Application.Interfaces.ICategoryService, RestaurantApp.Application.Services.CategoryService>();
 builder.Services.AddScoped<RestaurantApp.Application.Interfaces.IMenuItemService, RestaurantApp.Application.Services.MenuItemService>();
 builder.Services.AddScoped<RestaurantApp.Application.Interfaces.IOrderService, RestaurantApp.Application.Services.OrderService>();
+builder.Services.AddScoped<RestaurantApp.Application.Interfaces.IDiningTableService, RestaurantApp.Application.Services.DiningTableService>();
 
 var app = builder.Build();
 

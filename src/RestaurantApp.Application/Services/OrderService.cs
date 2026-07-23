@@ -14,6 +14,7 @@ using System.Security.Cryptography;
 public class OrderService(
     IRepository<Order> repository,
     IRepository<MenuItem> menuRepository,
+    IRepository<DiningTable> tableRepository,
     IUnitOfWork unitOfWork) : IOrderService
 {
     public async Task AddAsync(OrderCreateDto dto)
@@ -24,6 +25,16 @@ public class OrderService(
         if (selectedItems.Count == 0)
             throw new CountZeroException("Select at least one menu item.");
 
+        var table = await tableRepository.GetByIdAsync(dto.DiningTableId, Array.Empty<string>())
+            ?? throw new EntityNotFoundException("Dining table not found.");
+        if (!table.IsActive)
+            throw new InvalidOperationException("The selected dining table is not active.");
+        if (await repository.IsExistAsync(order =>
+                order.DiningTableId == table.Id &&
+                order.Status != OrderStatus.Served &&
+                order.Status != OrderStatus.Cancelled))
+            throw new InvalidOperationException("The selected dining table already has an active order.");
+
         var menuItemIds = selectedItems.Select(item => item.MenuItemId).Distinct().ToArray();
         var menuItems = await menuRepository
             .GetAllAsync(item => menuItemIds.Contains(item.Id), Array.Empty<string>())
@@ -31,7 +42,7 @@ public class OrderService(
         if (menuItems.Count != menuItemIds.Length)
             throw new EntityNotFoundException("One or more menu items no longer exist.");
 
-        var order = Order.Create(CreateOrderNumber(), notes: dto.Notes);
+        var order = Order.Create(CreateOrderNumber(), table.Id, dto.Notes);
 
         foreach (var itemDto in selectedItems)
         {
@@ -46,9 +57,49 @@ public class OrderService(
     {
         var entity = await repository.GetByIdAsync(id, new string[0]);
         if (entity == null) throw new EntityNotFoundException("Not found.");
-            
-        await repository.RemoveAsync(entity);
+
+        entity.Cancel("Cancelled by restaurant staff.");
+        await repository.UpdateAsync(entity);
         await repository.SaveChangesAsync();
+    }
+
+    public async Task CancelAsync(int id, string reason)
+    {
+        var order = await repository.GetByIdAsync(id, Array.Empty<string>())
+            ?? throw new EntityNotFoundException("Order not found.");
+        order.Cancel(reason);
+        await repository.UpdateAsync(order);
+        await repository.SaveChangesAsync();
+    }
+
+    public async Task AdvanceStatusAsync(int id)
+    {
+        var order = await repository.GetByIdAsync(id, Array.Empty<string>())
+            ?? throw new EntityNotFoundException("Order not found.");
+        var nextStatus = order.Status switch
+        {
+            OrderStatus.Pending => OrderStatus.Preparing,
+            OrderStatus.Preparing => OrderStatus.Ready,
+            OrderStatus.Ready => OrderStatus.Served,
+            _ => throw new InvalidOperationException("This order cannot be advanced.")
+        };
+
+        order.MoveTo(nextStatus);
+        await repository.UpdateAsync(order);
+        await repository.SaveChangesAsync();
+    }
+
+    public async Task<List<OrderReturnDto>> GetKitchenBoardAsync()
+    {
+        var orders = await repository.GetAllAsync(
+                order => order.Status == OrderStatus.Pending ||
+                         order.Status == OrderStatus.Preparing ||
+                         order.Status == OrderStatus.Ready,
+                "OrderItems.MenuItem",
+                "DiningTable")
+            .OrderBy(order => order.CreatedAtUtc)
+            .ToListAsync();
+        return orders.Select(order => order.ToDto()).ToList();
     }
     
     public async Task<List<OrderReturnDto>> GetAllAsync()

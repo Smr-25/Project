@@ -8,6 +8,9 @@ public interface IOrderService
 {
     Task AddAsync(OrderCreateDto dto);
     Task RemoveAsync(int id);
+    Task CancelAsync(int id, string reason);
+    Task AdvanceStatusAsync(int id);
+    Task<List<OrderReturnDto>> GetKitchenBoardAsync();
     Task<List<OrderReturnDto>> GetAllAsync();
     Task<List<OrderReturnDto>> GetByDateIntervalAsync(DateTime startDate, DateTime endDate);
     Task<List<OrderReturnDto>> GetByPriceIntervalAsync(decimal minAmount, decimal maxAmount);
