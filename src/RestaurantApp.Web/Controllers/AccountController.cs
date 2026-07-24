@@ -6,7 +6,9 @@ using RestaurantApp.Web.Models;
 
 namespace RestaurantApp.Web.Controllers;
 
-public sealed class AccountController(SignInManager<ApplicationUser> signInManager) : Controller
+public sealed class AccountController(
+    SignInManager<ApplicationUser> signInManager,
+    UserManager<ApplicationUser> userManager) : Controller
 {
     [AllowAnonymous, HttpGet]
     public IActionResult Login(string? returnUrl = null) => View(new LoginViewModel { ReturnUrl = returnUrl });
@@ -19,8 +21,15 @@ public sealed class AccountController(SignInManager<ApplicationUser> signInManag
             return View(model);
         }
 
+        var user = await userManager.FindByEmailAsync(model.Email.Trim());
+        if (user is null || !user.IsActive)
+        {
+            ModelState.AddModelError(string.Empty, "The email or password is incorrect.");
+            return View(model);
+        }
+
         var result = await signInManager.PasswordSignInAsync(
-            model.Email.Trim(),
+            user,
             model.Password,
             model.RememberMe,
             lockoutOnFailure: true);

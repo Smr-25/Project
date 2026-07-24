@@ -16,6 +16,14 @@ public class HomeController : Controller
         return View();
     }
 
+    [HttpGet]
+    public IActionResult ErrorStatus(int code)
+    {
+        Response.StatusCode = code;
+        ViewBag.StatusCode = code;
+        return View();
+    }
+
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
     public IActionResult Error()
     {

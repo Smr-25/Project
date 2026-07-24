@@ -41,7 +41,7 @@
                 <td><span class="badge @(category.IsActive ? "text-bg-success" : "text-bg-secondary")">@(category.IsActive ? "Active" : "Archived")</span></td>
                 <td class="text-end">
                     <a asp-action="Edit" asp-route-id="@category.Id" class="btn btn-sm btn-outline-dark">Edit</a>
-                    <form asp-action="Delete" asp-route-id="@category.Id" method="post" class="d-inline" onsubmit="return confirm('Delete this empty category?');">
+                    <form asp-action="Delete" asp-route-id="@category.Id" method="post" class="d-inline" data-confirm="Delete this empty category?">
                         <button class="btn btn-sm btn-outline-danger" type="submit">Delete</button>
                     </form>
                 </td>

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RestaurantApp.Application.Interfaces;
+using RestaurantApp.Application.Exceptions;
 using RestaurantApp.Application.Security;
 
 namespace RestaurantApp.Web.Controllers;
@@ -18,7 +19,7 @@ public sealed class KitchenController(IOrderService orderService) : Controller
         {
             await orderService.AdvanceStatusAsync(id);
         }
-        catch (Exception exception)
+        catch (Exception exception) when (exception is EntityNotFoundException or InvalidOperationException)
         {
             TempData["Error"] = exception.Message;
         }
@@ -33,7 +34,7 @@ public sealed class KitchenController(IOrderService orderService) : Controller
         {
             await orderService.CancelAsync(id, reason);
         }
-        catch (Exception exception)
+        catch (Exception exception) when (exception is EntityNotFoundException or InvalidOperationException or ArgumentException)
         {
             TempData["Error"] = exception.Message;
         }

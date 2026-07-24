@@ -1,0 +1,11 @@
+@{
+    var statusCode = ViewBag.StatusCode as int? ?? 500;
+    ViewData["Title"] = $"Error {statusCode}";
+}
+
+<div class="text-center py-5">
+    <p class="display-1 fw-bold mb-2">@statusCode</p>
+    <h1 class="h3">The requested page could not be completed.</h1>
+    <p class="text-muted">Return to the dashboard and try again.</p>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-dark">Return to dashboard</a>
+</div>

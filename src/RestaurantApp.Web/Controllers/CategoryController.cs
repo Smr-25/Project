@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RestaurantApp.Application.Dtos.Categories;
+using RestaurantApp.Application.Exceptions;
 using RestaurantApp.Application.Interfaces;
 using RestaurantApp.Application.Security;
 
@@ -29,7 +30,7 @@ public sealed class CategoryController(ICategoryService categoryService) : Contr
             TempData["Success"] = "Category created.";
             return RedirectToAction(nameof(Index));
         }
-        catch (Exception exception)
+        catch (Exception exception) when (exception is EntityAlreadyExistException or InvalidOperationException)
         {
             ModelState.AddModelError(string.Empty, exception.Message);
             return View(dto);
@@ -63,7 +64,7 @@ public sealed class CategoryController(ICategoryService categoryService) : Contr
             TempData["Success"] = "Category updated.";
             return RedirectToAction(nameof(Index));
         }
-        catch (Exception exception)
+        catch (Exception exception) when (exception is EntityAlreadyExistException or EntityNotFoundException or InvalidOperationException)
         {
             ModelState.AddModelError(string.Empty, exception.Message);
             return View(dto);
@@ -78,7 +79,7 @@ public sealed class CategoryController(ICategoryService categoryService) : Contr
             await categoryService.RemoveAsync(id);
             TempData["Success"] = "Empty category deleted.";
         }
-        catch (Exception exception)
+        catch (Exception exception) when (exception is EntityNotFoundException or InvalidOperationException)
         {
             TempData["Error"] = exception.Message;
         }

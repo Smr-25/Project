@@ -101,7 +101,7 @@ public class MenuController(IMenuItemService menuService, ICategoryService categ
             TempData["Success"] = "Menu item updated successfully.";
             return RedirectToAction(nameof(List));
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is EntityAlreadyExistException or EntityNotFoundException or InvalidOperationException)
         {
             ViewBag.Categories = await categoryService.GetAllAsync();
             ModelState.AddModelError("", ex.Message);
@@ -119,7 +119,7 @@ public class MenuController(IMenuItemService menuService, ICategoryService categ
                 ? "Menu item is available again."
                 : "Menu item was archived without changing order history.";
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is EntityNotFoundException or InvalidOperationException)
         {
             TempData["Error"] = ex.Message;
         }

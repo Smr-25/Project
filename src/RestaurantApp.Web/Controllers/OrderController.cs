@@ -54,10 +54,10 @@ public class OrderController(
             ModelState.AddModelError("", ex.Message);
             return View(dto);
         }
-        catch (Exception ex)
+        catch (InvalidOperationException ex)
         {
             await LoadOrderOptionsAsync();
-            ModelState.AddModelError("", "An unexpected error occurred: " + ex.Message);
+            ModelState.AddModelError("", ex.Message);
             return View(dto);
         }
     }
@@ -101,7 +101,7 @@ public class OrderController(
             await orderService.CancelAsync(id, "Cancelled by staff from the order list.");
             TempData["Success"] = "Order cancelled without deleting its history.";
         }
-        catch (Exception ex)
+        catch (Exception ex) when (ex is EntityNotFoundException or InvalidOperationException or ArgumentException)
         {
             TempData["Error"] = ex.Message;
         }

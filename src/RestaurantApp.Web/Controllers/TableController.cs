@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RestaurantApp.Application.Dtos.DiningTables;
+using RestaurantApp.Application.Exceptions;
 using RestaurantApp.Application.Interfaces;
 using RestaurantApp.Application.Security;
 
@@ -29,7 +30,7 @@ public sealed class TableController(IDiningTableService tableService) : Controll
             TempData["Success"] = "Dining table added.";
             return RedirectToAction(nameof(Index));
         }
-        catch (Exception exception)
+        catch (Exception exception) when (exception is EntityAlreadyExistException or InvalidOperationException)
         {
             ModelState.AddModelError(string.Empty, exception.Message);
             return View(dto);
@@ -62,7 +63,7 @@ public sealed class TableController(IDiningTableService tableService) : Controll
             TempData["Success"] = "Dining table updated.";
             return RedirectToAction(nameof(Index));
         }
-        catch (Exception exception)
+        catch (Exception exception) when (exception is EntityAlreadyExistException or EntityNotFoundException or InvalidOperationException)
         {
             ModelState.AddModelError(string.Empty, exception.Message);
             return View(dto);

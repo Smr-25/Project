@@ -91,7 +91,7 @@
                         <td>
                             <a asp-action="Details" asp-route-id="@order.Id" class="btn btn-sm btn-info">Details</a>
                             
-                            <form asp-action="Delete" asp-route-id="@order.Id" method="post" style="display:inline;" onsubmit="return confirm('Are you sure you want to cancel this order?');">
+                            <form asp-action="Delete" asp-route-id="@order.Id" method="post" style="display:inline;" data-confirm="Cancel this order while keeping its history?">
                                 <button type="submit" class="btn btn-sm btn-danger">Cancel</button>
                             </form>
                         </td>
