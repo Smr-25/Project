@@ -4,6 +4,7 @@ using RestaurantApp.Application.Security;
 using RestaurantApp.Application.Interfaces;
 using RestaurantApp.Application.Dtos.MenuItems;
 using RestaurantApp.Application.Exceptions;
+using RestaurantApp.Application.Common;
 
 namespace RestaurantApp.Web.Controllers;
 
@@ -52,21 +53,11 @@ public class MenuController(IMenuItemService menuService, ICategoryService categ
     }
 
     [HttpGet]
-    public async Task<IActionResult> List(int? categoryId, decimal? minPrice, decimal? maxPrice, string? searchText)
+    public async Task<IActionResult> List(MenuItemQueryDto query)
     {
         ViewBag.Categories = await categoryService.GetAllAsync();
-        IEnumerable<MenuItemReturnDto> items;
-
-        if (categoryId.HasValue)
-            items = await menuService.GetByCategoryAsync(categoryId.Value);
-        else if (minPrice.HasValue && maxPrice.HasValue)
-            items = await menuService.GetByPriceIntervalAsync(minPrice.Value, maxPrice.Value);
-        else if (!string.IsNullOrWhiteSpace(searchText))
-            items = await menuService.SearchByNameAsync(searchText);
-        else
-            items = await menuService.GetAllAsync();
-
-        return View(items);
+        ViewBag.Query = query;
+        return View(await menuService.SearchAsync(query));
     }
 
     [HttpGet]

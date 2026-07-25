@@ -10,6 +10,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Security.Cryptography;
+using RestaurantApp.Application.Common;
 
 public class OrderService(
     IRepository<Order> repository,
@@ -145,6 +146,46 @@ public class OrderService(
         if (data == null) throw new EntityNotFoundException("Not found.");
             
         return data.ToDto();
+    }
+
+    public async Task<PagedResult<OrderReturnDto>> SearchAsync(OrderQueryDto query)
+    {
+        var source = repository.GetAllAsync(null, "OrderItems.MenuItem", "DiningTable");
+        if (query.StartDate.HasValue)
+        {
+            var start = new DateTimeOffset(query.StartDate.Value.Date);
+            source = source.Where(order => order.CreatedAtUtc >= start);
+        }
+        if (query.EndDate.HasValue)
+        {
+            var endExclusive = new DateTimeOffset(query.EndDate.Value.Date).AddDays(1);
+            source = source.Where(order => order.CreatedAtUtc < endExclusive);
+        }
+        if (query.MinAmount.HasValue)
+            source = source.Where(order => order.TotalAmount >= query.MinAmount.Value);
+        if (query.MaxAmount.HasValue)
+            source = source.Where(order => order.TotalAmount <= query.MaxAmount.Value);
+        if (query.Status.HasValue)
+            source = source.Where(order => order.Status == query.Status.Value);
+        if (query.DiningTableId.HasValue)
+            source = source.Where(order => order.DiningTableId == query.DiningTableId.Value);
+
+        var totalCount = await source.CountAsync();
+        var page = Math.Max(1, query.Page);
+        var pageSize = Math.Clamp(query.PageSize, 5, 50);
+        var items = await source
+            .OrderByDescending(order => order.CreatedAtUtc)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return new PagedResult<OrderReturnDto>
+        {
+            Items = items.Select(order => order.ToDto()).ToList(),
+            Page = page,
+            PageSize = pageSize,
+            TotalCount = totalCount
+        };
     }
 
     private static string CreateOrderNumber()

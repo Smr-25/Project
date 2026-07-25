@@ -1,21 +1,53 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@model RestaurantApp.Application.Dtos.Dashboard.DashboardDto
+@{
+    ViewData["Title"] = "Operations dashboard";
 }
 
-<div class="text-center mt-5">
-    <h1 class="display-4 mb-4">Restaurant Management System</h1>
-    <p class="lead">Welcome to the system. Please select one of the operations below:</p>
-
-    <div class="row justify-content-center mt-5">
-        <div class="col-md-4 mb-3">
-            <a href="@Url.Action("Index", "Menu")" class="btn btn-primary btn-lg w-100 p-4" style="text-decoration: none;">
-                1 - Menu Operations
-            </a>
+<section class="py-4">
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <p class="text-uppercase text-muted small mb-1">Today at a glance</p>
+            <h1 class="display-6 mb-0">Restaurant operations</h1>
         </div>
-        <div class="col-md-4 mb-3">
-            <a href="@Url.Action("Index", "Order")" class="btn btn-success btn-lg w-100 p-4" style="text-decoration: none;">
-                2 - Order Operations
-            </a>
+        <a asp-controller="Order" asp-action="Create" class="btn btn-dark">Create order</a>
+    </div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-xl"><div class="card h-100 border-0 shadow-sm"><div class="card-body"><p class="text-muted small">Revenue</p><p class="h3 mb-0">@Model.TodayRevenue.ToString("N2") AZN</p></div></div></div>
+        <div class="col-6 col-xl"><div class="card h-100 border-0 shadow-sm"><div class="card-body"><p class="text-muted small">Orders</p><p class="h3 mb-0">@Model.TodayOrderCount</p></div></div></div>
+        <div class="col-6 col-xl"><div class="card h-100 border-0 shadow-sm"><div class="card-body"><p class="text-muted small">Active orders</p><p class="h3 mb-0">@Model.ActiveOrderCount</p></div></div></div>
+        <div class="col-6 col-xl"><div class="card h-100 border-0 shadow-sm"><div class="card-body"><p class="text-muted small">Average ticket</p><p class="h3 mb-0">@Model.AverageTicket.ToString("N2") AZN</p></div></div></div>
+        <div class="col-6 col-xl"><div class="card h-100 border-0 shadow-sm"><div class="card-body"><p class="text-muted small">Occupied tables</p><p class="h3 mb-0">@Model.OccupiedTableCount</p></div></div></div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-8">
+            <div class="card border-0 shadow-sm">
+                <div class="card-header bg-white d-flex justify-content-between"><strong>Recent orders</strong><a asp-controller="Order" asp-action="List">View all</a></div>
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead><tr><th>Order</th><th>Table</th><th>Status</th><th>Total</th><th>Time</th></tr></thead>
+                        <tbody>
+                        @foreach (var order in Model.RecentOrders)
+                        {
+                            <tr><td><a asp-controller="Order" asp-action="Details" asp-route-id="@order.Id">@order.Number</a></td><td>@(order.TableNumber ?? "—")</td><td><span class="badge text-bg-light">@order.Status</span></td><td>@order.TotalAmount.ToString("N2") AZN</td><td>@order.CreatedAtUtc.ToLocalTime().ToString("HH:mm")</td></tr>
+                        }
+                        @if (Model.RecentOrders.Count == 0) { <tr><td colspan="5" class="text-center text-muted py-4">No orders yet.</td></tr> }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-header bg-white"><strong>Top-selling items</strong></div>
+                <ol class="list-group list-group-numbered list-group-flush">
+                    @foreach (var item in Model.TopSellingItems)
+                    {
+                        <li class="list-group-item d-flex justify-content-between align-items-center"><span>@item.Name <small class="d-block text-muted">@item.Revenue.ToString("N2") AZN</small></span><span class="badge text-bg-dark rounded-pill">@item.Quantity</span></li>
+                    }
+                </ol>
+            </div>
         </div>
     </div>
-</div>
+</section>

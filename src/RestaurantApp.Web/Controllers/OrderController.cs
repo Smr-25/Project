@@ -4,6 +4,7 @@ using RestaurantApp.Application.Security;
 using RestaurantApp.Application.Interfaces;
 using RestaurantApp.Application.Dtos.Orders;
 using RestaurantApp.Application.Exceptions;
+using RestaurantApp.Application.Common;
 
 namespace RestaurantApp.Web.Controllers;
 
@@ -63,20 +64,11 @@ public class OrderController(
     }
 
     [HttpGet]
-    public async Task<IActionResult> List(DateTime? startDate, DateTime? endDate, decimal? minAmount, decimal? maxAmount, DateTime? exactDate)
+    public async Task<IActionResult> List(OrderQueryDto query)
     {
-        IEnumerable<OrderReturnDto> items;
-
-        if (startDate.HasValue && endDate.HasValue)
-            items = await orderService.GetByDateIntervalAsync(startDate.Value, endDate.Value);
-        else if (minAmount.HasValue && maxAmount.HasValue)
-            items = await orderService.GetByPriceIntervalAsync(minAmount.Value, maxAmount.Value);
-        else if (exactDate.HasValue)
-            items = await orderService.GetByDateAsync(exactDate.Value);
-        else
-            items = await orderService.GetAllAsync();
-
-        return View(items);
+        ViewBag.Query = query;
+        ViewBag.DiningTables = await tableService.GetAllAsync();
+        return View(await orderService.SearchAsync(query));
     }
 
     [HttpGet]

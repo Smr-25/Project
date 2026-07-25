@@ -1,4 +1,5 @@
 namespace RestaurantApp.Application.Interfaces;
+using RestaurantApp.Application.Common;
 using RestaurantApp.Application.Dtos.Orders;
 using System.Collections.Generic;
 using System;
@@ -16,4 +17,5 @@ public interface IOrderService
     Task<List<OrderReturnDto>> GetByPriceIntervalAsync(decimal minAmount, decimal maxAmount);
     Task<List<OrderReturnDto>> GetByDateAsync(DateTime date);
     Task<OrderReturnDto> GetByNoAsync(int id);
+    Task<PagedResult<OrderReturnDto>> SearchAsync(OrderQueryDto query);
 }

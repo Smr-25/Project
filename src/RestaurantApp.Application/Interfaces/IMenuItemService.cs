@@ -1,4 +1,5 @@
 namespace RestaurantApp.Application.Interfaces;
+using RestaurantApp.Application.Common;
 using RestaurantApp.Application.Dtos.MenuItems;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -15,4 +16,5 @@ public interface IMenuItemService
     Task<List<MenuItemReturnDto>> GetByCategoryAsync(int categoryId);
     Task<List<MenuItemReturnDto>> GetByPriceIntervalAsync(decimal minPrice, decimal maxPrice);
     Task<List<MenuItemReturnDto>> SearchByNameAsync(string searchText);
+    Task<PagedResult<MenuItemReturnDto>> SearchAsync(MenuItemQueryDto query);
 }

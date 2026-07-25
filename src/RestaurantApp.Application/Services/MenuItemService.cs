@@ -5,6 +5,7 @@ using RestaurantApp.Application.Exceptions;
 using RestaurantApp.Application.Interfaces;
 using RestaurantApp.Domain.Models;
 using RestaurantApp.Application.Abstractions;
+using RestaurantApp.Application.Common;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 
@@ -111,6 +112,42 @@ public class MenuItemService(IRepository<MenuItem> repository, IRepository<Categ
     {
         var data = await repository.GetAllAsync(x => x.Name.ToLower().Contains(searchText.ToLower().Trim()), "Category").ToListAsync();
         return data.Select(item => item.ToDto()).ToList();
+    }
+
+    public async Task<PagedResult<MenuItemReturnDto>> SearchAsync(MenuItemQueryDto query)
+    {
+        var source = repository.GetAllAsync(null, "Category");
+        if (!string.IsNullOrWhiteSpace(query.Search))
+        {
+            var search = query.Search.Trim().ToLower();
+            source = source.Where(item => item.Name.ToLower().Contains(search));
+        }
+        if (query.CategoryId.HasValue)
+            source = source.Where(item => item.CategoryId == query.CategoryId.Value);
+        if (query.MinPrice.HasValue)
+            source = source.Where(item => item.Price >= query.MinPrice.Value);
+        if (query.MaxPrice.HasValue)
+            source = source.Where(item => item.Price <= query.MaxPrice.Value);
+        if (query.IsAvailable.HasValue)
+            source = source.Where(item => item.IsAvailable == query.IsAvailable.Value);
+
+        var totalCount = await source.CountAsync();
+        var page = Math.Max(1, query.Page);
+        var pageSize = Math.Clamp(query.PageSize, 5, 50);
+        var items = await source
+            .OrderBy(item => item.Category.DisplayOrder)
+            .ThenBy(item => item.Name)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return new PagedResult<MenuItemReturnDto>
+        {
+            Items = items.Select(item => item.ToDto()).ToList(),
+            Page = page,
+            PageSize = pageSize,
+            TotalCount = totalCount
+        };
     }
 
     private static string? Normalize(string? value) =>

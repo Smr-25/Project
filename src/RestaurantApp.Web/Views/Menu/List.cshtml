@@ -1,119 +1,36 @@
-@model IEnumerable<RestaurantApp.Application.Dtos.MenuItems.MenuItemReturnDto>
-
+@model RestaurantApp.Application.Common.PagedResult<RestaurantApp.Application.Dtos.MenuItems.MenuItemReturnDto>
 @{
-    ViewData["Title"] = "Menu Items List";
-    var categories = ViewBag.Categories as List<RestaurantApp.Application.Dtos.Categories.CategoryReturnDto> ?? new List<RestaurantApp.Application.Dtos.Categories.CategoryReturnDto>();
+    ViewData["Title"] = "Menu items";
+    var categories = ViewBag.Categories as List<RestaurantApp.Application.Dtos.Categories.CategoryReturnDto> ?? [];
+    var query = ViewBag.Query as RestaurantApp.Application.Dtos.MenuItems.MenuItemQueryDto ?? new();
 }
 
-<div class="container mt-5">
-    <h2>Menu Items List</h2>
-    <hr />
-
-    @if (TempData["Success"] != null)
-    {
-        <div class="alert alert-success">@TempData["Success"]</div>
-    }
-    @if (TempData["Error"] != null)
-    {
-        <div class="alert alert-danger">@TempData["Error"]</div>
-    }
-
-    <!-- Filters Section -->
-    <div class="card mb-4">
-        <div class="card-body">
-            <h5 class="card-title">Filters & Search</h5>
-            <div class="row">
-                <!-- Search by name -->
-                <div class="col-md-4 mb-2">
-                    <form asp-action="List" method="get" class="d-flex">
-                        <input type="text" name="searchText" class="form-control me-2" placeholder="Search by name..." value="@ViewContext.HttpContext.Request.Query["searchText"]" />
-                        <button type="submit" class="btn btn-outline-primary">Search</button>
-                    </form>
-                </div>
-                <!-- Filter by category -->
-                <div class="col-md-4 mb-2">
-                    <form asp-action="List" method="get" class="d-flex">
-                        <select name="categoryId" class="form-select me-2">
-                            <option value="">-- All Categories --</option>
-                            @foreach (var cat in categories)
-                            {
-                                if (ViewContext.HttpContext.Request.Query["categoryId"] == cat.Id.ToString())
-                                {
-                                    <option value="@cat.Id" selected>@cat.Name</option>
-                                }
-                                else
-                                {
-                                    <option value="@cat.Id">@cat.Name</option>
-                                }
-                            }
-                        </select>
-                        <button type="submit" class="btn btn-outline-success">Filter</button>
-                    </form>
-                </div>
-                <!-- Filter by price -->
-                <div class="col-md-4 mb-2">
-                    <form asp-action="List" method="get" class="d-flex">
-                        <input type="number" name="minPrice" class="form-control me-2" placeholder="Min" step="0.01" value="@ViewContext.HttpContext.Request.Query["minPrice"]" required />
-                        <input type="number" name="maxPrice" class="form-control me-2" placeholder="Max" step="0.01" value="@ViewContext.HttpContext.Request.Query["maxPrice"]" required />
-                        <button type="submit" class="btn btn-outline-warning">Filter</button>
-                    </form>
-                </div>
-            </div>
-            @if (ViewContext.HttpContext.Request.Query.Count > 0)
-            {
-                <div class="mt-2 text-end">
-                    <a asp-action="List" class="btn btn-sm btn-secondary">Clear Filters</a>
-                </div>
-            }
-        </div>
-    </div>
-
-    <!-- Data Table -->
-    <table class="table table-bordered table-striped">
-        <thead class="table-dark">
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Category</th>
-                <th>Price</th>
-                <th>Status</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            @if (Model != null && Model.Any())
-            {
-                foreach (var item in Model)
-                {
-                    <tr>
-                        <td>@item.Id</td>
-                        <td>@item.Name</td>
-                        <td>@item.CategoryName</td>
-                        <td>@item.Price.ToString("C")</td>
-                        <td><span class="badge @(item.IsAvailable ? "text-bg-success" : "text-bg-secondary")">@(item.IsAvailable ? "Available" : "Archived")</span></td>
-                        <td>
-                            <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Edit</a>
-                            
-                            <form asp-action="SetAvailability" asp-route-id="@item.Id" method="post" style="display:inline;">
-                                <input type="hidden" name="isAvailable" value="@(!item.IsAvailable ? "true" : "false")" />
-                                <button type="submit" class="btn btn-sm @(item.IsAvailable ? "btn-outline-danger" : "btn-outline-success")">
-                                    @(item.IsAvailable ? "Archive" : "Restore")
-                                </button>
-                            </form>
-                        </td>
-                    </tr>
-                }
-            }
-            else
-            {
-                <tr>
-                    <td colspan="6" class="text-center">No menu items found.</td>
-                </tr>
-            }
-        </tbody>
-    </table>
-
-    <div class="mt-4">
-        <a asp-action="Index" class="btn btn-secondary">Back to Menu Operations</a>
-    </div>
+<div class="d-flex justify-content-between align-items-center mt-4 mb-3">
+    <div><p class="text-uppercase text-muted small mb-1">Menu management</p><h1 class="h2 mb-0">Menu items</h1></div>
+    <a asp-action="Create" class="btn btn-dark">Add menu item</a>
 </div>
+@if (TempData["Success"] is string success) { <div class="alert alert-success">@success</div> }
+@if (TempData["Error"] is string error) { <div class="alert alert-danger">@error</div> }
+
+<form method="get" class="card card-body mb-4">
+    <div class="row g-2">
+        <div class="col-md-4"><input name="Search" value="@query.Search" class="form-control" placeholder="Search menu" /></div>
+        <div class="col-md-3"><select name="CategoryId" class="form-select"><option value="">All categories</option>@foreach (var category in categories) { <option value="@category.Id" selected="@(query.CategoryId == category.Id)">@category.Name</option> }</select></div>
+        <div class="col-md-2"><input name="MinPrice" value="@query.MinPrice" class="form-control" type="number" step="0.01" placeholder="Min price" /></div>
+        <div class="col-md-2"><input name="MaxPrice" value="@query.MaxPrice" class="form-control" type="number" step="0.01" placeholder="Max price" /></div>
+        <div class="col-md-1"><button class="btn btn-dark w-100" type="submit">Go</button></div>
+        <div class="col-md-3"><select name="IsAvailable" class="form-select"><option value="">Any status</option><option value="true" selected="@(query.IsAvailable == true)">Available</option><option value="false" selected="@(query.IsAvailable == false)">Archived</option></select></div>
+        <div class="col-md-2"><select name="PageSize" class="form-select"><option value="10">10 per page</option><option value="25" selected="@(query.PageSize == 25)">25 per page</option><option value="50" selected="@(query.PageSize == 50)">50 per page</option></select></div>
+        <div class="col-md-auto"><a asp-action="List" class="btn btn-outline-secondary">Clear</a></div>
+    </div>
+</form>
+
+<div class="table-responsive"><table class="table align-middle"><thead><tr><th>Name</th><th>Category</th><th>Price</th><th>Status</th><th class="text-end">Actions</th></tr></thead><tbody>
+@foreach (var item in Model.Items)
+{
+    <tr><td><strong>@item.Name</strong><small class="d-block text-muted">@item.Description</small></td><td>@item.CategoryName</td><td>@item.Price.ToString("N2") AZN</td><td><span class="badge @(item.IsAvailable ? "text-bg-success" : "text-bg-secondary")">@(item.IsAvailable ? "Available" : "Archived")</span></td><td class="text-end"><a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-dark">Edit</a> <form asp-action="SetAvailability" asp-route-id="@item.Id" method="post" class="d-inline"><input type="hidden" name="isAvailable" value="@(!item.IsAvailable ? "true" : "false")" /><button type="submit" class="btn btn-sm @(item.IsAvailable ? "btn-outline-danger" : "btn-outline-success")">@(item.IsAvailable ? "Archive" : "Restore")</button></form></td></tr>
+}
+@if (Model.Items.Count == 0) { <tr><td colspan="5" class="text-center text-muted py-4">No menu items match the filters.</td></tr> }
+</tbody></table></div>
+
+<div class="d-flex justify-content-between align-items-center"><span class="text-muted">@Model.TotalCount results · Page @Model.Page of @Model.TotalPages</span><div class="btn-group"><a class="btn btn-outline-dark @(Model.HasPreviousPage ? "" : "disabled")" asp-action="List" asp-route-page="@(Model.Page - 1)" asp-route-pageSize="@Model.PageSize" asp-route-search="@query.Search" asp-route-categoryId="@query.CategoryId" asp-route-minPrice="@query.MinPrice" asp-route-maxPrice="@query.MaxPrice" asp-route-isAvailable="@query.IsAvailable">Previous</a><a class="btn btn-outline-dark @(Model.HasNextPage ? "" : "disabled")" asp-action="List" asp-route-page="@(Model.Page + 1)" asp-route-pageSize="@Model.PageSize" asp-route-search="@query.Search" asp-route-categoryId="@query.CategoryId" asp-route-minPrice="@query.MinPrice" asp-route-maxPrice="@query.MaxPrice" asp-route-isAvailable="@query.IsAvailable">Next</a></div></div>

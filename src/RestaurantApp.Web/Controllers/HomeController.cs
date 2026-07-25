@@ -1,22 +1,27 @@
 using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using RestaurantApp.Application.Interfaces;
 using RestaurantApp.Web.Models;
 
 namespace RestaurantApp.Web.Controllers;
 
-public class HomeController : Controller
+public class HomeController(IDashboardService dashboardService) : Controller
 {
-    public IActionResult Index()
+    [Authorize]
+    public async Task<IActionResult> Index()
     {
-        return View();
+        return View(await dashboardService.GetAsync());
     }
 
+    [AllowAnonymous]
     public IActionResult Privacy()
     {
         return View();
     }
 
     [HttpGet]
+    [AllowAnonymous]
     public IActionResult ErrorStatus(int code)
     {
         Response.StatusCode = code;
@@ -25,6 +30,7 @@ public class HomeController : Controller
     }
 
     [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
+    [AllowAnonymous]
     public IActionResult Error()
     {
         return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
