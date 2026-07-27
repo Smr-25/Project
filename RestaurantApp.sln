@@ -15,6 +15,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{0AB3BF05
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RestaurantApp.UnitTests", "tests\RestaurantApp.UnitTests\RestaurantApp.UnitTests.csproj", "{C7197370-8CD3-4CCF-9BA3-8677D20F6065}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RestaurantApp.IntegrationTests", "tests\RestaurantApp.IntegrationTests\RestaurantApp.IntegrationTests.csproj", "{129ADFB2-3773-42E1-A220-0AF82B1BC1EC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -85,12 +87,25 @@ Global
 		{C7197370-8CD3-4CCF-9BA3-8677D20F6065}.Release|x64.Build.0 = Release|Any CPU
 		{C7197370-8CD3-4CCF-9BA3-8677D20F6065}.Release|x86.ActiveCfg = Release|Any CPU
 		{C7197370-8CD3-4CCF-9BA3-8677D20F6065}.Release|x86.Build.0 = Release|Any CPU
+		{129ADFB2-3773-42E1-A220-0AF82B1BC1EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{129ADFB2-3773-42E1-A220-0AF82B1BC1EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{129ADFB2-3773-42E1-A220-0AF82B1BC1EC}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{129ADFB2-3773-42E1-A220-0AF82B1BC1EC}.Debug|x64.Build.0 = Debug|Any CPU
+		{129ADFB2-3773-42E1-A220-0AF82B1BC1EC}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{129ADFB2-3773-42E1-A220-0AF82B1BC1EC}.Debug|x86.Build.0 = Debug|Any CPU
+		{129ADFB2-3773-42E1-A220-0AF82B1BC1EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{129ADFB2-3773-42E1-A220-0AF82B1BC1EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{129ADFB2-3773-42E1-A220-0AF82B1BC1EC}.Release|x64.ActiveCfg = Release|Any CPU
+		{129ADFB2-3773-42E1-A220-0AF82B1BC1EC}.Release|x64.Build.0 = Release|Any CPU
+		{129ADFB2-3773-42E1-A220-0AF82B1BC1EC}.Release|x86.ActiveCfg = Release|Any CPU
+		{129ADFB2-3773-42E1-A220-0AF82B1BC1EC}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{C7197370-8CD3-4CCF-9BA3-8677D20F6065} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{129ADFB2-3773-42E1-A220-0AF82B1BC1EC} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {D8A9FE9A-EDD8-4573-B65D-E89DA3027F9A}
