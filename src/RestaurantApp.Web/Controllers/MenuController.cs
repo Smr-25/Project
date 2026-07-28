@@ -13,7 +13,7 @@ public class MenuController(IMenuItemService menuService, ICategoryService categ
 {
     public IActionResult Index()
     {
-        return View();
+        return RedirectToAction(nameof(List));
     }
 
     [HttpGet]

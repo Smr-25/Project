@@ -1,81 +1,76 @@
 @model RestaurantApp.Application.Dtos.Orders.OrderCreateDto
-
 @{
-    ViewData["Title"] = "Add New Order";
-    var menuItems = ViewBag.MenuItems as List<RestaurantApp.Application.Dtos.MenuItems.MenuItemReturnDto> ?? new List<RestaurantApp.Application.Dtos.MenuItems.MenuItemReturnDto>();
+    ViewData["Title"] = "Create order";
+    var menuItems = ViewBag.MenuItems as List<RestaurantApp.Application.Dtos.MenuItems.MenuItemReturnDto> ?? [];
     var diningTables = ViewBag.DiningTables as List<RestaurantApp.Application.Dtos.DiningTables.DiningTableReturnDto> ?? [];
-    if (Model.OrderItems.Count == 0)
-    {
-        for (var i = 0; i < 5; i++)
-        {
-            Model.OrderItems.Add(new RestaurantApp.Application.Dtos.OrderItems.OrderItemCreateDto());
-        }
-    }
 }
 
-<div class="container mt-5">
-    <h2>Add New Order</h2>
-    <hr />
+<section class="py-4" data-order-builder>
+    <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 mb-4">
+        <div><p class="eyebrow">New service</p><h1 class="display-6 mb-1">Build an order</h1><p class="text-muted mb-0">Choose a table, then add dishes and kitchen notes.</p></div>
+        <a asp-action="List" class="btn btn-outline-dark">Back to orders</a>
+    </div>
 
     <form asp-action="Create" method="post">
-        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+        <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
+        <div class="row g-4">
+            <div class="col-xl-8">
+                <div class="card border-0 shadow-sm mb-4">
+                    <div class="card-body p-4">
+                        <div class="row g-3">
+                            <div class="col-md-5">
+                                <label asp-for="DiningTableId" class="form-label fw-semibold">Dining table</label>
+                                <select asp-for="DiningTableId" class="form-select form-select-lg">
+                                    <option value="0">Select an available table</option>
+                                    @foreach (var table in diningTables)
+                                    {
+                                        <option value="@table.Id">Table @table.Number · @table.Capacity seats</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="DiningTableId" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-7">
+                                <label asp-for="Notes" class="form-label fw-semibold">Service note</label>
+                                <input asp-for="Notes" class="form-control form-control-lg" placeholder="Birthday, allergy alert, guest request..." />
+                                <span asp-validation-for="Notes" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-        <div class="mb-3">
-            <label asp-for="DiningTableId" class="form-label">Dining table</label>
-            <select asp-for="DiningTableId" class="form-select">
-                <option value="0">Select a table</option>
-                @foreach (var table in diningTables)
-                {
-                    <option value="@table.Id">Table @table.Number · @table.Capacity seats</option>
-                }
-            </select>
-            <span asp-validation-for="DiningTableId" class="text-danger"></span>
-        </div>
+                <div class="d-flex justify-content-between align-items-center mb-3"><h2 class="h4 mb-0">Available menu</h2><span class="text-muted small">Enter a quantity to select an item</span></div>
+                <div class="row g-3">
+                    @for (var index = 0; index < Model.OrderItems.Count; index++)
+                    {
+                        var menuItem = menuItems.Single(item => item.Id == Model.OrderItems[index].MenuItemId);
+                        <div class="col-md-6">
+                            <article class="menu-order-card" data-order-row>
+                                <input asp-for="OrderItems[index].MenuItemId" type="hidden" />
+                                <div class="d-flex justify-content-between gap-3">
+                                    <div><span class="menu-category">@menuItem.CategoryName</span><h3 class="h5 mb-1">@menuItem.Name</h3><p class="text-muted small mb-2">@menuItem.Description</p></div>
+                                    <strong class="menu-price">@menuItem.Price.ToString("N2") AZN</strong>
+                                </div>
+                                <div class="row g-2 align-items-end">
+                                    <div class="col-4"><label asp-for="OrderItems[index].Quantity" class="form-label small">Quantity</label><input asp-for="OrderItems[index].Quantity" type="number" min="0" max="99" class="form-control order-quantity" data-price="@menuItem.Price.ToString(System.Globalization.CultureInfo.InvariantCulture)" /></div>
+                                    <div class="col-8"><label asp-for="OrderItems[index].SpecialInstructions" class="form-label small">Kitchen note</label><input asp-for="OrderItems[index].SpecialInstructions" class="form-control" placeholder="Optional" /></div>
+                                </div>
+                            </article>
+                        </div>
+                    }
+                </div>
+            </div>
 
-        <div class="mb-3">
-            <label asp-for="Notes" class="form-label">Order notes</label>
-            <textarea asp-for="Notes" class="form-control" rows="2" placeholder="Optional note for the team"></textarea>
-            <span asp-validation-for="Notes" class="text-danger"></span>
-        </div>
-
-        <h4>Order Items</h4>
-        <p class="text-muted">Select an item and enter count. Leave empty to ignore row.</p>
-        
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Menu Item</th>
-                    <th>Quantity</th>
-                    <th>Special instructions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @for (int i = 0; i < Model.OrderItems.Count; i++)
-                {
-                    <tr>
-                        <td>
-                            <select asp-for="OrderItems[i].MenuItemId" class="form-select">
-                                <option value="0">-- Select Menu Item --</option>
-                                @foreach (var item in menuItems)
-                                {
-                                    <option value="@item.Id">@item.Name (@item.Price.ToString("C"))</option>
-                                }
-                            </select>
-                        </td>
-                        <td>
-                            <input asp-for="OrderItems[i].Quantity" type="number" min="0" max="99" class="form-control" />
-                        </td>
-                        <td>
-                            <input asp-for="OrderItems[i].SpecialInstructions" class="form-control" placeholder="Optional" />
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
-
-        <div class="form-group mt-3">
-            <button type="submit" class="btn btn-primary">Create Order</button>
-            <a asp-action="Index" class="btn btn-secondary">Back to Order Operations</a>
+            <aside class="col-xl-4">
+                <div class="order-summary-card">
+                    <p class="eyebrow">Order summary</p>
+                    <div class="summary-line"><span>Selected quantity</span><strong data-order-count>0</strong></div>
+                    <div class="summary-total"><span>Estimated total</span><strong><span data-order-total>0.00</span> AZN</strong></div>
+                    <p class="small text-muted">The server recalculates all prices before the order is saved.</p>
+                    <button type="submit" class="btn btn-accent btn-lg w-100">Send to kitchen</button>
+                </div>
+            </aside>
         </div>
     </form>
-</div>
+</section>
+
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

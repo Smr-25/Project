@@ -5,6 +5,8 @@ using RestaurantApp.Application.Interfaces;
 using RestaurantApp.Application.Dtos.Orders;
 using RestaurantApp.Application.Exceptions;
 using RestaurantApp.Application.Common;
+using RestaurantApp.Application.Dtos.MenuItems;
+using RestaurantApp.Application.Dtos.OrderItems;
 
 namespace RestaurantApp.Web.Controllers;
 
@@ -16,14 +18,15 @@ public class OrderController(
 {
     public IActionResult Index()
     {
-        return View();
+        return RedirectToAction(nameof(List));
     }
 
     [HttpGet]
     public async Task<IActionResult> Create()
     {
-        await LoadOrderOptionsAsync();
-        return View(new OrderCreateDto());
+        var dto = new OrderCreateDto();
+        await LoadOrderOptionsAsync(dto);
+        return View(dto);
     }
 
     [HttpPost]
@@ -31,7 +34,7 @@ public class OrderController(
     {
         if (!ModelState.IsValid)
         {
-            await LoadOrderOptionsAsync();
+            await LoadOrderOptionsAsync(dto);
             return View(dto);
         }
 
@@ -45,19 +48,19 @@ public class OrderController(
         }
         catch (CountZeroException ex)
         {
-            await LoadOrderOptionsAsync();
+            await LoadOrderOptionsAsync(dto);
             ModelState.AddModelError("", ex.Message);
             return View(dto);
         }
         catch (EntityNotFoundException ex)
         {
-            await LoadOrderOptionsAsync();
+            await LoadOrderOptionsAsync(dto);
             ModelState.AddModelError("", ex.Message);
             return View(dto);
         }
         catch (InvalidOperationException ex)
         {
-            await LoadOrderOptionsAsync();
+            await LoadOrderOptionsAsync(dto);
             ModelState.AddModelError("", ex.Message);
             return View(dto);
         }
@@ -101,9 +104,18 @@ public class OrderController(
         return RedirectToAction(nameof(List));
     }
 
-    private async Task LoadOrderOptionsAsync()
+    private async Task LoadOrderOptionsAsync(OrderCreateDto dto)
     {
-        ViewBag.MenuItems = await menuService.GetAvailableAsync();
+        var menuItems = await menuService.GetAvailableAsync();
+        var submittedItems = dto.OrderItems
+            .Where(item => item.MenuItemId > 0)
+            .GroupBy(item => item.MenuItemId)
+            .ToDictionary(group => group.Key, group => group.First());
+        dto.OrderItems = menuItems.Select(item => submittedItems.GetValueOrDefault(item.Id) ?? new OrderItemCreateDto
+        {
+            MenuItemId = item.Id
+        }).ToList();
+        ViewBag.MenuItems = menuItems;
         ViewBag.DiningTables = await tableService.GetAvailableAsync();
     }
 }
