@@ -38,3 +38,7 @@ Thumbs.db
 # Publish folder
 publish/
 appsettings.Mac.json
+
+# Local container configuration
+.env
+!.env.example

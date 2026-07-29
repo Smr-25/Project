@@ -28,7 +28,8 @@ public sealed class PostgreSqlPersistenceTests(PostgreSqlFixture fixture)
         var table = await context.DiningTables.OrderBy(item => item.Id).FirstAsync();
         var menuItem = await context.MenuItems.OrderBy(item => item.Id).FirstAsync();
         var originalPrice = menuItem.Price;
-        var order = Order.Create($"ORD-TEST-{Guid.NewGuid():N}", table.Id, "Integration test order");
+        var orderNumber = $"ORD-TEST-{Guid.NewGuid().ToString("N")[..16]}";
+        var order = Order.Create(orderNumber, table.Id, "Integration test order");
         order.AddItem(menuItem, 2, "Light salt");
         context.Orders.Add(order);
 

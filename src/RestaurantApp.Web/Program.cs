@@ -79,7 +79,10 @@ else
 }
 
 app.UseMiddleware<SecurityHeadersMiddleware>();
-app.UseHttpsRedirection();
+if (builder.Configuration.GetValue("HttpsRedirection:Enabled", true))
+{
+    app.UseHttpsRedirection();
+}
 app.UseRouting();
 app.UseStatusCodePagesWithReExecute("/Home/ErrorStatus", "?code={0}");
 
@@ -87,6 +90,12 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapStaticAssets();
+
+app.MapGet("/health", async (RestaurantDbContext database, CancellationToken cancellationToken) =>
+    await database.Database.CanConnectAsync(cancellationToken)
+        ? Results.Ok(new { status = "Healthy" })
+        : Results.StatusCode(StatusCodes.Status503ServiceUnavailable))
+    .AllowAnonymous();
 
 app.MapControllerRoute(
         name: "default",

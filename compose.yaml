@@ -1,0 +1,55 @@
+name: restaurant-app
+
+services:
+  database:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: restaurant
+      POSTGRES_USER: restaurant
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in your local .env file}
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U restaurant -d restaurant"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    security_opt:
+      - no-new-privileges:true
+
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_HTTP_PORTS: 8080
+      HttpsRedirection__Enabled: "false"
+      ConnectionStrings__DefaultConnection: Host=database;Port=5432;Database=restaurant;Username=restaurant;Password=${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in your local .env file}
+      BootstrapAdmin__Email: ${RESTAURANT_ADMIN_EMAIL:-admin@restaurant.local}
+      BootstrapAdmin__Password: ${RESTAURANT_ADMIN_PASSWORD:?Set RESTAURANT_ADMIN_PASSWORD in your local .env file}
+      BootstrapAdmin__DisplayName: ${RESTAURANT_ADMIN_NAME:-Restaurant administrator}
+    ports:
+      - "8080:8080"
+    volumes:
+      - data-protection:/home/app/.aspnet/DataProtection-Keys
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "--silent", "http://localhost:8080/health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  postgres-data:
+  data-protection:
