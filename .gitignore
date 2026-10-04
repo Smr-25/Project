@@ -1,6 +1,7 @@
 # Build folders
 bin/
 obj/
+bin?Debug/
 
 # User-specific files
 *.user
@@ -37,3 +38,4 @@ Thumbs.db
 publish/
 
 appsettings.Mac.json
+.env

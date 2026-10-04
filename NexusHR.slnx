@@ -1,6 +1,0 @@
-<Solution>
-  <Project Path="NexusHR.Api/NexusHR.Api.csproj" />
-  <Project Path="NexusHR.Application/NexusHR.Application.csproj" />
-  <Project Path="NexusHR.Domain/NexusHR.Domain.csproj" />
-  <Project Path="NexusHR.Infrastructure/NexusHR.Infrastructure.csproj" />
-</Solution>

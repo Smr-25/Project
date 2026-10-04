@@ -1,0 +1,44 @@
+@model HRManagementApp.Models.EditEmployeeViewModel
+@{
+    ViewData["Title"] = "Edit Employee";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h2 class="mb-4">Edit Employee</h2>
+        
+        <form asp-action="Edit" method="post" class="card shadow-sm p-4">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3 fw-bold"></div>
+
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="No" />
+
+            <div class="mb-3">
+                <label class="form-label fw-semibold">Employee No</label>
+                <input class="form-control" value="@Model.No" disabled />
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Position" class="form-label fw-semibold">Position</label>
+                <input asp-for="Position" class="form-control" />
+                <span asp-validation-for="Position" class="text-danger"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="Salary" class="form-label fw-semibold">Salary</label>
+                <input asp-for="Salary" class="form-control" type="number" step="0.01" min="250" />
+                <span asp-validation-for="Salary" class="text-danger"></span>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a asp-action="Index" class="btn btn-secondary">Back</a>
+                <button type="submit" class="btn btn-warning px-4">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/4.0.0/jquery.validate.unobtrusive.min.js"></script>
+}

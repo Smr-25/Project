@@ -1,0 +1,67 @@
+@model IEnumerable<HRManagementApp.Core.Entities.Department>
+@{
+    ViewData["Title"] = "Departments";
+}
+
+<div class="row align-items-center justify-content-between g-3 mb-4">
+    <div class="col-md-4">
+        <h2>Departments</h2>
+    </div>
+    <div class="col-md-5">
+        <form method="get" asp-action="Index" class="d-flex">
+            <input type="text" name="search" value="@ViewData["SearchQuery"]" class="form-control me-2 shadow-sm" placeholder="Search departments..." aria-label="Search departments">
+            <button type="submit" class="btn btn-outline-primary shadow-sm"><i class="bi bi-search">Search</i></button>
+            @if (!string.IsNullOrEmpty(ViewData["SearchQuery"]?.ToString()))
+            {
+                <a asp-action="Index" class="btn btn-outline-secondary ms-2 shadow-sm">Clear</a>
+            }
+        </form>
+    </div>
+    <div class="col-md-3 text-end">
+        <a asp-action="Create" class="btn btn-primary shadow-sm">+ New Department</a>
+    </div>
+</div>
+
+
+<div class="table-responsive">
+<table class="table table-bordered table-striped shadow-sm bg-white">
+    <thead class="table-dark">
+        <tr>
+            <th>Name</th>
+            <th>Worker Limit</th>
+            <th>Salary Limit</th>
+            <th>Current Workers</th>
+            <th>Avg Salary</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if(!Model.Any()) {
+            <tr><td colspan="6" class="text-center">No departments found.</td></tr>
+        }
+        @foreach (var dept in Model)
+        {
+            <tr>
+                <td class="fw-bold text-primary">@dept.Name</td>
+                <td>@dept.WorkerLimit</td>
+                <td>@dept.SalaryLimit.ToString("N2") AZN</td>
+                <td>
+                    <span class="badge @(dept.Employees.Count == dept.WorkerLimit ? "bg-danger" : "bg-success")">
+                        @dept.Employees.Count / @dept.WorkerLimit
+                    </span>
+                </td>
+                <td>@dept.CalcSalaryAverage().ToString("N2") AZN</td>
+                <td>
+                    <div class="d-flex gap-2">
+                        <a asp-action="Edit" asp-route-id="@dept.Id" class="btn btn-sm btn-warning shadow-sm">Edit Name</a>
+                        <form asp-action="Delete" method="post" onsubmit="return confirm('Are you sure you want to delete this department?\nAll employees inside will be deleted as well!');">
+                            <input type="hidden" name="id" value="@dept.Id" />
+                            <button type="submit" class="btn btn-sm btn-danger shadow-sm">Delete</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+</div>

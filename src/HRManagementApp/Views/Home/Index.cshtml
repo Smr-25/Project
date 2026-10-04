@@ -1,0 +1,97 @@
+@model HRManagementApp.Models.DashboardViewModel
+@{
+    ViewData["Title"] = "Overview";
+}
+
+<div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
+    <div>
+        <p class="text-uppercase text-muted fw-semibold small mb-1">Workforce overview</p>
+        <h1 class="fw-bold mb-1">HR dashboard</h1>
+        <p class="text-muted mb-0">A clear view of your teams, capacity and monthly salary budget.</p>
+    </div>
+    <a asp-controller="Employee" asp-action="Create" class="btn btn-primary">+ Add employee</a>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-label">Departments</div>
+            <div class="stat-value">@Model.TotalDepartments</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-label">Employees</div>
+            <div class="stat-value">@Model.TotalEmployees</div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <div class="stat-label">Monthly salary</div>
+            <div class="stat-value">@Model.MonthlySalary.ToString("N2") <small class="fs-6">AZN</small></div>
+        </div>
+    </div>
+</div>
+
+<div class="card mb-4">
+    <div class="card-body">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h2 class="h5 fw-bold mb-1">Department capacity</h2>
+                <p class="text-muted mb-0">Employees and salary used in each department.</p>
+            </div>
+            <a asp-controller="Department" asp-action="Index" class="btn btn-outline-primary btn-sm">View all</a>
+        </div>
+
+        @if (Model.Departments.Count == 0)
+        {
+            <div class="text-center py-4 text-muted">
+                No departments yet.
+                <a asp-controller="Department" asp-action="Create">Create your first department</a>.
+            </div>
+        }
+        else
+        {
+            <div class="table-responsive">
+                <table class="table mb-0">
+                    <thead>
+                        <tr>
+                            <th scope="col">Department</th>
+                            <th scope="col">People</th>
+                            <th scope="col">Salary used</th>
+                            <th scope="col">Budget</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var department in Model.Departments)
+                        {
+                            <tr>
+                                <td class="fw-semibold">@department.Name</td>
+                                <td>@department.EmployeeCount / @department.WorkerLimit</td>
+                                <td>@department.SalarySpent.ToString("N2") AZN</td>
+                                <td>@department.SalaryLimit.ToString("N2") AZN</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-6">
+        <div class="card h-100"><div class="card-body">
+            <h2 class="h5 fw-bold">Departments</h2>
+            <p class="text-muted">Create teams and set worker and salary limits.</p>
+            <a asp-controller="Department" asp-action="Index" class="btn btn-outline-primary">Manage departments</a>
+        </div></div>
+    </div>
+    <div class="col-md-6">
+        <div class="card h-100"><div class="card-body">
+            <h2 class="h5 fw-bold">Employees</h2>
+            <p class="text-muted">Add people, update roles and search the workforce.</p>
+            <a asp-controller="Employee" asp-action="Index" class="btn btn-outline-primary">Manage employees</a>
+        </div></div>
+    </div>
+</div>

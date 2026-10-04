@@ -1,0 +1,114 @@
+:root {
+    --ink: #17324d;
+    --muted: #617286;
+    --accent: #0d7d78;
+    --surface: #ffffff;
+    --canvas: #f3f6f9;
+}
+
+body {
+    min-height: 100vh;
+    background: var(--canvas);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.navbar {
+    background: #17324d;
+    box-shadow: 0 3px 16px rgba(23, 50, 77, .12);
+}
+
+.navbar-brand {
+    font-weight: 750;
+    letter-spacing: -.035em;
+}
+
+.brand-accent { color: #57d6c6; }
+.navbar .nav-link { color: #d5e3ee; }
+.navbar .nav-link:hover,
+.navbar .nav-link:focus { color: #ffffff; }
+
+.page-content { min-height: calc(100vh - 190px); }
+
+h1, h2, h3 { letter-spacing: -.03em; }
+.text-muted { color: var(--muted) !important; }
+
+.card,
+.table,
+.alert {
+    border-radius: 14px;
+}
+
+.card {
+    border: 1px solid #e0e8ee;
+    box-shadow: 0 6px 24px rgba(23, 50, 77, .05);
+}
+
+.card-body { padding: 1.4rem; }
+
+.stat-card {
+    height: 100%;
+    padding: 1.4rem;
+    border-radius: 14px;
+    background: var(--surface);
+    border: 1px solid #e0e8ee;
+    box-shadow: 0 6px 24px rgba(23, 50, 77, .05);
+}
+
+.stat-label {
+    color: var(--muted);
+    font-size: .85rem;
+    font-weight: 650;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+}
+
+.stat-value {
+    margin-top: .35rem;
+    font-size: clamp(1.65rem, 3vw, 2.4rem);
+    font-weight: 750;
+    line-height: 1.1;
+}
+
+.table {
+    background: var(--surface);
+    overflow: hidden;
+    border-color: #e0e8ee;
+}
+
+.table thead th {
+    background: #e9f0f5;
+    color: var(--ink);
+    border-bottom: 0;
+    font-size: .84rem;
+    letter-spacing: .02em;
+}
+
+.table td,
+.table th { padding: .85rem 1rem; vertical-align: middle; }
+.table tbody tr:hover { background: #f8fbfc; }
+
+.btn { border-radius: 9px; font-weight: 600; }
+.btn-primary { background: var(--accent); border-color: var(--accent); }
+.btn-primary:hover,
+.btn-primary:focus { background: #086c68; border-color: #086c68; }
+
+.form-control,
+.form-select { border-radius: 9px; border-color: #d1dde5; }
+.form-control:focus,
+.form-select:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 .2rem rgba(13, 125, 120, .14);
+}
+
+.footer {
+    color: var(--muted);
+    background: var(--surface);
+    border-top: 1px solid #e0e8ee;
+    font-size: .9rem;
+}
+
+@media (max-width: 767px) {
+    .table { min-width: 640px; }
+    .page-heading { gap: 1rem; align-items: flex-start !important; }
+}

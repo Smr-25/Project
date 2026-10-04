@@ -1,0 +1,50 @@
+@model HRManagementApp.Business.DTOs.EmployeeDto
+@{
+    ViewData["Title"] = "New Employee";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <h2 class="mb-4">Create New Employee</h2>
+        
+        <form asp-action="Create" method="post" class="card shadow-sm p-4">
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3 fw-bold"></div>
+
+            <div class="mb-3">
+                <label asp-for="FullName" class="form-label fw-semibold">Full Name</label>
+                <input asp-for="FullName" class="form-control" placeholder="e.g. John Doe" />
+                <span asp-validation-for="FullName" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Position" class="form-label fw-semibold">Position</label>
+                <input asp-for="Position" class="form-control" placeholder="e.g. Developer" />
+                <span asp-validation-for="Position" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Salary" class="form-label fw-semibold">Salary (AZN)</label>
+                <input asp-for="Salary" class="form-control" type="number" step="0.01" min="250" value="250" />
+                <span asp-validation-for="Salary" class="text-danger"></span>
+            </div>
+
+            <div class="mb-4">
+                <label asp-for="DepartmentId" class="form-label fw-semibold">Department</label>
+                <select asp-for="DepartmentId" class="form-select" asp-items="@ViewBag.Departments">
+                    <option value="0">-- Select Department --</option>
+                </select>
+                <span asp-validation-for="DepartmentId" class="text-danger"></span>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <a asp-action="Index" class="btn btn-secondary">Back</a>
+                <button type="submit" class="btn btn-success px-4">Create</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/4.0.0/jquery.validate.unobtrusive.min.js"></script>
+}
