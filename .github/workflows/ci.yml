@@ -21,5 +21,20 @@ jobs:
         run: dotnet build HRManagementApp.slnx --configuration Release --no-restore --warnaserror
       - name: Test
         run: dotnet test HRManagementApp.slnx --configuration Release --no-build --no-restore
-      - name: Build Docker image
-        run: docker build --tag hrmanagementapp:ci .
+      - name: Validate published Compose file
+        run: docker compose -f compose.published.yaml config --quiet
+      - name: Start Docker stack
+        run: docker compose up --build -d
+      - name: Smoke test running app
+        run: |
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://127.0.0.1:8080/healthz; then
+              exit 0
+            fi
+            sleep 2
+          done
+          docker compose logs --tail=100 app db
+          exit 1
+      - name: Stop test stack
+        if: always()
+        run: docker compose down -v

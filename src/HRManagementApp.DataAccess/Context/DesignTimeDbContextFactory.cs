@@ -8,7 +8,8 @@ public sealed class DesignTimeDbContextFactory : IDesignTimeDbContextFactory<App
     public AppDbContext CreateDbContext(string[] args)
     {
         var connectionString = Environment.GetEnvironmentVariable("ConnectionStrings__DefaultConnection")
-            ?? "Host=localhost;Database=hrmanagement;Username=hrapp;Password=localdevpass";
+            ?? throw new InvalidOperationException(
+                "Set ConnectionStrings__DefaultConnection before running EF Core design-time commands.");
         var options = new DbContextOptionsBuilder<AppDbContext>()
             .UseNpgsql(connectionString)
             .Options;

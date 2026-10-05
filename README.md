@@ -32,9 +32,22 @@ Install Docker Desktop (or Docker Engine with Compose). Download [compose.publis
 docker compose -f compose.published.yaml up -d
 ```
 
-Open **http://localhost:8080**. Docker pulls the published app image and PostgreSQL image; no .NET SDK, source checkout, or registry login is needed for a public image. The database persists in a named Docker volume. The Compose file is for a localhost demo and uses a known default database password: set `POSTGRES_PASSWORD` in a local `.env` file before starting if you want a different password. Do not expose this demo stack to the internet.
+Open **http://localhost:8080**. Docker pulls the published app image and PostgreSQL image; no .NET SDK, source checkout, or registry login is needed. On first start, Compose generates a random database password inside a Docker-managed credential volume. Each installation keeps its own database and credential volumes locally; neither is included in the public image or repository.
 
-To stop it, run `docker compose -f compose.published.yaml down` in the same folder. Do not add `-v` unless you intend to delete your local database.
+To stop it, run `docker compose -f compose.published.yaml down` in the same folder. Do not add `-v` unless you intend to delete both the local database and its credential.
+
+### Updating an older Docker installation
+
+The previous Compose file used a different database password. If you already have a database volume from that version, the new generated credential will not match it. Keep your data by stopping the old stack, starting just the database with the new Compose file, and rotating its `hrapp` password from inside the database container:
+
+```bash
+docker compose -f compose.published.yaml down
+docker compose -f compose.published.yaml up -d db
+docker compose -f compose.published.yaml exec -T db sh -ec 'printf "ALTER ROLE hrapp WITH PASSWORD '\''%s'\'';\n" "$(cat /run/secrets/postgres_password)" | psql -v ON_ERROR_STOP=1 -U hrapp -d hrmanagement'
+docker compose -f compose.published.yaml up -d
+```
+
+Use `compose.yaml` in place of `compose.published.yaml` if you run from source. The command reads the new credential inside the container; it does not print the password. Do not use `down -v` for an upgrade, as that deletes your existing data.
 
 ## Build from source with Docker
 
@@ -44,11 +57,9 @@ Install Docker with the Compose plugin, then run from the repository root:
 docker compose up --build
 ```
 
-Open **http://localhost:8080**. The first start applies the database migration and adds demo data automatically. The PostgreSQL data is stored in a Docker volume and remains available after `docker compose down`.
+Open **http://localhost:8080**. The first start generates a random local database password, applies the database migration, and adds demo data automatically. The PostgreSQL data and credential are stored in Docker volumes and remain available after `docker compose down`.
 
 This command builds the application image from source on your computer; no registry account is needed. It does not publish the image or deploy a public website.
-
-The Compose file includes a password for local demonstration. To use your own local password, copy `.env.example` to `.env` and change `POSTGRES_PASSWORD` before starting the stack. Do not reuse the demo password for a public deployment.
 
 To stop the containers:
 
@@ -56,7 +67,7 @@ To stop the containers:
 docker compose down
 ```
 
-To deliberately remove the local database and start over, run `docker compose down -v`. This deletes the Compose database volume and its data.
+To deliberately remove the local database and start over, run `docker compose down -v`. This deletes both the Compose database and credential volumes.
 
 ## Project structure
 
@@ -71,6 +82,7 @@ tests/
   HRManagementApp.Tests/       Rule and validation tests
 Dockerfile
 compose.yaml
+compose.published.yaml
 ```
 
 ## Build and test locally
@@ -89,7 +101,7 @@ The app applies migrations when it starts. Demo data is inserted only when the d
 
 ## Current scope
 
-This repository is a local portfolio demo. It has no login or role system. The Docker Compose port is bound to localhost so the demo is not exposed to the network by default. GitHub Actions checks the .NET build, tests, and Docker image build on each push or pull request.
+This repository is a local portfolio demo. It has no login or role system and must not be used for real employee data or exposed to the internet. The Docker Compose app port is bound to localhost; the PostgreSQL port is not published. The source repository and container image are public, but an installation's database volume and generated password are local to its Docker host. GitHub Actions checks the .NET build, tests, and Docker image build on each push or pull request.
 
 ## Deployment
 

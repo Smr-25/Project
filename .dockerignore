@@ -10,3 +10,8 @@
 **/*.suo
 **/*.log
 appsettings.Mac.json
+.env
+**/.env
+**/.env.*
+**/*.pem
+**/*.pfx
