@@ -1,15 +1,11 @@
 # Ember & Oak — Restaurant Operations
 
-[![Continuous integration](https://github.com/Smr-25/RestoranApp/actions/workflows/ci.yml/badge.svg)](https://github.com/Smr-25/RestoranApp/actions/workflows/ci.yml)
-[![.NET 10](https://img.shields.io/badge/.NET-10.0-512BD4)](https://dotnet.microsoft.com/)
-[![PostgreSQL 17](https://img.shields.io/badge/PostgreSQL-17-4169E1)](https://www.postgresql.org/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 A portfolio-ready ASP.NET Core MVC application that models a restaurant's daily operating flow: menu setup, table service, transactional order creation, kitchen fulfilment and management reporting.
 
 The project focuses on business rules and production-minded engineering rather than simple CRUD. Prices are snapshotted when an order is created, order transitions are controlled by the domain, cancellations preserve history, staff access is role-based, and the PostgreSQL schema is verified with container-backed integration tests.
 
-## What it demonstrates
+## Features
 
 - Layered .NET solution with explicit Domain, Application, Infrastructure and Web projects
 - ASP.NET Core Identity with `Admin`, `Manager`, `Waiter` and `Kitchen` roles
@@ -24,7 +20,17 @@ The project focuses on business rules and production-minded engineering rather t
 - Non-root multi-stage Docker image and health-checked Compose stack
 - GitHub Actions for build, tests, image verification and GHCR publishing
 
-## Technology
+## Screenshots
+
+Captured from the running local Docker Compose app with demo orders.
+
+![Restaurant dashboard with operational KPIs](docs/screenshots/dashboard.jpg)
+
+![Menu management with categories and items](docs/screenshots/menu.jpg)
+
+![Kitchen board with active order tickets](docs/screenshots/kitchen.jpg)
+
+## Tech stack
 
 | Area | Choice |
 | --- | --- |
@@ -36,7 +42,7 @@ The project focuses on business rules and production-minded engineering rather t
 | Testing | xUnit, Testcontainers for .NET |
 | Delivery | Docker, Docker Compose, GitHub Actions, GHCR |
 
-## Quick start with Docker
+## Quick start
 
 You need Docker Desktop or another Docker Engine with Compose support.
 
@@ -67,7 +73,7 @@ docker compose down
 
 Add `--volumes` to the down command only when you deliberately want to delete the local database.
 
-## Suggested demo flow
+## Demo workflow
 
 1. Sign in and review today's KPIs on the dashboard.
 2. Open **Menu** and demonstrate category filters, availability and safe item archiving.
@@ -78,7 +84,7 @@ Add `--volumes` to the down command only when you deliberately want to delete th
 
 The bootstrapped administrator can demonstrate every workflow. Additional staff accounts can be assigned the Manager, Waiter or Kitchen role through ASP.NET Core Identity when integrating the application with an organisation's user-provisioning process.
 
-## Local development
+## Development
 
 Prerequisites:
 
@@ -112,7 +118,7 @@ dotnet ef migrations list \
   --startup-project src/RestaurantApp.Web/RestaurantApp.Web.csproj
 ```
 
-## Tests and quality gates
+## Tests
 
 Run the complete test suite from the repository root:
 
@@ -146,7 +152,7 @@ tests/
 
 See [Architecture and design decisions](docs/architecture.md) for dependency direction, request flow, persistence decisions and security boundaries.
 
-## Security notes
+## Security and scope
 
 - All state-changing MVC actions receive automatic antiforgery validation.
 - Identity cookies are HTTP-only, same-site and protected by account lockout rules.
