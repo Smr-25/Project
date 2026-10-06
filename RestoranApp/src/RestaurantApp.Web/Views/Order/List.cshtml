@@ -1,0 +1,31 @@
+@model RestaurantApp.Application.Common.PagedResult<RestaurantApp.Application.Dtos.Orders.OrderReturnDto>
+@{
+    ViewData["Title"] = "Orders";
+    var query = ViewBag.Query as RestaurantApp.Application.Dtos.Orders.OrderQueryDto ?? new();
+    var tables = ViewBag.DiningTables as List<RestaurantApp.Application.Dtos.DiningTables.DiningTableReturnDto> ?? [];
+}
+
+<div class="d-flex justify-content-between align-items-center mt-4 mb-3"><div><p class="text-uppercase text-muted small mb-1">Service history</p><h1 class="h2 mb-0">Orders</h1></div><a asp-action="Create" class="btn btn-dark">Create order</a></div>
+@if (TempData["Success"] is string success) { <div class="alert alert-success">@success</div> }
+@if (TempData["Error"] is string error) { <div class="alert alert-danger">@error</div> }
+
+<form method="get" class="card card-body mb-4"><div class="row g-2">
+    <div class="col-md-2"><input name="StartDate" value="@query.StartDate?.ToString("yyyy-MM-dd")" type="date" class="form-control" /></div>
+    <div class="col-md-2"><input name="EndDate" value="@query.EndDate?.ToString("yyyy-MM-dd")" type="date" class="form-control" /></div>
+    <div class="col-md-2"><input name="MinAmount" value="@query.MinAmount" type="number" step="0.01" class="form-control" placeholder="Min amount" /></div>
+    <div class="col-md-2"><input name="MaxAmount" value="@query.MaxAmount" type="number" step="0.01" class="form-control" placeholder="Max amount" /></div>
+    <div class="col-md-2"><select name="Status" class="form-select"><option value="">Any status</option>@foreach (var status in Enum.GetValues<RestaurantApp.Domain.Models.OrderStatus>()) { <option value="@status" selected="@(query.Status == status)">@status</option> }</select></div>
+    <div class="col-md-2"><select name="DiningTableId" class="form-select"><option value="">Any table</option>@foreach (var table in tables) { <option value="@table.Id" selected="@(query.DiningTableId == table.Id)">Table @table.Number</option> }</select></div>
+    <div class="col-md-2"><select name="PageSize" class="form-select"><option value="10">10 per page</option><option value="25" selected="@(query.PageSize == 25)">25 per page</option><option value="50" selected="@(query.PageSize == 50)">50 per page</option></select></div>
+    <div class="col-md-auto"><button class="btn btn-dark" type="submit">Apply filters</button> <a asp-action="List" class="btn btn-outline-secondary">Clear</a></div>
+</div></form>
+
+<div class="table-responsive"><table class="table align-middle"><thead><tr><th>Order</th><th>Table</th><th>Status</th><th>Items</th><th>Total</th><th>Created</th><th class="text-end">Actions</th></tr></thead><tbody>
+@foreach (var order in Model.Items)
+{
+    <tr><td class="fw-semibold">@order.Number</td><td>@(order.TableNumber ?? "—")</td><td><span class="badge text-bg-light">@order.Status</span></td><td>@order.TotalItemCount</td><td>@order.TotalAmount.ToString("N2") AZN</td><td>@order.CreatedAtUtc.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td><td class="text-end"><a asp-action="Details" asp-route-id="@order.Id" class="btn btn-sm btn-outline-dark">Details</a>@if (order.Status is not RestaurantApp.Domain.Models.OrderStatus.Served and not RestaurantApp.Domain.Models.OrderStatus.Cancelled) { <form asp-action="Delete" asp-route-id="@order.Id" method="post" class="d-inline" data-confirm="Cancel this order while keeping its history?"><button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button></form> }</td></tr>
+}
+@if (Model.Items.Count == 0) { <tr><td colspan="7" class="text-center text-muted py-4">No orders match the filters.</td></tr> }
+</tbody></table></div>
+
+<div class="d-flex justify-content-between align-items-center"><span class="text-muted">@Model.TotalCount results · Page @Model.Page of @Model.TotalPages</span><div class="btn-group"><a class="btn btn-outline-dark @(Model.HasPreviousPage ? "" : "disabled")" asp-action="List" asp-route-page="@(Model.Page - 1)" asp-route-pageSize="@Model.PageSize" asp-route-startDate="@query.StartDate?.ToString("yyyy-MM-dd")" asp-route-endDate="@query.EndDate?.ToString("yyyy-MM-dd")" asp-route-minAmount="@query.MinAmount" asp-route-maxAmount="@query.MaxAmount" asp-route-status="@query.Status" asp-route-diningTableId="@query.DiningTableId">Previous</a><a class="btn btn-outline-dark @(Model.HasNextPage ? "" : "disabled")" asp-action="List" asp-route-page="@(Model.Page + 1)" asp-route-pageSize="@Model.PageSize" asp-route-startDate="@query.StartDate?.ToString("yyyy-MM-dd")" asp-route-endDate="@query.EndDate?.ToString("yyyy-MM-dd")" asp-route-minAmount="@query.MinAmount" asp-route-maxAmount="@query.MaxAmount" asp-route-status="@query.Status" asp-route-diningTableId="@query.DiningTableId">Next</a></div></div>

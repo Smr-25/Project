@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#171512" />
+    <title>@ViewData["Title"] · Ember & Oak</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/RestaurantApp.Web.styles.css" asp-append-version="true" />
+</head>
+<body>
+<header class="app-header">
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-xl">
+            <a class="navbar-brand brand-lockup" asp-controller="Home" asp-action="Index">
+                <span class="brand-mark">E</span>
+                <span><strong>Ember &amp; Oak</strong><small>Restaurant operations</small></span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavigation" aria-controls="mainNavigation" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+            <div class="collapse navbar-collapse" id="mainNavigation">
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    <ul class="navbar-nav ms-lg-4 me-auto">
+                        <li class="nav-item"><a class="nav-link" asp-controller="Home" asp-action="Index">Dashboard</a></li>
+                        @if (User.IsInRole("Admin") || User.IsInRole("Manager"))
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-controller="Menu" asp-action="List">Menu</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="Category" asp-action="Index">Categories</a></li>
+                            <li class="nav-item"><a class="nav-link" asp-controller="Table" asp-action="Index">Tables</a></li>
+                        }
+                        @if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Waiter"))
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-controller="Order" asp-action="List">Orders</a></li>
+                        }
+                        @if (User.IsInRole("Admin") || User.IsInRole("Manager") || User.IsInRole("Kitchen"))
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-controller="Kitchen" asp-action="Index">Kitchen</a></li>
+                        }
+                    </ul>
+                    <div class="staff-menu">
+                        <span class="staff-identity"><span class="staff-dot"></span>@User.Identity.Name</span>
+                        <form asp-controller="Account" asp-action="Logout" method="post"><button class="btn btn-sm btn-outline-light" type="submit">Sign out</button></form>
+                    </div>
+                }
+                else
+                {
+                    <div class="ms-auto"><a class="btn btn-sm btn-light" asp-controller="Account" asp-action="Login">Staff sign in</a></div>
+                }
+            </div>
+        </div>
+    </nav>
+</header>
+
+<main class="container-xl page-shell">
+    @RenderBody()
+</main>
+
+<footer class="app-footer">
+    <div class="container-xl d-flex flex-column flex-sm-row justify-content-between gap-2">
+        <span>Ember &amp; Oak restaurant operations</span>
+        <span>ASP.NET Core · PostgreSQL · 2026</span>
+    </div>
+</footer>
+
+<script src="~/lib/jquery/dist/jquery.min.js"></script>
+<script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/site.js" asp-append-version="true"></script>
+@await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

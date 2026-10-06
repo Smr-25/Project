@@ -1,0 +1,12 @@
+.git
+.github
+.idea
+.vscode
+**/bin*
+**/obj*
+**/*.user
+**/*.log
+.env
+appsettings.Mac.json
+README.md
+docs

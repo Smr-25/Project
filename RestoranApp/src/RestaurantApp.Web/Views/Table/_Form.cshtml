@@ -1,0 +1,9 @@
+@model RestaurantApp.Application.Dtos.DiningTables.DiningTableUpsertDto
+<form method="post" class="card card-body mt-3">
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+    <div class="mb-3"><label asp-for="Number" class="form-label"></label><input asp-for="Number" class="form-control" /><span asp-validation-for="Number" class="text-danger"></span></div>
+    <div class="mb-3"><label asp-for="Capacity" class="form-label"></label><input asp-for="Capacity" class="form-control" /><span asp-validation-for="Capacity" class="text-danger"></span></div>
+    <div class="form-check mb-3"><input asp-for="IsActive" class="form-check-input" /><label asp-for="IsActive" class="form-check-label">Available for service</label></div>
+    <div class="d-flex gap-2"><button class="btn btn-dark" type="submit">Save table</button><a asp-action="Index" class="btn btn-outline-secondary">Cancel</a></div>
+</form>
+<partial name="_ValidationScriptsPartial" />
