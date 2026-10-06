@@ -1,0 +1,18 @@
+@model ErrorViewModel
+@{
+    ViewData["Title"] = "Xəta";
+}
+
+<h1 class="text-danger">Xəta.</h1>
+<h2 class="text-danger">İstəyinizi emal edərkən xəta baş verdi.</h2>
+
+@if (Model.ShowRequestId)
+{
+    <p>
+        <strong>Request ID:</strong> <code>@Model.RequestId</code>
+    </p>
+}
+
+<p>
+    Sistem administratoru ilə əlaqə saxlayın.
+</p>

@@ -1,0 +1,41 @@
+# Build folders
+bin/
+obj/
+bin?Debug/
+
+# User-specific files
+*.user
+*.userosscache
+*.suo
+*.rsuser
+
+# Visual Studio
+.vs/
+
+# Rider / JetBrains
+.idea/
+
+# VS Code
+.vscode/
+
+# Logs
+*.log
+
+# NuGet packages
+*.nupkg
+*.snupkg
+
+# Build results
+*.dll
+*.exe
+*.pdb
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Publish folder
+publish/
+
+appsettings.Mac.json
+.env

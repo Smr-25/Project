@@ -1,0 +1,17 @@
+.git
+.DS_Store
+**/bin/
+**/obj/
+**/bin?Debug/
+**/.vs/
+**/.idea/
+**/.vscode/
+**/*.user
+**/*.suo
+**/*.log
+appsettings.Mac.json
+.env
+**/.env
+**/.env.*
+**/*.pem
+**/*.pfx
