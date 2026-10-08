@@ -114,7 +114,7 @@ struct SettingsView: View {
                     .padding(23)
                     .FrostedCard(CornerRadius: 25)
 
-                    Text("WordRevisit · Version 1.0")
+                    Text("WordRevisit · Version \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "1.1.0")")
                         .font(.system(size: 12))
                         .foregroundStyle(Palette.Muted.opacity(0.7))
                         .frame(maxWidth: .infinity)

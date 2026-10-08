@@ -50,6 +50,12 @@ struct QuizQuestion: Identifiable {
     var Answer: String { Mode == .Easy ? Entry.Translation : Entry.Term }
 }
 
+struct QuizSession: Identifiable {
+    let id = UUID()
+    let Mode: QuizMode
+    let Questions: [QuizQuestion]
+}
+
 struct QuizRecord: Codable, Identifiable {
     var Id: UUID = UUID()
     var Date: Date = .now

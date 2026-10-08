@@ -2,7 +2,7 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject private var Store: WordRepository
-    @State private var ActiveMode: QuizMode?
+    @State private var ActiveQuiz: QuizSession?
 
     var body: some View {
         ZStack {
@@ -13,8 +13,8 @@ struct HomeView: View {
                     Hero
                     Stats
                     SectionEyebrow(Title: "Choose your challenge")
-                    ModeCard(Mode: .Easy, Tint: Palette.White) { ActiveMode = .Easy }
-                    ModeCard(Mode: .Hard, Tint: Palette.Accent) { ActiveMode = .Hard }
+                    ModeCard(Mode: .Easy, Tint: Palette.White) { StartQuiz(.Easy) }
+                    ModeCard(Mode: .Hard, Tint: Palette.Accent) { StartQuiz(.Hard) }
                     Footer
                 }
                 .padding(.horizontal, 24)
@@ -22,15 +22,19 @@ struct HomeView: View {
                 .padding(.bottom, 40)
             }
         }
-        .fullScreenCover(item: $ActiveMode) { Mode in
-            QuizView(Mode: Mode, Questions: QuizPlanner.MakeQuestions(From: Store.Entries, Mode: Mode))
+        .fullScreenCover(item: $ActiveQuiz) { Quiz in
+            QuizView(Mode: Quiz.Mode, Questions: Quiz.Questions)
                 .environmentObject(Store)
         }
         .onAppear {
             #if DEBUG
-            if ProcessInfo.processInfo.arguments.contains("-PreviewQuiz") { ActiveMode = .Easy }
+            if ProcessInfo.processInfo.arguments.contains("-PreviewQuiz") { StartQuiz(.Easy) }
             #endif
         }
+    }
+
+    private func StartQuiz(_ Mode: QuizMode) {
+        ActiveQuiz = QuizSession(Mode: Mode, Questions: QuizPlanner.MakeQuestions(From: Store.Entries, Mode: Mode))
     }
 
     private var Header: some View {

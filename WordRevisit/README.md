@@ -2,6 +2,8 @@
 
 An offline iPhone vocabulary app for practising English and Azerbaijani with short, focused quizzes. The first launch contains 59 English words and their Azerbaijani translations. Words, results, and reminder settings stay on the device.
 
+Current version: **1.1.0**. This release keeps each quiz's questions in a fixed order while answers update the word statistics, and shows the WordRevisit logo on the native iOS launch screen.
+
 ## Screenshots
 
 Captured from the running iPhone 17 Pro simulator on iOS 26.4. The interface uses Liquid Glass on iOS 26 and a native material fallback on earlier supported releases.
@@ -21,6 +23,7 @@ Captured from the running iPhone 17 Pro simulator on iOS 26.4. The interface use
 - Two optional local notifications each day, with times chosen in Settings. No server or account is needed.
 - An optional Xcode renewal reminder six days after you mark an install in Settings.
 - Light, Dark, and Tinted Home Screen icon variants on iOS 18 and later.
+- A centered logo appears during the system launch screen; iOS controls how long it remains visible.
 
 ## Run on an iPhone without the App Store
 
