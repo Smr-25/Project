@@ -8,7 +8,7 @@ enum StarterVocabulary {
         .init(Term: "habitat", Translation: "yaşayış mühiti"),
         .init(Term: "pollution", Translation: "çirklənmə"),
         .init(Term: "extend", Translation: "uzatmaq; genişləndirmək"),
-        .init(Term: "fell", Translation: "ağacı kəsmək", Definition: "To cut down a tree."),
+        .init(Term: "fell", Translation: "ağacı kəsmək; ağac kəsmək", Definition: "To cut down a tree."),
         .init(Term: "nutrients", Translation: "qida maddələri"),
         .init(Term: "terrestrial", Translation: "quruda yaşayan; yerüstü"),
         .init(Term: "aquatic", Translation: "suda yaşayan; suya aid"),
@@ -62,4 +62,12 @@ enum StarterVocabulary {
         .init(Term: "determine", Translation: "müəyyən etmək"),
         .init(Term: "accumulate", Translation: "yığılmaq; toplamaq")
     ]
+
+    static func UpgradeLegacyFellTranslation(_ Entries: inout [WordEntry]) -> Bool {
+        guard let Index = Entries.firstIndex(where: {
+            $0.Term == "fell" && $0.Translation == "ağacı kəsmək"
+        }) else { return false }
+        Entries[Index].Translation = "ağacı kəsmək; ağac kəsmək"
+        return true
+    }
 }

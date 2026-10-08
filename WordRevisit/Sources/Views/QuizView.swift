@@ -59,7 +59,8 @@ struct QuizView: View {
     }
 
     private var QuestionState: some View {
-        VStack(alignment: .leading, spacing: 28) {
+        let Question = Questions[Index]
+        return VStack(alignment: .leading, spacing: 28) {
             GeometryReader { Geometry in
                 ZStack(alignment: .leading) {
                     Capsule().fill(.white.opacity(0.12))
@@ -72,7 +73,7 @@ struct QuizView: View {
 
             VStack(alignment: .leading, spacing: 12) {
                 SectionEyebrow(Title: Mode == .Easy ? "Translate this word" : "Find the English word")
-                Text(Questions[Index].Prompt)
+                Text(Question.Prompt)
                     .font(.system(size: 42, weight: .bold, design: .rounded))
                     .minimumScaleFactor(0.7)
                     .lineLimit(3)
@@ -88,11 +89,12 @@ struct QuizView: View {
             VStack(alignment: .leading, spacing: 13) {
                 SectionEyebrow(Title: "Your answer")
                 TextField("Type what you remember...", text: $Input)
+                    .id(Question.id)
                     .textInputAutocapitalization(.never)
                     .autocorrectionDisabled()
                     .submitLabel(.done)
                     .focused($AnswerFocused)
-                    .onSubmit { if !Submitted { CheckAnswer() } }
+                    .onSubmit { CheckAnswer(For: Question) }
                     .font(.system(size: 18, weight: .medium))
                     .padding(18)
                     .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 18))
@@ -106,10 +108,10 @@ struct QuizView: View {
                     Label(WasCorrect ? "You got it" : "Keep this one close", systemImage: WasCorrect ? "checkmark.circle.fill" : "arrow.uturn.backward.circle.fill")
                         .font(.system(size: 16, weight: .bold, design: .rounded))
                         .foregroundStyle(WasCorrect ? Palette.White : Palette.Accent)
-                    Text(Questions[Index].Answer)
+                    Text(Question.Answer)
                         .font(.system(size: 24, weight: .bold, design: .rounded))
-                    if !Questions[Index].Entry.Definition.isEmpty {
-                        Text(Questions[Index].Entry.Definition)
+                    if !Question.Entry.Definition.isEmpty {
+                        Text(Question.Entry.Definition)
                             .font(.system(size: 14))
                             .foregroundStyle(Palette.Muted)
                     }
@@ -119,12 +121,17 @@ struct QuizView: View {
                 .FrostedCard(CornerRadius: 22)
             }
 
-            Button(Submitted ? (Index == Questions.count - 1 ? "See results" : "Next word") : "Check answer") {
-                if Submitted { Advance() } else { CheckAnswer() }
+            if Submitted {
+                Button(Index == Questions.count - 1 ? "See results" : "Next word") {
+                    Advance(From: Question)
+                }
+                .buttonStyle(PrimaryActionStyle(Tint: Mode == .Easy ? Palette.White : Palette.Accent))
+            } else {
+                Button("Check answer") { CheckAnswer(For: Question) }
+                    .buttonStyle(PrimaryActionStyle(Tint: Mode == .Easy ? Palette.White : Palette.Accent))
+                    .disabled(Input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                    .opacity(Input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0.5 : 1)
             }
-            .buttonStyle(PrimaryActionStyle(Tint: Mode == .Easy ? Palette.White : Palette.Accent))
-            .disabled(!Submitted && Input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-            .opacity(!Submitted && Input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0.5 : 1)
         }
     }
 
@@ -173,16 +180,18 @@ struct QuizView: View {
         .frame(maxWidth: .infinity)
     }
 
-    private func CheckAnswer() {
-        guard !Submitted, !Input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-        WasCorrect = QuizPlanner.Matches(Input, Answer: Questions[Index].Answer)
-        if WasCorrect { CorrectCount += 1 }
-        Store.RecordAnswer(For: Questions[Index].Entry.Id, IsCorrect: WasCorrect)
-        AnswerFocused = false
+    private func CheckAnswer(For Question: QuizQuestion) {
+        guard !Submitted, Questions[Index].id == Question.id,
+              !Input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
         Submitted = true
+        WasCorrect = QuizPlanner.Matches(Input, Answer: Question.Answer)
+        if WasCorrect { CorrectCount += 1 }
+        Store.RecordAnswer(For: Question.Entry.Id, IsCorrect: WasCorrect)
+        AnswerFocused = false
     }
 
-    private func Advance() {
+    private func Advance(From Question: QuizQuestion) {
+        guard Submitted, Questions[Index].id == Question.id else { return }
         if Index + 1 == Questions.count {
             Store.FinishQuiz(Mode: Mode, Correct: CorrectCount, Total: Questions.count)
             IsFinished = true

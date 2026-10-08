@@ -24,6 +24,9 @@ enum QuizPlanner {
 
     private static func Normalize(_ Value: String) -> String {
         Value.trimmingCharacters(in: .whitespacesAndNewlines)
-            .folding(options: [.caseInsensitive, .diacriticInsensitive], locale: Locale(identifier: "az_AZ"))
+            .lowercased(with: Locale(identifier: "az_AZ"))
+            .replacingOccurrences(of: "ə", with: "e")
+            .replacingOccurrences(of: "ı", with: "i")
+            .folding(options: .diacriticInsensitive, locale: Locale(identifier: "az_AZ"))
     }
 }

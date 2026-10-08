@@ -7,6 +7,8 @@ private struct SavedData: Codable {
     var Morning: ReminderTime
     var Evening: ReminderTime
     var RemindersEnabled: Bool
+    var XcodeInstalledAt: Date?
+    var RenewalReminderEnabled: Bool?
 }
 
 @MainActor
@@ -16,6 +18,8 @@ final class WordRepository: ObservableObject {
     @Published var Morning = ReminderTime(Hour: 9, Minute: 0)
     @Published var Evening = ReminderTime(Hour: 19, Minute: 0)
     @Published var RemindersEnabled = false
+    @Published var XcodeInstalledAt: Date?
+    @Published var RenewalReminderEnabled = false
     @Published var ErrorMessage: String?
 
     private var CanSave = true
@@ -108,6 +112,9 @@ final class WordRepository: ObservableObject {
             Morning = Saved.Morning
             Evening = Saved.Evening
             RemindersEnabled = Saved.RemindersEnabled
+            XcodeInstalledAt = Saved.XcodeInstalledAt
+            RenewalReminderEnabled = Saved.RenewalReminderEnabled ?? false
+            if StarterVocabulary.UpgradeLegacyFellTranslation(&Entries) { Save() }
         } catch {
             CanSave = false
             ErrorMessage = "Your saved words could not be opened. The file was left untouched: \(error.localizedDescription)"
@@ -117,7 +124,9 @@ final class WordRepository: ObservableObject {
     private func Save() {
         do {
             let Snapshot = SavedData(Entries: Entries, History: History, Morning: Morning,
-                                     Evening: Evening, RemindersEnabled: RemindersEnabled)
+                                     Evening: Evening, RemindersEnabled: RemindersEnabled,
+                                     XcodeInstalledAt: XcodeInstalledAt,
+                                     RenewalReminderEnabled: RenewalReminderEnabled)
             let Data = try JSONEncoder().encode(Snapshot)
             try Data.write(to: FileURL, options: .atomic)
         } catch {

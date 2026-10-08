@@ -14,10 +14,12 @@ Captured from the running iPhone 17 Pro simulator on iOS 26.4. The interface use
 
 - **Easy recall:** English word → type its Azerbaijani translation.
 - **Hard recall:** Azerbaijani translation → type the English word.
+- Azerbaijani answers work with or without Azerbaijani keyboard characters.
 - Up to 20 questions per quiz, with words answered incorrectly selected first.
 - Add, edit, delete, and search words; optional definitions appear after a quiz answer.
 - Import and export words as CSV. A semicolon separates accepted alternative translations.
 - Two optional local notifications each day, with times chosen in Settings. No server or account is needed.
+- An optional Xcode renewal reminder six days after you mark an install in Settings.
 - Light, Dark, and Tinted Home Screen icon variants on iOS 18 and later.
 
 ## Run on an iPhone without the App Store
@@ -35,6 +37,8 @@ If Xcode says **“Your team has no devices from which to generate a provisionin
 
 The free Personal Team profile expires after **7 days**. Run the project from Xcode again to renew it. Export your words before removing the app or changing its bundle identifier. See [Apple's device-run guide](https://developer.apple.com/documentation/xcode/running-your-app-on-simulated-or-physical-devices) and [free-account limits](https://developer.apple.com/help/account/basics/about-your-developer-account).
 
+For a heads-up, turn on **Xcode renewal** in Settings. The app sends one local notification six days after the date you enable it or tap **I reinstalled from Xcode**. Tap that button after each successful reinstall. The reminder is an estimate because the app does not inspect your provisioning profile; it cannot renew the install for you.
+
 ## Code map
 
 ```text
@@ -48,7 +52,7 @@ Sources/
 The project uses SwiftUI, Foundation, and UserNotifications. There are no external packages, accounts, or cloud services. To run the small logic check on a Mac:
 
 ```bash
-swiftc Sources/Models/*.swift Sources/Services/QuizPlanner.swift Sources/Services/WordCSV.swift Tests/LogicChecks.swift -o /tmp/WordRevisitLogicChecks
+swiftc Sources/Models/*.swift Sources/Services/QuizPlanner.swift Sources/Services/WordCSV.swift Sources/Services/ReminderScheduler.swift Tests/LogicChecks.swift -o /tmp/WordRevisitLogicChecks
 /tmp/WordRevisitLogicChecks
 ```
 

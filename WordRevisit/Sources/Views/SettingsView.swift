@@ -51,6 +51,58 @@ struct SettingsView: View {
                     .padding(21)
                     .FrostedCard(CornerRadius: 27)
 
+                    VStack(alignment: .leading, spacing: 18) {
+                        HStack(spacing: 14) {
+                            Image(systemName: "iphone")
+                                .font(.system(size: 20))
+                                .foregroundStyle(Palette.Accent)
+                                .frame(width: 48, height: 48)
+                                .background(Palette.Accent.opacity(0.16), in: RoundedRectangle(cornerRadius: 15))
+                            VStack(alignment: .leading, spacing: 4) {
+                                Text("Xcode renewal")
+                                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                                Text("A reminder before your free install may expire")
+                                    .font(.system(size: 13))
+                                    .foregroundStyle(Palette.Muted)
+                            }
+                            Spacer()
+                            Toggle("Xcode renewal reminder", isOn: Binding(
+                                get: { Store.RenewalReminderEnabled },
+                                set: { Enabled in
+                                    Store.RenewalReminderEnabled = Enabled
+                                    if Enabled && Store.XcodeInstalledAt == nil { Store.XcodeInstalledAt = .now }
+                                    UpdateRenewalReminder()
+                                }
+                            ))
+                            .labelsHidden()
+                            .tint(Palette.Accent)
+                            .disabled(IsUpdating)
+                        }
+                        if Store.RenewalReminderEnabled {
+                            Divider().overlay(.white.opacity(0.08))
+                            if let InstalledAt = Store.XcodeInstalledAt,
+                               let ReminderAt = ReminderScheduler.RenewalDate(From: InstalledAt) {
+                                Text(ReminderAt > .now
+                                     ? "Next reminder: \(ReminderAt.formatted(date: .abbreviated, time: .shortened))"
+                                     : "Time to reinstall from Xcode.")
+                                    .font(.system(size: 14))
+                                    .foregroundStyle(Palette.Muted)
+                            }
+                            Button("I reinstalled from Xcode") {
+                                Store.XcodeInstalledAt = .now
+                                UpdateRenewalReminder()
+                            }
+                            .font(.system(size: 15, weight: .semibold))
+                            .foregroundStyle(Palette.Accent)
+                            .disabled(IsUpdating)
+                            Text("Tap after each Xcode install to restart the six-day countdown.")
+                                .font(.system(size: 12))
+                                .foregroundStyle(Palette.Muted)
+                        }
+                    }
+                    .padding(21)
+                    .FrostedCard(CornerRadius: 27)
+
                     VStack(alignment: .leading, spacing: 12) {
                         SectionEyebrow(Title: "Your data")
                         Text("Your words and quiz history stay on this iPhone. Export your words from My words before removing the app.")
@@ -88,6 +140,21 @@ struct SettingsView: View {
                 Store.RemindersEnabled = false
                 Store.SaveSettings()
                 Notice = "Allow notifications in iPhone Settings, then turn reminders on again."
+            }
+            IsUpdating = false
+        }
+    }
+
+    private func UpdateRenewalReminder() {
+        Store.SaveSettings()
+        IsUpdating = true
+        Task {
+            let Scheduled = await ReminderScheduler.SetRenewal(Enabled: Store.RenewalReminderEnabled,
+                                                               InstalledAt: Store.XcodeInstalledAt)
+            if !Scheduled {
+                Store.RenewalReminderEnabled = false
+                Store.SaveSettings()
+                Notice = "Allow notifications in iPhone Settings, then turn Xcode renewal on again."
             }
             IsUpdating = false
         }

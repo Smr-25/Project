@@ -11,6 +11,19 @@ enum LogicChecks {
         assert(Questions[0].Answer == "resilient")
         assert(QuizPlanner.Matches(" DÖZÜMLÜ ", Answer: Difficult.Translation))
         assert(!QuizPlanner.Matches("curious", Answer: Difficult.Translation))
+        var LegacyWords = [WordEntry(Term: "fell", Translation: "ağacı kəsmək"),
+                           WordEntry(Term: "fell", Translation: "my custom answer")]
+        assert(StarterVocabulary.UpgradeLegacyFellTranslation(&LegacyWords))
+        assert(QuizPlanner.Matches("agac kesmek", Answer: LegacyWords[0].Translation))
+        assert(QuizPlanner.Matches("yasayis muhiti", Answer: "yaşayış mühiti"))
+        assert(LegacyWords[1].Translation == "my custom answer")
+
+        var Calendar = Calendar(identifier: .gregorian)
+        Calendar.timeZone = TimeZone(identifier: "Europe/Berlin")!
+        let InstalledAt = Calendar.date(from: DateComponents(year: 2026, month: 10, day: 23, hour: 9))!
+        let ReminderAt = ReminderScheduler.RenewalDate(From: InstalledAt, Calendar: Calendar)!
+        let ReminderDay = Calendar.dateComponents([.year, .month, .day, .hour], from: ReminderAt)
+        assert(ReminderDay.year == 2026 && ReminderDay.month == 10 && ReminderDay.day == 29 && ReminderDay.hour == 9)
 
         let CSV = WordCSV.Encode([WordEntry(Term: "a,b", Translation: "söz", Definition: "A \"quoted\" meaning")])
         let Parsed = try WordCSV.Decode(CSV)
