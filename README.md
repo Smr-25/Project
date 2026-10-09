@@ -17,10 +17,17 @@ Three independent applications in one repository: two ASP.NET Core web apps and 
 
 ### WordRevisit
 
+Version **1.2.0** adds spaced reviews, personal example sentences, missed-word retry rounds, answer reviews, and a weekly progress screen. Vocabulary and learning history stay on the iPhone.
+
 <p align="center">
   <img src="WordRevisit/docs/screenshots/today.png" alt="WordRevisit Today screen" width="205">
   <img src="WordRevisit/docs/screenshots/words.png" alt="WordRevisit word library" width="205">
   <img src="WordRevisit/docs/screenshots/quiz.png" alt="WordRevisit quiz" width="205">
+</p>
+
+<p align="center">
+  <img src="WordRevisit/docs/screenshots/answer-review.png" alt="WordRevisit answer review" width="205">
+  <img src="WordRevisit/docs/screenshots/progress.png" alt="WordRevisit weekly learning progress" width="205">
 </p>
 
 <p align="center"><a href="WordRevisit/README.md">Features, iPhone setup, and all screenshots →</a></p>
