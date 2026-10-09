@@ -8,6 +8,7 @@ struct WordEditorView: View {
     @State private var Term: String
     @State private var Translation: String
     @State private var Definition: String
+    @State private var ExampleSentences: String
     @State private var ShowingDelete = false
     @State private var ErrorText: String?
 
@@ -16,6 +17,7 @@ struct WordEditorView: View {
         _Term = State(initialValue: Entry?.Term ?? "")
         _Translation = State(initialValue: Entry?.Translation ?? "")
         _Definition = State(initialValue: Entry?.Definition ?? "")
+        _ExampleSentences = State(initialValue: Entry?.ExampleSentences ?? "")
     }
 
     var body: some View {
@@ -29,7 +31,11 @@ struct WordEditorView: View {
                             .font(.system(size: 35, weight: .bold, design: .rounded))
                         InputGroup(Title: "ENGLISH WORD", Placeholder: "Enter an English word", Value: $Term)
                         InputGroup(Title: "AZERBAIJANI TRANSLATION", Placeholder: "Enter its translation", Value: $Translation)
-                        InputGroup(Title: "DEFINITION · OPTIONAL", Placeholder: "A short meaning or example", Value: $Definition)
+                        InputGroup(Title: "DEFINITION · OPTIONAL", Placeholder: "A short meaning", Value: $Definition)
+                        InputGroup(Title: "EXAMPLE SENTENCES · OPTIONAL", Placeholder: "Write a sentence using this word", Value: $ExampleSentences)
+                        Text("Your examples appear as hints in both quiz modes. You only answer with the word or its translation.")
+                            .font(.system(size: 13))
+                            .foregroundStyle(Palette.Muted)
                         Text("For multiple accepted translations, separate them with a semicolon.")
                             .font(.system(size: 13))
                             .foregroundStyle(Palette.Muted)
@@ -70,8 +76,9 @@ struct WordEditorView: View {
             Entry.Term = Term.trimmingCharacters(in: .whitespacesAndNewlines)
             Entry.Translation = Translation.trimmingCharacters(in: .whitespacesAndNewlines)
             Entry.Definition = Definition.trimmingCharacters(in: .whitespacesAndNewlines)
+            Entry.ExampleSentences = ExampleSentences.trimmingCharacters(in: .whitespacesAndNewlines)
             Store.Update(Entry)
-        } else if !Store.Add(Term: Term, Translation: Translation, Definition: Definition) {
+        } else if !Store.Add(Term: Term, Translation: Translation, Definition: Definition, ExampleSentences: ExampleSentences) {
             ErrorText = "This word and translation already exist, or they could not be saved."
             return
         }

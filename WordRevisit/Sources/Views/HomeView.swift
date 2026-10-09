@@ -2,7 +2,11 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject private var Store: WordRepository
+    @Environment(\.scenePhase) private var ScenePhase
     @State private var ActiveQuiz: QuizSession?
+    @State private var Now = Date.now
+
+    private var DueCount: Int { Store.Entries.filter { ReviewSchedule.IsDue($0, Now: Now) }.count }
 
     var body: some View {
         ZStack {
@@ -12,6 +16,7 @@ struct HomeView: View {
                     Header
                     Hero
                     Stats
+                    ReviewStatus
                     SectionEyebrow(Title: "Choose your challenge")
                     ModeCard(Mode: .Easy, Tint: Palette.White) { StartQuiz(.Easy) }
                     ModeCard(Mode: .Hard, Tint: Palette.Accent) { StartQuiz(.Hard) }
@@ -23,18 +28,52 @@ struct HomeView: View {
             }
         }
         .fullScreenCover(item: $ActiveQuiz) { Quiz in
-            QuizView(Mode: Quiz.Mode, Questions: Quiz.Questions)
+            QuizView(Session: Quiz)
                 .environmentObject(Store)
         }
         .onAppear {
+            Now = .now
             #if DEBUG
             if ProcessInfo.processInfo.arguments.contains("-PreviewQuiz") { StartQuiz(.Easy) }
             #endif
         }
+        .onChange(of: ScenePhase) { _, Phase in
+            if Phase == .active { Now = .now }
+        }
     }
 
     private func StartQuiz(_ Mode: QuizMode) {
-        ActiveQuiz = QuizSession(Mode: Mode, Questions: QuizPlanner.MakeQuestions(From: Store.Entries, Mode: Mode))
+        Now = .now
+        let IsPractice = !Store.Entries.isEmpty && DueCount == 0
+        ActiveQuiz = QuizSession(Mode: Mode,
+                                 Questions: QuizPlanner.MakeQuestions(From: Store.Entries, Mode: Mode,
+                                                                      Now: Now, IncludeUpcoming: IsPractice),
+                                 IsPractice: IsPractice)
+    }
+
+    private var ReviewStatus: some View {
+        HStack(alignment: .top, spacing: 14) {
+            Image(systemName: DueCount > 0 ? "calendar.badge.clock" : "checkmark.seal")
+                .font(.system(size: 24))
+                .foregroundStyle(Palette.Accent)
+            VStack(alignment: .leading, spacing: 6) {
+                Text(DueCount > 0 ? "\(DueCount) \(DueCount == 1 ? "word" : "words") ready for review" : "All caught up")
+                    .font(.system(size: 17, weight: .bold, design: .rounded))
+                Text(DueCount > 0
+                     ? "New and due words first. Up to 20 per quiz."
+                     : "You can still practise. Extra practice keeps your review dates.")
+                    .font(.system(size: 13))
+                    .foregroundStyle(Palette.Muted)
+                if DueCount == 0, let Next = Store.Entries.compactMap(\.NextReviewAt).min() {
+                    Text("Next review: \(Next.formatted(date: .abbreviated, time: .shortened))")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(Palette.Muted)
+                }
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(20)
+        .FrostedCard(CornerRadius: 24)
     }
 
     private var Header: some View {
@@ -152,6 +191,7 @@ private struct ModeCard: View {
             }
             .padding(18)
             .FrostedCard(CornerRadius: 25)
+            .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
     }

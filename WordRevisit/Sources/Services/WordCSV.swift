@@ -62,16 +62,17 @@ enum WordCSV {
                 return WordEntry(
                     Term: Columns[0].trimmingCharacters(in: .whitespacesAndNewlines),
                     Translation: Columns[1].trimmingCharacters(in: .whitespacesAndNewlines),
-                    Definition: Columns.count > 2 ? Columns[2].trimmingCharacters(in: .whitespacesAndNewlines) : ""
+                    Definition: Columns.count > 2 ? Columns[2].trimmingCharacters(in: .whitespacesAndNewlines) : "",
+                    ExampleSentences: Columns.count > 3 ? Columns[3].trimmingCharacters(in: .whitespacesAndNewlines) : ""
                 )
             }
     }
 
     static func Encode(_ Entries: [WordEntry]) -> String {
         let Rows = Entries.map { Entry in
-            [Entry.Term, Entry.Translation, Entry.Definition].map(Escape).joined(separator: ",")
+            [Entry.Term, Entry.Translation, Entry.Definition, Entry.ExampleSentences].map(Escape).joined(separator: ",")
         }
-        return (["English,Azerbaijani,Definition"] + Rows).joined(separator: "\n") + "\n"
+        return (["English,Azerbaijani,Definition,Examples"] + Rows).joined(separator: "\n") + "\n"
     }
 
     private static func Escape(_ Value: String) -> String {

@@ -21,6 +21,12 @@
 		000000000000000000000096 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0000000000000000000000FA /* Assets.xcassets */; };
 		000000000000000000000097 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0000000000000000000000FC /* LaunchScreen.storyboard */; };
 		000000000000000000000071 /* StarterVocabulary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0000000000000000000000D5 /* StarterVocabulary.swift */; };
+		000000000000000000000072 /* QuizRun.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0000000000000000000000D6 /* QuizRun.swift */; };
+		000000000000000000000073 /* StudyProgress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0000000000000000000000D7 /* StudyProgress.swift */; };
+		000000000000000000000074 /* ReviewSchedule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0000000000000000000000D8 /* ReviewSchedule.swift */; };
+		000000000000000000000075 /* QuizReviewView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0000000000000000000000D9 /* QuizReviewView.swift */; };
+		000000000000000000000076 /* LearningProgressView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0000000000000000000000DA /* LearningProgressView.swift */; };
+		000000000000000000000900 /* QuizUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000000000000000000000901; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,24 +46,39 @@
 		0000000000000000000000FC /* LaunchScreen.storyboard */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; path = LaunchScreen.storyboard; sourceTree = "<group>"; };
 		0000000000000000000000FB /* WordRevisit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = WordRevisit.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		0000000000000000000000D5 /* StarterVocabulary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StarterVocabulary.swift; sourceTree = "<group>"; };
+		0000000000000000000000D6 /* QuizRun.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizRun.swift; sourceTree = "<group>"; };
+		0000000000000000000000D7 /* StudyProgress.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StudyProgress.swift; sourceTree = "<group>"; };
+		0000000000000000000000D8 /* ReviewSchedule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReviewSchedule.swift; sourceTree = "<group>"; };
+		0000000000000000000000D9 /* QuizReviewView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizReviewView.swift; sourceTree = "<group>"; };
+		0000000000000000000000DA /* LearningProgressView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LearningProgressView.swift; sourceTree = "<group>"; };
+		000000000000000000000901 = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = QuizUITests.swift; sourceTree = "<group>"; };
+		000000000000000000000902 = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; path = WordRevisitUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
-		00000000000000000000012D = {isa = PBXGroup; children = (00000000000000000000012E, 0000000000000000000000FA, 0000000000000000000000FC, 000000000000000000000133); sourceTree = "<group>"; };
+		00000000000000000000012D = {isa = PBXGroup; children = (000000000000000000000903, 00000000000000000000012E, 0000000000000000000000FA, 0000000000000000000000FC, 000000000000000000000133); sourceTree = "<group>"; };
 		00000000000000000000012E /* Sources */ = {isa = PBXGroup; children = (0000000000000000000000C9, 00000000000000000000012F, 000000000000000000000130, 000000000000000000000131, 000000000000000000000132); path = Sources; sourceTree = "<group>"; };
-		00000000000000000000012F /* Models */ = {isa = PBXGroup; children = (0000000000000000000000CA, 0000000000000000000000D5); path = Models; sourceTree = "<group>"; };
+		00000000000000000000012F /* Models */ = {isa = PBXGroup; children = (0000000000000000000000D7, 0000000000000000000000D6, 0000000000000000000000CA, 0000000000000000000000D5); path = Models; sourceTree = "<group>"; };
 		000000000000000000000130 /* Data */ = {isa = PBXGroup; children = (0000000000000000000000CB); path = Data; sourceTree = "<group>"; };
-		000000000000000000000131 /* Services */ = {isa = PBXGroup; children = (0000000000000000000000CC, 0000000000000000000000CD, 0000000000000000000000CE); path = Services; sourceTree = "<group>"; };
-		000000000000000000000132 /* Views */ = {isa = PBXGroup; children = (0000000000000000000000CF, 0000000000000000000000D0, 0000000000000000000000D1, 0000000000000000000000D2, 0000000000000000000000D3, 0000000000000000000000D4); path = Views; sourceTree = "<group>"; };
-		000000000000000000000133 /* Products */ = {isa = PBXGroup; children = (0000000000000000000000FB); name = Products; sourceTree = "<group>"; };
+		000000000000000000000131 /* Services */ = {isa = PBXGroup; children = (0000000000000000000000D8, 0000000000000000000000CC, 0000000000000000000000CD, 0000000000000000000000CE); path = Services; sourceTree = "<group>"; };
+		000000000000000000000132 /* Views */ = {isa = PBXGroup; children = (0000000000000000000000DA, 0000000000000000000000D9, 0000000000000000000000CF, 0000000000000000000000D0, 0000000000000000000000D1, 0000000000000000000000D2, 0000000000000000000000D3, 0000000000000000000000D4); path = Views; sourceTree = "<group>"; };
+		000000000000000000000133 /* Products */ = {isa = PBXGroup; children = (000000000000000000000902, 0000000000000000000000FB); name = Products; sourceTree = "<group>"; };
+		000000000000000000000903 = {isa = PBXGroup; children = (000000000000000000000901); path = Tests; sourceTree = "<group>"; };
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
 		000000000000000000000190 /* WordRevisit */ = {isa = PBXNativeTarget; buildConfigurationList = 000000000000000000000259; buildPhases = (0000000000000000000001F5, 0000000000000000000001F6); buildRules = (); dependencies = (); name = WordRevisit; productName = WordRevisit; productReference = 0000000000000000000000FB; productType = "com.apple.product-type.application"; };
+		000000000000000000000904 /* WordRevisitUITests */ = {isa = PBXNativeTarget; buildConfigurationList = 000000000000000000000905; buildPhases = (000000000000000000000906); buildRules = (); dependencies = (000000000000000000000907); name = WordRevisitUITests; productName = WordRevisitUITests; productReference = 000000000000000000000902; productType = "com.apple.product-type.bundle.ui-testing"; };
 /* End PBXNativeTarget section */
 
+/* Begin PBXContainerItemProxy section */
+		000000000000000000000908 = {isa = PBXContainerItemProxy; containerPortal = 000000000000000000000191; proxyType = 1; remoteGlobalIDString = 000000000000000000000190; remoteInfo = WordRevisit; };
+/* End PBXContainerItemProxy section */
+/* Begin PBXTargetDependency section */
+		000000000000000000000907 = {isa = PBXTargetDependency; target = 000000000000000000000190; targetProxy = 000000000000000000000908; };
+/* End PBXTargetDependency section */
 /* Begin PBXProject section */
-		000000000000000000000191 /* Project object */ = {isa = PBXProject; attributes = { BuildIndependentTargetsInParallel = 1; LastUpgradeCheck = 2700; TargetAttributes = { 000000000000000000000190 = { CreatedOnToolsVersion = 27.0; }; }; }; buildConfigurationList = 000000000000000000000258; compatibilityVersion = "Xcode 14.0"; developmentRegion = en; hasScannedForEncodings = 0; knownRegions = (en, Base); mainGroup = 00000000000000000000012D; productRefGroup = 000000000000000000000133; projectDirPath = ""; projectRoot = ""; targets = (000000000000000000000190); };
+		000000000000000000000191 /* Project object */ = {isa = PBXProject; attributes = { BuildIndependentTargetsInParallel = 1; LastUpgradeCheck = 2700; TargetAttributes = { 000000000000000000000904 = { TestTargetID = 000000000000000000000190; }; 000000000000000000000190 = { CreatedOnToolsVersion = 27.0; }; }; }; buildConfigurationList = 000000000000000000000258; compatibilityVersion = "Xcode 14.0"; developmentRegion = en; hasScannedForEncodings = 0; knownRegions = (en, Base); mainGroup = 00000000000000000000012D; productRefGroup = 000000000000000000000133; projectDirPath = ""; projectRoot = ""; targets = (000000000000000000000190, 000000000000000000000904); };
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
@@ -65,19 +86,23 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		0000000000000000000001F5 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (000000000000000000000065, 000000000000000000000066, 000000000000000000000067, 000000000000000000000068, 000000000000000000000069, 00000000000000000000006A, 00000000000000000000006B, 00000000000000000000006C, 00000000000000000000006D, 00000000000000000000006E, 00000000000000000000006F, 000000000000000000000070, 000000000000000000000071); runOnlyForDeploymentPostprocessing = 0; };
+		0000000000000000000001F5 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (000000000000000000000076, 000000000000000000000075, 000000000000000000000074, 000000000000000000000073, 000000000000000000000072, 000000000000000000000065, 000000000000000000000066, 000000000000000000000067, 000000000000000000000068, 000000000000000000000069, 00000000000000000000006A, 00000000000000000000006B, 00000000000000000000006C, 00000000000000000000006D, 00000000000000000000006E, 00000000000000000000006F, 000000000000000000000070, 000000000000000000000071); runOnlyForDeploymentPostprocessing = 0; };
+		000000000000000000000906 = {isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (000000000000000000000900); runOnlyForDeploymentPostprocessing = 0; };
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
 		0000000000000000000002BD = {isa = XCBuildConfiguration; buildSettings = { ALWAYS_SEARCH_USER_PATHS = NO; CLANG_ENABLE_MODULES = YES; CLANG_ENABLE_OBJC_ARC = YES; CLANG_WARN_BOOL_CONVERSION = YES; CLANG_WARN_CONSTANT_CONVERSION = YES; CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES; CLANG_WARN_DOCUMENTATION_COMMENTS = YES; CLANG_WARN_EMPTY_BODY = YES; CLANG_WARN_ENUM_CONVERSION = YES; CLANG_WARN_INFINITE_RECURSION = YES; CLANG_WARN_INT_CONVERSION = YES; CLANG_WARN_OBJC_ROOT_CLASS = YES; CLANG_WARN_UNREACHABLE_CODE = YES; COPY_PHASE_STRIP = NO; GCC_C_LANGUAGE_STANDARD = gnu17; GCC_NO_COMMON_BLOCKS = YES; GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR; GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE; IPHONEOS_DEPLOYMENT_TARGET = 18.0; SDKROOT = iphoneos; SWIFT_VERSION = 5.0; DEBUG_INFORMATION_FORMAT = dwarf; GCC_OPTIMIZATION_LEVEL = 0; SWIFT_OPTIMIZATION_LEVEL = "-Onone"; SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG; }; name = Debug; };
 		0000000000000000000002BE = {isa = XCBuildConfiguration; buildSettings = { ALWAYS_SEARCH_USER_PATHS = NO; CLANG_ENABLE_MODULES = YES; CLANG_ENABLE_OBJC_ARC = YES; CLANG_WARN_BOOL_CONVERSION = YES; CLANG_WARN_CONSTANT_CONVERSION = YES; CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES; CLANG_WARN_DOCUMENTATION_COMMENTS = YES; CLANG_WARN_EMPTY_BODY = YES; CLANG_WARN_ENUM_CONVERSION = YES; CLANG_WARN_INFINITE_RECURSION = YES; CLANG_WARN_INT_CONVERSION = YES; CLANG_WARN_OBJC_ROOT_CLASS = YES; CLANG_WARN_UNREACHABLE_CODE = YES; COPY_PHASE_STRIP = NO; GCC_C_LANGUAGE_STANDARD = gnu17; GCC_NO_COMMON_BLOCKS = YES; GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR; GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE; IPHONEOS_DEPLOYMENT_TARGET = 18.0; SDKROOT = iphoneos; SWIFT_VERSION = 5.0; }; name = Release; };
-		0000000000000000000002BF = {isa = XCBuildConfiguration; buildSettings = { ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 2; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = WordRevisit; INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES; INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen; IPHONEOS_DEPLOYMENT_TARGET = 18.0; MARKETING_VERSION = 1.1.0; PRODUCT_BUNDLE_IDENTIFIER = org.wordrevisit.app; PRODUCT_NAME = "$(TARGET_NAME)"; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SUPPORTS_MACCATALYST = NO; SWIFT_EMIT_LOC_STRINGS = YES; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = 1; }; name = Debug; };
-		0000000000000000000002C0 = {isa = XCBuildConfiguration; buildSettings = { ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 2; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = WordRevisit; INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES; INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen; IPHONEOS_DEPLOYMENT_TARGET = 18.0; MARKETING_VERSION = 1.1.0; PRODUCT_BUNDLE_IDENTIFIER = org.wordrevisit.app; PRODUCT_NAME = "$(TARGET_NAME)"; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SUPPORTS_MACCATALYST = NO; SWIFT_EMIT_LOC_STRINGS = YES; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = 1; }; name = Release; };
+		0000000000000000000002BF = {isa = XCBuildConfiguration; buildSettings = { ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 3; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = WordRevisit; INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES; INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen; IPHONEOS_DEPLOYMENT_TARGET = 18.0; MARKETING_VERSION = 1.2.0; PRODUCT_BUNDLE_IDENTIFIER = org.wordrevisit.app; PRODUCT_NAME = "$(TARGET_NAME)"; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SUPPORTS_MACCATALYST = NO; SWIFT_EMIT_LOC_STRINGS = YES; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = 1; }; name = Debug; };
+		0000000000000000000002C0 = {isa = XCBuildConfiguration; buildSettings = { ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon; CODE_SIGN_STYLE = Automatic; CURRENT_PROJECT_VERSION = 3; GENERATE_INFOPLIST_FILE = YES; INFOPLIST_KEY_CFBundleDisplayName = WordRevisit; INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES; INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen; IPHONEOS_DEPLOYMENT_TARGET = 18.0; MARKETING_VERSION = 1.2.0; PRODUCT_BUNDLE_IDENTIFIER = org.wordrevisit.app; PRODUCT_NAME = "$(TARGET_NAME)"; SUPPORTED_PLATFORMS = "iphoneos iphonesimulator"; SUPPORTS_MACCATALYST = NO; SWIFT_EMIT_LOC_STRINGS = YES; SWIFT_VERSION = 5.0; TARGETED_DEVICE_FAMILY = 1; }; name = Release; };
+		000000000000000000000909 = {isa = XCBuildConfiguration; buildSettings = { CODE_SIGN_STYLE = Automatic; GENERATE_INFOPLIST_FILE = YES; PRODUCT_BUNDLE_IDENTIFIER = org.wordrevisit.app.uitests; PRODUCT_NAME = "$(TARGET_NAME)"; TEST_TARGET_NAME = WordRevisit; SWIFT_VERSION = 5.0; IPHONEOS_DEPLOYMENT_TARGET = 18.0; TARGETED_DEVICE_FAMILY = 1; }; name = Debug; };
+		00000000000000000000090A = {isa = XCBuildConfiguration; buildSettings = { CODE_SIGN_STYLE = Automatic; GENERATE_INFOPLIST_FILE = YES; PRODUCT_BUNDLE_IDENTIFIER = org.wordrevisit.app.uitests; PRODUCT_NAME = "$(TARGET_NAME)"; TEST_TARGET_NAME = WordRevisit; SWIFT_VERSION = 5.0; IPHONEOS_DEPLOYMENT_TARGET = 18.0; TARGETED_DEVICE_FAMILY = 1; }; name = Release; };
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
 		000000000000000000000258 = {isa = XCConfigurationList; buildConfigurations = (0000000000000000000002BD, 0000000000000000000002BE); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
 		000000000000000000000259 = {isa = XCConfigurationList; buildConfigurations = (0000000000000000000002BF, 0000000000000000000002C0); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
+		000000000000000000000905 = {isa = XCConfigurationList; buildConfigurations = (000000000000000000000909, 00000000000000000000090A); defaultConfigurationIsVisible = 0; defaultConfigurationName = Release; };
 /* End XCConfigurationList section */
 	};
 	rootObject = 000000000000000000000191 /* Project object */;

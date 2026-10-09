@@ -24,6 +24,7 @@ struct LibraryView: View {
     @State private var ShowingExport = false
     @State private var EditingEntry: WordEntry?
     @State private var Notice: String?
+    @FocusState private var SearchFocused: Bool
 
     private var FilteredEntries: [WordEntry] {
         Store.Entries.filter {
@@ -43,7 +44,7 @@ struct LibraryView: View {
                     HStack {
                         SectionEyebrow(Title: "Your collection")
                         Spacer()
-                        Text("\(FilteredEntries.count) words")
+                        Text("\(FilteredEntries.count) \(FilteredEntries.count == 1 ? "word" : "words")")
                             .font(.system(size: 12))
                             .foregroundStyle(Palette.Muted)
                     }
@@ -52,7 +53,10 @@ struct LibraryView: View {
                     } else {
                         LazyVStack(spacing: 11) {
                             ForEach(FilteredEntries) { Entry in
-                                Button { EditingEntry = Entry } label: { WordRow(Entry: Entry) }
+                                Button {
+                                    SearchFocused = false
+                                    EditingEntry = Entry
+                                } label: { WordRow(Entry: Entry) }
                                     .buttonStyle(.plain)
                             }
                         }
@@ -62,6 +66,7 @@ struct LibraryView: View {
                 .padding(.top, 20)
                 .padding(.bottom, 35)
             }
+            .scrollDismissesKeyboard(.interactively)
         }
         .sheet(isPresented: $ShowingAdd) { WordEditorView() }
         .sheet(item: $EditingEntry) { Entry in WordEditorView(Entry: Entry) }
@@ -124,6 +129,8 @@ struct LibraryView: View {
         HStack(spacing: 12) {
             Image(systemName: "magnifyingglass").foregroundStyle(Palette.Muted)
             TextField("Search your words", text: $Search)
+                .focused($SearchFocused)
+                .onSubmit { SearchFocused = false }
                 .textInputAutocapitalization(.never)
                 .autocorrectionDisabled()
         }
@@ -164,5 +171,6 @@ private struct WordRow: View {
         }
         .padding(17)
         .FrostedCard(CornerRadius: 20)
+        .contentShape(Rectangle())
     }
 }

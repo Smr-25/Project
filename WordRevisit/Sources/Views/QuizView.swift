@@ -5,15 +5,19 @@ struct QuizView: View {
     @Environment(\.dismiss) private var Dismiss
     @FocusState private var AnswerFocused: Bool
 
-    let Mode: QuizMode
-    let Questions: [QuizQuestion]
-
-    @State private var Index = 0
+    @State private var Run: QuizRun
     @State private var Input = ""
-    @State private var Submitted = false
-    @State private var WasCorrect = false
-    @State private var CorrectCount = 0
-    @State private var IsFinished = false
+    @State private var ShowingReview = false
+
+    init(Session: QuizSession) {
+        _Run = State(initialValue: QuizRun(Session: Session))
+    }
+
+    private var Mode: QuizMode { Run.Session.Mode }
+    private var Questions: [QuizQuestion] { Run.Questions }
+    private var Index: Int { Run.Index }
+    private var Submitted: Bool { Run.SubmittedAnswer != nil }
+    private var WasCorrect: Bool { Run.SubmittedAnswer?.IsCorrect == true }
 
     var body: some View {
         ZStack {
@@ -23,7 +27,7 @@ struct QuizView: View {
                     Header
                     if Questions.isEmpty {
                         EmptyState
-                    } else if IsFinished {
+                    } else if Run.IsFinished {
                         FinishedState
                     } else {
                         QuestionState
@@ -33,6 +37,11 @@ struct QuizView: View {
                 .padding(.top, 28)
                 .padding(.bottom, 40)
             }
+            .scrollDismissesKeyboard(.interactively)
+            .id(Run.CurrentQuestion?.id)
+        }
+        .sheet(isPresented: $ShowingReview) {
+            QuizReviewView(Answers: Run.OriginalAnswers, Title: "Your first answers")
         }
     }
 
@@ -46,7 +55,7 @@ struct QuizView: View {
             }
             .accessibilityLabel("Close quiz")
             Spacer()
-            Text(Mode.Title.uppercased())
+            Text(Run.IsRetry ? "TRY AGAIN" : Mode.Title.uppercased())
                 .font(.system(size: 12, weight: .bold, design: .rounded))
                 .tracking(2)
                 .foregroundStyle(Palette.Muted)
@@ -61,6 +70,12 @@ struct QuizView: View {
     private var QuestionState: some View {
         let Question = Questions[Index]
         return VStack(alignment: .leading, spacing: 28) {
+            if Run.IsRetry || Run.Session.IsPractice {
+                Text(Run.IsRetry ? "A second look. Your original score stays the same."
+                     : "Extra practice · your review dates stay the same.")
+                    .font(.system(size: 13))
+                    .foregroundStyle(Palette.Muted)
+            }
             GeometryReader { Geometry in
                 ZStack(alignment: .leading) {
                     Capsule().fill(.white.opacity(0.12))
@@ -74,6 +89,7 @@ struct QuizView: View {
             VStack(alignment: .leading, spacing: 12) {
                 SectionEyebrow(Title: Mode == .Easy ? "Translate this word" : "Find the English word")
                 Text(Question.Prompt)
+                    .accessibilityIdentifier("QuizPrompt")
                     .font(.system(size: 42, weight: .bold, design: .rounded))
                     .minimumScaleFactor(0.7)
                     .lineLimit(3)
@@ -85,6 +101,21 @@ struct QuizView: View {
             .frame(maxWidth: .infinity, minHeight: 155, alignment: .leading)
             .padding(28)
             .FrostedCard(CornerRadius: 30)
+
+            if !Question.Entry.ExampleSentences.isEmpty {
+                VStack(alignment: .leading, spacing: 10) {
+                    Label("YOUR EXAMPLES", systemImage: "quote.opening")
+                        .font(.system(size: 11, weight: .bold, design: .rounded))
+                        .foregroundStyle(Palette.Accent)
+                    Text(Question.Entry.ExampleSentences)
+                        .font(.system(size: 16))
+                        .lineSpacing(5)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding(21)
+                .FrostedCard(CornerRadius: 22)
+            }
 
             VStack(alignment: .leading, spacing: 13) {
                 SectionEyebrow(Title: "Your answer")
@@ -101,6 +132,7 @@ struct QuizView: View {
                     .overlay(RoundedRectangle(cornerRadius: 18).stroke(.white.opacity(0.14)))
                     .disabled(Submitted)
                     .accessibilityLabel("Your answer")
+                    .accessibilityIdentifier("QuizAnswer")
             }
 
             if Submitted {
@@ -158,15 +190,15 @@ struct QuizView: View {
                 .font(.system(size: 54))
                 .foregroundStyle(Palette.White)
                 .padding(.top, 55)
-            Text("Nicely done.")
+            Text(Run.IsRetry ? "Another step." : "Nicely done.")
                 .font(.system(size: 42, weight: .bold, design: .rounded))
             Text("Every answer makes the next one easier.")
                 .foregroundStyle(Palette.Muted)
             VStack(spacing: 5) {
-                Text("\(CorrectCount) / \(Questions.count)")
+                Text("\(Run.CorrectCount) / \(Questions.count)")
                     .font(.system(size: 54, weight: .bold, design: .rounded))
                     .foregroundStyle(Palette.White)
-                Text("WORDS REMEMBERED")
+                Text(Run.IsRetry ? "REMEMBERED THIS TIME" : "WORDS REMEMBERED")
                     .font(.system(size: 11, weight: .bold))
                     .tracking(2)
                     .foregroundStyle(Palette.Muted)
@@ -174,6 +206,22 @@ struct QuizView: View {
             .frame(maxWidth: .infinity)
             .padding(30)
             .FrostedCard(CornerRadius: 28)
+            if Run.IsRetry {
+                Text("Original score: \(Run.OriginalAnswers.filter(\.IsCorrect).count) / \(Run.OriginalAnswers.count)")
+                    .font(.system(size: 14))
+                    .foregroundStyle(Palette.Muted)
+            }
+            if !Run.MissedQuestions.isEmpty {
+                Button("Retry \(Run.MissedQuestions.count) missed \(Run.MissedQuestions.count == 1 ? "word" : "words")") {
+                    Run.RetryMissed()
+                    Input = ""
+                }
+                .buttonStyle(PrimaryActionStyle(Tint: Palette.Accent))
+            }
+            Button("Review my answers") { ShowingReview = true }
+                .font(.system(size: 16, weight: .semibold))
+                .foregroundStyle(Palette.White)
+                .padding(.vertical, 8)
             Button("Back to today") { Dismiss() }
                 .buttonStyle(PrimaryActionStyle(Tint: Palette.White))
         }
@@ -181,24 +229,19 @@ struct QuizView: View {
     }
 
     private func CheckAnswer(For Question: QuizQuestion) {
-        guard !Submitted, Questions[Index].id == Question.id,
-              !Input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
-        Submitted = true
-        WasCorrect = QuizPlanner.Matches(Input, Answer: Question.Answer)
-        if WasCorrect { CorrectCount += 1 }
-        Store.RecordAnswer(For: Question.Entry.Id, IsCorrect: WasCorrect)
+        guard let Answer = Run.Submit(Input, For: Question.id) else { return }
+        if !Run.IsRetry {
+            Store.RecordAnswer(For: Question.Entry.Id, IsCorrect: Answer.IsCorrect,
+                               UpdatesSchedule: !Run.Session.IsPractice)
+        }
         AnswerFocused = false
     }
 
     private func Advance(From Question: QuizQuestion) {
-        guard Submitted, Questions[Index].id == Question.id else { return }
-        if Index + 1 == Questions.count {
-            Store.FinishQuiz(Mode: Mode, Correct: CorrectCount, Total: Questions.count)
-            IsFinished = true
-        } else {
-            Index += 1
-            Input = ""
-            Submitted = false
+        guard Run.CurrentQuestion?.id == Question.id, Run.SubmittedAnswer != nil else { return }
+        if Run.Advance(From: Question.id), !Run.IsRetry {
+            Store.FinishQuiz(Mode: Mode, Answers: Run.OriginalAnswers, IsPractice: Run.Session.IsPractice)
         }
+        Input = ""
     }
 }

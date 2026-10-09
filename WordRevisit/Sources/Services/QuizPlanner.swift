@@ -1,8 +1,9 @@
 import Foundation
 
 enum QuizPlanner {
-    static func MakeQuestions(From Entries: [WordEntry], Mode: QuizMode, Limit: Int = 20) -> [QuizQuestion] {
-        Entries.sorted {
+    static func MakeQuestions(From Entries: [WordEntry], Mode: QuizMode, Limit: Int = 20,
+                              Now: Date = .now, IncludeUpcoming: Bool = false) -> [QuizQuestion] {
+        Entries.filter { IncludeUpcoming || ReviewSchedule.IsDue($0, Now: Now) }.sorted {
             if $0.IncorrectCount != $1.IncorrectCount {
                 return $0.IncorrectCount > $1.IncorrectCount
             }
@@ -17,6 +18,7 @@ enum QuizPlanner {
 
     static func Matches(_ Input: String, Answer: String) -> Bool {
         let NormalizedInput = Normalize(Input)
+        guard !NormalizedInput.isEmpty else { return false }
         return Answer.split(whereSeparator: { $0 == ";" || $0 == "," })
             .map { Normalize(String($0)) }
             .contains(NormalizedInput)
@@ -28,5 +30,6 @@ enum QuizPlanner {
             .replacingOccurrences(of: "ə", with: "e")
             .replacingOccurrences(of: "ı", with: "i")
             .folding(options: .diacriticInsensitive, locale: Locale(identifier: "az_AZ"))
+            .split(whereSeparator: \.isWhitespace).joined(separator: " ")
     }
 }

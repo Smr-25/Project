@@ -40,6 +40,106 @@ enum LogicChecks {
         assert(Set(StarterVocabulary.Entries.map(\.Term)).count == 59)
         let RoundTrip = try WordCSV.Decode(WordCSV.Encode(StarterVocabulary.Entries))
         assert(RoundTrip.count == 59)
+        try CheckMigrationAndExamples()
+        CheckQuizFlow()
+        CheckReviewSchedule()
+        CheckProgress()
         print("Logic checks passed")
+    }
+
+    private static func CheckQuizFlow() {
+        let First = WordEntry(Term: "fell", Translation: "ağacı kəsmək; ağac kəsmək", ExampleSentences: "They fell old trees.")
+        let Second = WordEntry(Term: "breed", Translation: "çoxalmaq")
+        let Questions = [First, Second].map { QuizQuestion(Entry: $0, Mode: .Easy) }
+        var Run = QuizRun(Session: QuizSession(Mode: .Easy, Questions: Questions))
+        assert(Run.Submit(" ", For: First.id) == nil)
+        assert(!Run.Advance(From: First.id))
+        assert(Run.Submit("agac   kesmek", For: First.id)?.IsCorrect == true)
+        assert(Run.CurrentQuestion?.id == First.id)
+        assert(Run.Submit("agac kesmek", For: First.id) == nil)
+        assert(Run.Answers.count == 1)
+        assert(!Run.Advance(From: First.id))
+        assert(Run.CurrentQuestion?.id == Second.id)
+        assert(Run.Submit("agac kesmek", For: First.id) == nil)
+        assert(Run.Submit("wrong", For: Second.id)?.IsCorrect == false)
+        assert(Run.Advance(From: Second.id))
+        assert(!Run.Advance(From: Second.id))
+        assert(Run.OriginalAnswers.count == 2 && Run.CorrectCount == 1)
+        Run.RetryMissed()
+        assert(Run.IsRetry && Run.Questions.count == 1 && Run.CurrentQuestion?.id == Second.id)
+        assert(Run.Submit("coxalmaq", For: Second.id)?.IsCorrect == true)
+        assert(Run.Advance(From: Second.id))
+        assert(Run.MissedQuestions.isEmpty && Run.CorrectCount == 1)
+        assert(Run.OriginalAnswers.filter(\.IsCorrect).count == 1)
+        Run.RetryMissed()
+        assert(Run.IsFinished)
+        let Hard = QuizQuestion(Entry: First, Mode: .Hard)
+        assert(Hard.Prompt == First.Translation && Hard.Answer == "fell")
+        assert(Hard.Entry.ExampleSentences == Questions[0].Entry.ExampleSentences)
+        let Empty = QuizRun(Session: QuizSession(Mode: .Easy, Questions: []))
+        assert(Empty.CurrentQuestion == nil && Empty.SubmittedAnswer == nil)
+    }
+
+    private static func CheckReviewSchedule() {
+        var Calendar = Calendar(identifier: .gregorian)
+        Calendar.timeZone = TimeZone(identifier: "Europe/Berlin")!
+        let Now = Calendar.date(from: DateComponents(year: 2026, month: 10, day: 24, hour: 10))!
+        var Word = WordEntry(Term: "fell", Translation: "ağac kəsmək")
+        assert(ReviewSchedule.IsDue(Word, Now: Now))
+        for Interval in [1, 3, 7, 14, 30, 30] {
+            ReviewSchedule.Record(&Word, IsCorrect: true, Now: Now, Calendar: Calendar)
+            assert(Word.NextReviewAt == Calendar.date(byAdding: .day, value: Interval, to: Now))
+            assert(!ReviewSchedule.IsDue(Word, Now: Now))
+        }
+        assert(Word.CorrectCount == 6)
+        let Scheduled = Word.NextReviewAt
+        ReviewSchedule.Record(&Word, IsCorrect: false, Now: Now, UpdatesSchedule: false)
+        assert(Word.NextReviewAt == Scheduled && Word.ReviewStreak == 5)
+        assert(QuizPlanner.MakeQuestions(From: [Word], Mode: .Easy, Now: Now).isEmpty)
+        assert(QuizPlanner.MakeQuestions(From: [Word], Mode: .Easy, Now: Now, IncludeUpcoming: true).count == 1)
+        ReviewSchedule.Record(&Word, IsCorrect: false, Now: Now)
+        assert(Word.ReviewStreak == 0 && ReviewSchedule.IsDue(Word, Now: Now))
+        assert(Word.IncorrectCount == 2)
+    }
+
+    private static func CheckMigrationAndExamples() throws {
+        let Id = UUID()
+        let Legacy = """
+        {"Id":"\(Id)","Term":"fell","Translation":"ağacı kəsmək","Definition":"","CorrectCount":3,"IncorrectCount":1}
+        """
+        let Word = try JSONDecoder().decode(WordEntry.self, from: Data(Legacy.utf8))
+        assert(Word.Id == Id && Word.CorrectCount == 3)
+        assert(Word.ExampleSentences.isEmpty && Word.ReviewStreak == 0 && Word.NextReviewAt == nil)
+        let OldRecord = """
+        {"Id":"\(UUID())","Date":0,"Mode":"Easy","Correct":12,"Total":20}
+        """
+        let Record = try JSONDecoder().decode(QuizRecord.self, from: Data(OldRecord.utf8))
+        assert(Record.Answers == nil && Record.Correct == 12)
+        let Example = "They said, \"Try again.\"\nSmall efforts accumulate."
+        let WithExample = WordEntry(Term: "accumulate", Translation: "toplamaq", ExampleSentences: Example)
+        let Imported = try WordCSV.Decode(WordCSV.Encode([WithExample]))
+        assert(Imported[0].ExampleSentences == Example)
+        let OldCSV = try WordCSV.Decode("English,Azerbaijani,Definition\nfell,ağac kəsmək,To cut down a tree\n")
+        assert(OldCSV[0].ExampleSentences.isEmpty)
+        let SavedWord = try JSONDecoder().decode(WordEntry.self, from: JSONEncoder().encode(WithExample))
+        assert(SavedWord == WithExample)
+    }
+
+    private static func CheckProgress() {
+        var Calendar = Calendar(identifier: .gregorian)
+        Calendar.timeZone = TimeZone(identifier: "Asia/Baku")!
+        let Now = Calendar.date(from: DateComponents(year: 2026, month: 10, day: 9, hour: 0, minute: 30))!
+        func Record(_ Days: Int, _ Correct: Int, _ Total: Int) -> QuizRecord {
+            QuizRecord(Date: Calendar.date(byAdding: .day, value: Days, to: Now)!, Mode: "Easy", Correct: Correct, Total: Total)
+        }
+        let History = [Record(0, 10, 20), Record(0, 5, 5), Record(-1, 7, 10), Record(-2, 2, 5), Record(-6, 1, 2), Record(-7, 1, 2)]
+        let Progress = StudyProgress(History: History, Now: Now, Calendar: Calendar)
+        assert(Progress.Week.count == 7 && Progress.WeeklyAnswers == 42)
+        assert(Progress.ActiveDays == 4 && Progress.Streak == 3)
+        assert(Progress.Accuracy == 59)
+        let Yesterday = StudyProgress(History: [Record(-1, 1, 2)], Now: Now, Calendar: Calendar)
+        assert(Yesterday.Streak == 1)
+        assert(StudyProgress(History: [Record(-2, 1, 2)], Now: Now, Calendar: Calendar).Streak == 0)
+        assert(StudyProgress(History: [], Now: Now, Calendar: Calendar).WeeklyAnswers == 0)
     }
 }

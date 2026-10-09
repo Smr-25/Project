@@ -38,7 +38,7 @@ final class WordRepository: ObservableObject {
     }
 
     @discardableResult
-    func Add(Term: String, Translation: String, Definition: String) -> Bool {
+    func Add(Term: String, Translation: String, Definition: String, ExampleSentences: String = "") -> Bool {
         guard CanSave else { return false }
         let CleanTerm = Term.trimmingCharacters(in: .whitespacesAndNewlines)
         let CleanTranslation = Translation.trimmingCharacters(in: .whitespacesAndNewlines)
@@ -48,7 +48,8 @@ final class WordRepository: ObservableObject {
             $0.Translation.localizedCaseInsensitiveCompare(CleanTranslation) == .orderedSame
         }) else { return false }
         Entries.append(WordEntry(Term: CleanTerm, Translation: CleanTranslation,
-                                 Definition: Definition.trimmingCharacters(in: .whitespacesAndNewlines)))
+                                 Definition: Definition.trimmingCharacters(in: .whitespacesAndNewlines),
+                                 ExampleSentences: ExampleSentences.trimmingCharacters(in: .whitespacesAndNewlines)))
         Save()
         return true
     }
@@ -82,17 +83,16 @@ final class WordRepository: ObservableObject {
         return Added
     }
 
-    func RecordAnswer(For Id: UUID, IsCorrect: Bool) {
+    func RecordAnswer(For Id: UUID, IsCorrect: Bool, UpdatesSchedule: Bool = true) {
         guard CanSave, let Index = Entries.firstIndex(where: { $0.Id == Id }) else { return }
-        if IsCorrect { Entries[Index].CorrectCount += 1 }
-        else { Entries[Index].IncorrectCount += 1 }
-        Entries[Index].LastReviewedAt = .now
+        ReviewSchedule.Record(&Entries[Index], IsCorrect: IsCorrect, UpdatesSchedule: UpdatesSchedule)
         Save()
     }
 
-    func FinishQuiz(Mode: QuizMode, Correct: Int, Total: Int) {
+    func FinishQuiz(Mode: QuizMode, Answers: [QuizAnswer], IsPractice: Bool) {
         guard CanSave else { return }
-        History.insert(QuizRecord(Mode: Mode.rawValue, Correct: Correct, Total: Total), at: 0)
+        History.insert(QuizRecord(Mode: Mode.rawValue, Correct: Answers.filter(\.IsCorrect).count,
+                                 Total: Answers.count, Answers: Answers, IsPractice: IsPractice), at: 0)
         Save()
     }
 
