@@ -1,10 +1,10 @@
 # WordRevisit
 
-A native, offline iPhone app for learning English with Azerbaijani translations. **Version 2.0.0**, iOS **18+**, SwiftUI. No account, advertisements, analytics, backend, or network calls. The first installation includes the original 59-word collection.
+A native, offline iPhone app for learning English with Azerbaijani translations. **Version 2.0.0**, iOS **18+**, SwiftUI. Vocabulary and learning history stay on your iPhone. The first installation includes a 59-word starter collection.
 
 ## Screenshots
 
-Version 2.0 running in an iOS 27 simulator with isolated demonstration data. The black, white, and red interface uses Liquid Glass on iOS 26+ and native materials on iOS 18–25.
+Screenshots from an iOS 27 simulator using sample data. The black, white, and red interface uses Liquid Glass on iOS 26+ and native materials on iOS 18–25.
 
 | Today's plan | Recall and feedback | Progress |
 |:---:|:---:|:---:|
@@ -22,11 +22,10 @@ Version 2.0 running in an iOS 27 simulator with isolated demonstration data. The
 
 - The default target is **20 new words**, in **two batches of 10**, alongside due reviews. Choose one, two, or four batches.
 - New words follow collection/import order. Words sharing a synonym group or an Azerbaijani meaning are introduced on different study days.
-- Due reviews prioritise the oldest due date and then the lowest stage. Equal-priority cards are shuffled. Free quizzes also shuffle ties instead of using alphabetical order.
-- Every question keeps its identity and expected answer until you explicitly continue. Duplicate Enter/button submissions are ignored.
+- Due reviews prioritise the oldest due date and then the lowest stage. Equal-priority cards are shuffled. Free quizzes also shuffle equal-priority words.
 - At the start of a study day, over 100 due reviews halves the new-word allowance; over 150 pauses it. Paused intake resumes below 100. The daily review limit is 200 distinct words; extra reviews remain due.
 - After at least two missed days, the comeback day has no new words and at most 40 reviews.
-- A study day starts at **04:00 local time**. Saved answers retain their study-day key when the device's time zone changes.
+- A study day starts at **04:00 local time**.
 - The daily minimum is **15 distinct words practised**, or the entire available queue when smaller. Mistakes count as practice; repeating one word does not inflate the minimum. Completing all scheduled words finishes the full plan.
 - Each seven consecutive completed study days earns a streak freeze, with up to two saved. A freeze covers a missed day automatically; the best streak remains recorded.
 - The plan's daily limits are fixed for that study day. Changes to those limits apply to the next day; adding or deleting vocabulary updates the remaining available work.
@@ -51,11 +50,11 @@ After four mistakes a word is labelled difficult and the feedback offers a memor
 
 Early stages use English/Azerbaijani choices; later stages add definitions, cloze sentences, and written recall. Definitions and cloze questions are only used when the necessary content exists. Cloze blanks whole-word occurrences in your example sentence. If four unambiguous options cannot be built, the question uses written recall instead. Distractors exclude words with shared meanings or the same synonym group, and respect part of speech when supplied.
 
-Assign matching **Synonym group** names to related words. **Practise synonyms** becomes useful when at least two words in a group reach stage 3 and three distinct distractors are available. It asks you to select the matching synonym; it does not invent contextual distinctions from a plain list. Synonym practice leaves review dates and daily minimums unchanged.
+Assign matching **Synonym group** names to related words. **Practise synonyms** becomes useful when at least two words in a group reach stage 3 and three distinct distractors are available. Select the matching synonym from the answer choices. Synonym practice leaves review dates and daily minimums unchanged.
 
-Daily questions show examples through **Show sentence hint**, then show examples, definitions and memory hooks after answering. Your own sentence can be saved and shared from the editor. There is no automatic sentence grading or pronunciation feature.
+Daily questions show examples through **Show sentence hint**, then show examples, definitions and memory hooks after answering. Your own sentence can be saved and shared from the editor.
 
-**Easy recall** (English → Azerbaijani) and **Hard recall** (Azerbaijani → English) remain available as free practice. Their example hints stay visible, results can be reviewed, and missed words can be retried. Free practice does not change daily review stages or dates. Its quiz history is kept separately; resumable sessions apply to the daily plan and synonym practice.
+**Easy recall** (English → Azerbaijani) and **Hard recall** (Azerbaijani → English) are available as free practice. Their example hints stay visible, results can be reviewed, and missed words can be retried. Free practice does not change daily review stages or dates. Its quiz history is kept separately; resumable sessions apply to the daily plan and synonym practice.
 
 ## Manage words and import
 
@@ -86,11 +85,11 @@ CSV carries vocabulary and notes only. **JSON backup** also carries stages, date
 
 Daily reminders default to **09:00 and 20:30**. A 22:00 reminder is scheduled only when no study has started; the daily minimum cancels the remaining daily reminders. Quiet hours default to **23:00–07:00**. Tapping a study notification opens or resumes the session. The app refreshes a seven-day notification schedule on use. Notification delivery still follows the iPhone's permission and Focus settings.
 
-The separate **Xcode renewal** reminder is preserved. Backups and renewal are independent of the daily minimum.
+Enable **Xcode renewal** in Settings for a reminder to reinstall through Xcode. Backup and renewal reminders remain active after you complete the daily minimum.
 
 ## Updating from 1.2
 
-Keep the same bundle identifier and installation. Existing words, examples and quiz histories are decoded with defaults for new fields; old due dates are preserved and old review streaks map to the new stages. Previous quiz days seed the streak history. The storage schema is version 2, writes are atomic, and an unreadable existing file is left untouched rather than overwritten with starter words.
+Install the update over your existing app using the same bundle identifier. Your words, examples, quiz history and due dates are preserved. Existing review progress transfers to the new stages, and previous quiz days count toward your streak history.
 
 ## Run on an iPhone without the App Store
 
@@ -130,11 +129,7 @@ swiftc Sources/Models/*.swift Sources/Services/*.swift Sources/Data/WordReposito
 /tmp/WordRevisitLearningChecks
 ```
 
-Choose an iPhone simulator and **Product → Test** (`⌘U`) for UI checks: bulk delete and paste preview, daily answer identity and relaunch recovery, shuffled free quizzes and retries, and synonym practice. Debug tests use an isolated temporary store. Logic checks cover 298-row CSV import, legacy migration, intervals, learning steps, load protection, comeback, spelling tolerance, group separation, streak freezes, notification plans, invalid backup rejection and full restore. A 5,000-word load/plan check prints its measured time; device startup performance should be measured on the target iPhone.
-
-## Agreed release scope
-
-2.0 delivers the daily learning workflow, data management, backup, local reminders and basic synonym practice. XP, boss/speed games, achievements, widgets, FSRS, a 30-day workload forecast and context-sensitive synonym questions are reserved for later releases. Pronunciation and listening questions are intentionally excluded. No unfinished feature buttons are shown.
+Choose an iPhone simulator and **Product → Test** (`⌘U`) to run UI checks for word management, saved sessions, quizzes and synonym practice. Tests use an isolated temporary store. The command-line checks cover imports, migration, learning schedules, answer grading, streaks, notifications and backup restoration.
 
 ## License
 

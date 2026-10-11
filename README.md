@@ -17,7 +17,7 @@ Three independent applications in one repository: two ASP.NET Core web apps and 
 
 ### WordRevisit
 
-Version **2.0.0** adds a daily learning plan, resumable sessions, staged reviews, synonym practice, bulk word management, and full backups. Vocabulary and learning history stay on the iPhone.
+WordRevisit **2.0.0** includes a daily learning plan, resumable sessions, staged reviews, synonym practice, bulk word management, and full backups. Vocabulary and learning history stay on the iPhone.
 
 <p align="center">
   <img src="WordRevisit/docs/screenshots/today.png" alt="WordRevisit daily plan" width="205">
@@ -25,7 +25,7 @@ Version **2.0.0** adds a daily learning plan, resumable sessions, staged reviews
   <img src="WordRevisit/docs/screenshots/progress.png" alt="WordRevisit learning progress" width="205">
 </p>
 
-<p align="center"><a href="WordRevisit/README.md">Features, iPhone setup, and all screenshots →</a></p>
+<p align="center"><a href="WordRevisit/README.md">Features and iPhone setup →</a></p>
 
 ## Getting started
 
@@ -49,7 +49,7 @@ cp .env.example .env
 
 Follow the [restaurant setup guide](RestoranApp/README.md#quick-start) to fill in `.env` and start the stack. Do not commit the local `.env` file. The restaurant app uses staff roles; its README covers the demo login and workflows.
 
-**WordRevisit** runs locally on an iPhone through Xcode with a free Apple Account; it has no Docker service or App Store deployment. See the [iPhone setup steps](WordRevisit/README.md#run-on-an-iphone-without-the-app-store).
+**WordRevisit** runs locally on an iPhone through Xcode with a free Apple Account. See the [iPhone setup steps](WordRevisit/README.md#run-on-an-iphone-without-the-app-store).
 
 ## Repository map
 
@@ -57,7 +57,7 @@ Follow the [restaurant setup guide](RestoranApp/README.md#quick-start) to fill i
 Project/
 ├── HRManagementApp/        HR application, solution, tests, and Docker files
 ├── RestoranApp/            Restaurant application, solution, tests, and Docker files
-├── WordRevisit/             Native iPhone app, screenshots, and setup guide
+├── WordRevisit/            Native iPhone app, screenshots, and setup guide
 └── .github/workflows/      Container publishing workflows for each application
 ```
 
