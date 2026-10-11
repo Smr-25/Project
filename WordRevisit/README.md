@@ -1,59 +1,96 @@
 # WordRevisit
 
-An offline iPhone vocabulary app for practising English and Azerbaijani with short, focused quizzes. The first launch contains 59 English words and their Azerbaijani translations. Words, results, and reminder settings stay on the device.
-
-Current version: **1.2.0**. Add your own example sentences, review every answer, retry missed words, and follow your progress with spaced reviews. Existing words and quiz history are preserved when updating the same installation.
+A native, offline iPhone app for learning English with Azerbaijani translations. **Version 2.0.0**, iOS **18+**, SwiftUI. No account, advertisements, analytics, backend, or network calls. The first installation includes the original 59-word collection.
 
 ## Screenshots
 
-Captured from version 1.2.0 running in the iPhone 18 Pro simulator on iOS 27, using demo learning data. The interface uses Liquid Glass on iOS 26 and later, with a native material fallback on earlier supported releases.
+Version 2.0 running in an iOS 27 simulator with isolated demonstration data. The black, white, and red interface uses Liquid Glass on iOS 26+ and native materials on iOS 18–25.
 
-| Today | My words | Quiz | Settings |
-|:---:|:---:|:---:|:---:|
-| ![Today screen](docs/screenshots/today.png) | ![Word library](docs/screenshots/words.png) | ![Easy quiz](docs/screenshots/quiz.png) | ![Reminder settings](docs/screenshots/settings.png) |
+| Today's plan | Recall and feedback | Progress |
+|:---:|:---:|:---:|
+| ![Daily learning plan](docs/screenshots/today.png) | ![Written recall feedback](docs/screenshots/study.png) | ![Learning statistics](docs/screenshots/progress.png) |
 
-| Hard recall with examples | Results and retry | Answer review | Progress |
-|:---:|:---:|:---:|:---:|
-| ![Hard quiz with a personal example sentence](docs/screenshots/quiz-hard.png) | ![Quiz results and retry button](docs/screenshots/results.png) | ![Saved answer review](docs/screenshots/answer-review.png) | ![Weekly learning progress](docs/screenshots/progress.png) |
+## Start here
 
-## Features
+1. Open **My words** to add or edit words. Each word can have a definition, examples, part of speech, synonym group, memory hook, and your own sentence.
+2. Use **Import CSV** or **Manage words → Paste words**, review the counts, and confirm the import.
+3. Tap **Start today's plan**. Meet new words, recall them after short gaps, then complete their mini-test. Close at any point and use **Continue saved session** later.
+4. Use **Progress** to review saved answers and difficult words.
+5. Export a full JSON backup from **Settings → Backup & restore** before removing the app or changing its bundle identifier.
 
-- **Easy recall:** English word → type its Azerbaijani translation.
-- **Hard recall:** Azerbaijani translation → type the English word.
-- Azerbaijani answers work with or without Azerbaijani keyboard characters.
-- Up to 20 new or due words per quiz, with difficult words selected first. The question list stays fixed throughout a quiz.
-- Spaced reviews after 1, 3, 7, 14, and 30 days of successful recall.
-- A results review shows each question, your answer, and accepted translations. Reopen saved reviews from Progress.
-- Retry just the words you missed, without changing your first score or review dates.
-- Progress includes a seven-day activity chart, quiz streak, accuracy, difficult words, and recent quizzes.
-- Add, edit, delete, and search words. Optional definitions appear after a quiz answer.
-- Write your own example sentences in the word editor. They appear as visible hints in both quiz modes and are never graded.
-- Import and export words and examples as CSV. A semicolon separates accepted alternative translations.
-- Two optional local notifications each day, with times chosen in Settings. No server or account is needed.
-- An optional Xcode renewal reminder six days after you mark an install in Settings.
-- Light, Dark, and Tinted Home Screen icon variants on iOS 18 and later.
-- A centered logo appears during the system launch screen; iOS controls how long it remains visible.
+## Daily learning
 
-## Your learning routine
+- The default target is **20 new words**, in **two batches of 10**, alongside due reviews. Choose one, two, or four batches.
+- New words follow collection/import order. Words sharing a synonym group or an Azerbaijani meaning are introduced on different study days.
+- Due reviews prioritise the oldest due date and then the lowest stage. Equal-priority cards are shuffled. Free quizzes also shuffle ties instead of using alphabetical order.
+- Every question keeps its identity and expected answer until you explicitly continue. Duplicate Enter/button submissions are ignored.
+- At the start of a study day, over 100 due reviews halves the new-word allowance; over 150 pauses it. Paused intake resumes below 100. The daily review limit is 200 distinct words; extra reviews remain due.
+- After at least two missed days, the comeback day has no new words and at most 40 reviews.
+- A study day starts at **04:00 local time**. Saved answers retain their study-day key when the device's time zone changes.
+- The daily minimum is **15 distinct words practised**, or the entire available queue when smaller. Mistakes count as practice; repeating one word does not inflate the minimum. Completing all scheduled words finishes the full plan.
+- Each seven consecutive completed study days earns a streak freeze, with up to two saved. A freeze covers a missed day automatically; the best streak remains recorded.
+- The plan's daily limits are fixed for that study day. Changes to those limits apply to the next day; adding or deleting vocabulary updates the remaining available work.
 
-Open **My words**, choose a word, and fill in **Example sentences**. You can write several sentences on separate lines. In Easy recall you still answer with the Azerbaijani translation; in Hard recall you answer with the English word. Examples are visible in both directions, even if a sentence contains the answer.
+### New words and review stages
 
-After a quiz, **Review my answers** shows the original answers. **Retry missed words** starts a shorter round containing only mistakes; you can repeat it if needed. The original result is saved once, and retries do not inflate your accuracy or advance the word's review schedule.
+An introduction shows the word, translations, definition and examples. Add an optional memory hook, learn the word, mark it already known, or leave it for tomorrow. Already-known words enter stage 5. Learning steps default to **1 minute**, then **10 minutes**, followed by a mini-test. A waiting session is saved and can be closed; reminders can announce its next ready card.
 
-A correct scheduled answer moves the next review out by 1, 3, 7, 14, then 30 calendar days. A wrong answer resets the interval and makes the word due again. Easy and Hard share the same word schedule. When no words are due, quizzes become **extra practice**: answers still count in a completed quiz, but review dates stay unchanged.
+| Stage | Review interval |
+|---|---|
+| 1–3 | 1, 2, 4 days |
+| 4–6 | 8, 16, 30 days |
+| 7–9 | 60, 120, 180 days |
 
-The Progress chart covers the last seven local calendar days. Streaks count consecutive days with a completed quiz; yesterday's streak stays active until today ends. Incomplete quizzes update word practice and review dates, but only completed quizzes appear in activity totals and accuracy. Older quiz scores remain visible, while detailed answer reviews are available for quizzes completed in 1.2.0 or later.
+Correct, unassisted, timely recall advances a stage. A correct answer with a hint, a single spelling error in a word of at least five letters, or a longer response is **Hard** and keeps the stage. Default response thresholds are 5 seconds for choices and 12 seconds for typing; these are adjustable.
 
-## CSV format
+A wrong answer or **I don't know** drops two stages, with a minimum of stage 1. It returns after 3–5 other cards where enough cards are available, needs two correct recovery answers, and is then due tomorrow. Longer intervals receive a configurable ±10% spread. Very overdue words receive an easier question tier.
 
-CSV is a plain-text table that you can also edit in a spreadsheet app:
+After four mistakes a word is labelled difficult and the feedback offers a memory hook. At most 15 difficult words stay active; excess words pause for seven days. You can also pause or resume any word manually.
+
+### Questions and synonyms
+
+Early stages use English/Azerbaijani choices; later stages add definitions, cloze sentences, and written recall. Definitions and cloze questions are only used when the necessary content exists. Cloze blanks whole-word occurrences in your example sentence. If four unambiguous options cannot be built, the question uses written recall instead. Distractors exclude words with shared meanings or the same synonym group, and respect part of speech when supplied.
+
+Assign matching **Synonym group** names to related words. **Practise synonyms** becomes useful when at least two words in a group reach stage 3 and three distinct distractors are available. It asks you to select the matching synonym; it does not invent contextual distinctions from a plain list. Synonym practice leaves review dates and daily minimums unchanged.
+
+Daily questions show examples through **Show sentence hint**, then show examples, definitions and memory hooks after answering. Your own sentence can be saved and shared from the editor. There is no automatic sentence grading or pronunciation feature.
+
+**Easy recall** (English → Azerbaijani) and **Hard recall** (Azerbaijani → English) remain available as free practice. Their example hints stay visible, results can be reviewed, and missed words can be retried. Free practice does not change daily review stages or dates. Its quiz history is kept separately; resumable sessions apply to the daily plan and synonym practice.
+
+## Manage words and import
+
+Use **Manage words → Select words**, tap individual rows, or choose **Select visible**, then confirm deletion. **Delete all words** is a separate confirmed action. Deleting words removes their schedules and pending cards, while retaining past answer history. Search includes English, Azerbaijani and group names; filters cover new, learning, review, difficult, paused and synonym entries.
+
+CSV is a UTF-8 plain-text table:
 
 ```csv
-English,Azerbaijani,Definition,Examples
-fell,ağacı kəsmək; ağac kəsmək,To cut down a tree.,They fell old trees.
+English,Azerbaijani,Definition,Examples,PartOfSpeech,Group,Mnemonic,MySentence
+large,böyük,Of considerable size.,A large forest.,adjective,size,,
+huge,iri; böyük,Extremely large.,A huge tree.,adjective,size,,
 ```
 
-The first two columns are required. Definition and Examples are optional; old two- and three-column files still work. Quotes, commas, and multiple lines in examples are supported by export/import. CSV exports vocabulary, including examples, but not quiz history or review dates. Import adds new word/translation pairs; it does not overwrite existing entries.
+English and Azerbaijani are required. The remaining columns are optional, in the order shown. Old two-, three-, and four-column files still work; empty definitions, quoted commas, escaped quotes and multiline examples are supported. A semicolon separates accepted meanings.
+
+The preview reports new entries, merged entries, skipped duplicates and invalid rows. Identical word/meaning pairs are skipped. For the same word with a different translation, choose **merge**, **keep separate**, or **skip**. Merging retains existing review progress. Invalid rows are reported and skipped after confirmation; an unfinished quoted field stops the preview.
+
+For quick paste, use one pair per line:
+
+```text
+forest - meşə
+water - su
+```
+
+CSV carries vocabulary and notes only. **JSON backup** also carries stages, dates, history, settings and the saved session. Restore validates the file before replacing data, asks for confirmation and keeps a local copy of the previous file. Files larger than 64 MB, unsupported schemas and malformed learning data are rejected. An optional backup reminder defaults to every seven days.
+
+## Notifications
+
+Daily reminders default to **09:00 and 20:30**. A 22:00 reminder is scheduled only when no study has started; the daily minimum cancels the remaining daily reminders. Quiet hours default to **23:00–07:00**. Tapping a study notification opens or resumes the session. The app refreshes a seven-day notification schedule on use. Notification delivery still follows the iPhone's permission and Focus settings.
+
+The separate **Xcode renewal** reminder is preserved. Backups and renewal are independent of the daily minimum.
+
+## Updating from 1.2
+
+Keep the same bundle identifier and installation. Existing words, examples and quiz histories are decoded with defaults for new fields; old due dates are preserved and old review streaks map to the new stages. Previous quiz days seed the streak history. The storage schema is version 2, writes are atomic, and an unreadable existing file is left untouched rather than overwritten with starter words.
 
 ## Run on an iPhone without the App Store
 
@@ -72,26 +109,32 @@ The free Personal Team profile expires after **7 days**. Run the project from Xc
 
 For a heads-up, turn on **Xcode renewal** in Settings. The app sends one local notification six days after the date you enable it or tap **I reinstalled from Xcode**. Tap that button after each successful reinstall. The reminder is an estimate because the app does not inspect your provisioning profile; it cannot renew the install for you.
 
-## Code map
+## Code map and checks
 
 ```text
 Sources/
-├── Models/      Word data, quiz sessions, answer history, and progress calculations
-├── Data/        Local JSON persistence and quiz history
-├── Services/    Review scheduling, quiz selection, CSV, and local notifications
-└── Views/       SwiftUI screens and visual style
+├── Models/      Codable words, learning settings, days, sessions and review logs
+├── Services/    Learning engine, calendar rules, import preview, CSV and reminders
+├── Data/        Atomic persistence, migration, backup and session transactions
+└── Views/       SwiftUI screens and shared visual components
 ```
 
-The project uses SwiftUI, Foundation, and UserNotifications. There are no external packages, accounts, or cloud services. To run the small logic check on a Mac:
+There are no third-party dependencies. Run these commands from `WordRevisit/` on a Mac with Xcode selected:
 
 ```bash
 swiftc Sources/Models/*.swift Sources/Services/*.swift Tests/LogicChecks.swift -o /tmp/WordRevisitLogicChecks
 /tmp/WordRevisitLogicChecks
 swiftc Sources/Models/*.swift Sources/Services/*.swift Sources/Data/WordRepository.swift Tests/RepositoryChecks.swift -o /tmp/WordRevisitRepositoryChecks
 /tmp/WordRevisitRepositoryChecks
+swiftc Sources/Models/*.swift Sources/Services/*.swift Sources/Data/WordRepository.swift Tests/LearningChecks.swift -o /tmp/WordRevisitLearningChecks
+/tmp/WordRevisitLearningChecks
 ```
 
-The checks cover legacy JSON/CSV, sentence round trips, review intervals, day boundaries, duplicate submissions, missed-word retries, and persistence. In Xcode, select an iPhone simulator and choose **Product → Test** (`⌘U`) to run the quiz UI regression. UI tests use a separate temporary data file in Debug builds, leaving your normal vocabulary untouched.
+Choose an iPhone simulator and **Product → Test** (`⌘U`) for UI checks: bulk delete and paste preview, daily answer identity and relaunch recovery, shuffled free quizzes and retries, and synonym practice. Debug tests use an isolated temporary store. Logic checks cover 298-row CSV import, legacy migration, intervals, learning steps, load protection, comeback, spelling tolerance, group separation, streak freezes, notification plans, invalid backup rejection and full restore. A 5,000-word load/plan check prints its measured time; device startup performance should be measured on the target iPhone.
+
+## Agreed release scope
+
+2.0 delivers the daily learning workflow, data management, backup, local reminders and basic synonym practice. XP, boss/speed games, achievements, widgets, FSRS, a 30-day workload forecast and context-sensitive synonym questions are reserved for later releases. Pronunciation and listening questions are intentionally excluded. No unfinished feature buttons are shown.
 
 ## License
 
