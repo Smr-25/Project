@@ -1,7 +1,7 @@
 import SwiftUI
 import UniformTypeIdentifiers
 
-private struct CSVDocument: FileDocument {
+struct CSVDocument: FileDocument {
     static var readableContentTypes: [UTType] { [.commaSeparatedText, .plainText] }
     var Text: String
 
@@ -24,12 +24,25 @@ struct LibraryView: View {
     @State private var ShowingExport = false
     @State private var EditingEntry: WordEntry?
     @State private var Notice: String?
+    @State private var Selecting = false
+    @State private var Selected: Set<UUID> = []
+    @State private var DeleteIds: Set<UUID> = []
+    @State private var ConfirmDelete = false
+    @State private var ShowingPaste = false
+    @State private var ImportText: String?
+    @State private var Filter = "All"
     @FocusState private var SearchFocused: Bool
 
     private var FilteredEntries: [WordEntry] {
         Store.Entries.filter {
-            Search.isEmpty || $0.Term.localizedCaseInsensitiveContains(Search) ||
-            $0.Translation.localizedCaseInsensitiveContains(Search)
+            (Search.isEmpty || $0.Group.localizedCaseInsensitiveContains(Search) || $0.Term.localizedCaseInsensitiveContains(Search) ||
+            $0.Translation.localizedCaseInsensitiveContains(Search))
+            && (Filter == "All" || Filter == "New" && $0.Learning.IntroducedAt == nil
+                || Filter == "Learning" && $0.Learning.Stage < 3 && $0.Learning.IntroducedAt != nil
+                || Filter == "Review" && $0.Learning.Stage >= 3
+                || Filter == "Difficult" && $0.Learning.Lapses >= Store.Learning.Settings.LeechThreshold
+                || Filter == "Paused" && !$0.Learning.IsAvailable(at: .now)
+                || Filter == "Synonyms" && !$0.Group.isEmpty)
         }
         .sorted { $0.Term.localizedStandardCompare($1.Term) == .orderedAscending }
     }
@@ -41,6 +54,16 @@ struct LibraryView: View {
                 VStack(alignment: .leading, spacing: 24) {
                     Header
                     SearchField
+                    Picker("Filter words", selection: $Filter) {
+                        ForEach(["All", "New", "Learning", "Review", "Difficult", "Paused", "Synonyms"], id: \.self) { Text($0).tag($0) }
+                    }.pickerStyle(.menu)
+                    if Selecting {
+                        HStack {
+                            Button("Select visible") { Selected.formUnion(FilteredEntries.map(\.Id)) }
+                            Spacer()
+                            Button("Delete (\(Selected.count))", role: .destructive) { DeleteIds = Selected; ConfirmDelete = true }.disabled(Selected.isEmpty)
+                        }.frame(minHeight: 44)
+                    }
                     HStack {
                         SectionEyebrow(Title: "Your collection")
                         Spacer()
@@ -55,8 +78,15 @@ struct LibraryView: View {
                             ForEach(FilteredEntries) { Entry in
                                 Button {
                                     SearchFocused = false
-                                    EditingEntry = Entry
-                                } label: { WordRow(Entry: Entry) }
+                                    if Selecting {
+                                        if Selected.contains(Entry.Id) { Selected.remove(Entry.Id) } else { Selected.insert(Entry.Id) }
+                                    } else { EditingEntry = Entry }
+                                } label: {
+                                    HStack {
+                                        if Selecting { Image(systemName: Selected.contains(Entry.Id) ? "checkmark.circle.fill" : "circle").foregroundStyle(Palette.Accent) }
+                                        WordRow(Entry: Entry)
+                                    }.contentShape(Rectangle())
+                                }
                                     .buttonStyle(.plain)
                             }
                         }
@@ -68,6 +98,14 @@ struct LibraryView: View {
             }
             .scrollDismissesKeyboard(.interactively)
         }
+        .sheet(isPresented: $ShowingPaste) { ImportWordsView() }
+        .sheet(isPresented: Binding(get: { ImportText != nil }, set: { if !$0 { ImportText = nil } })) { ImportWordsView(CSV: ImportText) }
+        .confirmationDialog("Delete \(DeleteIds.count) words?", isPresented: $ConfirmDelete, titleVisibility: .visible) {
+            Button("Delete \(DeleteIds.count) words", role: .destructive) {
+                Store.Delete(Ids: DeleteIds); Selected.subtract(DeleteIds); Selecting = false
+            }
+            Button("Cancel", role: .cancel) {}
+        } message: { Text("The selected words and their schedules will be removed. Past answer history stays. Export a backup first if you may want them back.") }
         .sheet(isPresented: $ShowingAdd) { WordEditorView() }
         .sheet(item: $EditingEntry) { Entry in WordEditorView(Entry: Entry) }
         .fileImporter(isPresented: $ShowingImport, allowedContentTypes: [.commaSeparatedText, .plainText]) { Result in
@@ -76,8 +114,7 @@ struct LibraryView: View {
                 let Accessed = URL.startAccessingSecurityScopedResource()
                 defer { if Accessed { URL.stopAccessingSecurityScopedResource() } }
                 let Text = try String(contentsOf: URL, encoding: .utf8)
-                let Added = Store.Import(try WordCSV.Decode(Text))
-                Notice = "Imported \(Added) new words."
+                ImportText = Text
             } catch {
                 Notice = "Import failed: \(error.localizedDescription)"
             }
@@ -112,6 +149,11 @@ struct LibraryView: View {
                 .accessibilityLabel("Add word")
             }
             HStack(spacing: 10) {
+                Menu {
+                    Button(Selecting ? "Done selecting" : "Select words") { Selecting.toggle(); Selected = [] }
+                    Button("Paste words") { ShowingPaste = true }
+                    Button("Delete all words", role: .destructive) { DeleteIds = Set(Store.Entries.map(\.Id)); ConfirmDelete = true }.disabled(Store.Entries.isEmpty)
+                } label: { Image(systemName: "ellipsis.circle").frame(width: 44, height: 44) }.accessibilityLabel("Manage words")
                 Button { ShowingImport = true } label: {
                     Label("Import CSV", systemImage: "square.and.arrow.down")
                 }
@@ -163,7 +205,9 @@ private struct WordRow: View {
             VStack(alignment: .leading, spacing: 5) {
                 Text(Entry.Term).font(.system(size: 18, weight: .semibold, design: .rounded))
                 Text(Entry.Translation).font(.system(size: 14)).foregroundStyle(Palette.Muted)
-                    .lineLimit(1)
+                    .lineLimit(2)
+                if !Entry.Group.isEmpty { Text(Entry.Group).font(.caption).foregroundStyle(Palette.Accent) }
+                if Entry.Learning.Suspended { Text("Paused").font(.caption) }
             }
             Spacer()
             Image(systemName: "chevron.right").font(.system(size: 12, weight: .bold))

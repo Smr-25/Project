@@ -3,14 +3,14 @@ import Foundation
 enum QuizPlanner {
     static func MakeQuestions(From Entries: [WordEntry], Mode: QuizMode, Limit: Int = 20,
                               Now: Date = .now, IncludeUpcoming: Bool = false) -> [QuizQuestion] {
-        Entries.filter { IncludeUpcoming || ReviewSchedule.IsDue($0, Now: Now) }.sorted {
+        Entries.shuffled().filter { $0.Learning.IsAvailable(at: Now) && (IncludeUpcoming || ReviewSchedule.IsDue($0, Now: Now)) }.sorted {
             if $0.IncorrectCount != $1.IncorrectCount {
                 return $0.IncorrectCount > $1.IncorrectCount
             }
             if $0.LastReviewedAt != $1.LastReviewedAt {
                 return ($0.LastReviewedAt ?? .distantPast) < ($1.LastReviewedAt ?? .distantPast)
             }
-            return $0.Term.localizedStandardCompare($1.Term) == .orderedAscending
+            return false
         }
         .prefix(max(0, Limit))
         .map { QuizQuestion(Entry: $0, Mode: Mode) }
@@ -24,7 +24,7 @@ enum QuizPlanner {
             .contains(NormalizedInput)
     }
 
-    private static func Normalize(_ Value: String) -> String {
+    static func Normalize(_ Value: String) -> String {
         Value.trimmingCharacters(in: .whitespacesAndNewlines)
             .lowercased(with: Locale(identifier: "az_AZ"))
             .replacingOccurrences(of: "ə", with: "e")

@@ -9,11 +9,21 @@ struct WordEditorView: View {
     @State private var Translation: String
     @State private var Definition: String
     @State private var ExampleSentences: String
+    @State private var Group: String
+    @State private var PartOfSpeech: String
+    @State private var Mnemonic: String
+    @State private var MySentence: String
+    @State private var Suspended: Bool
     @State private var ShowingDelete = false
     @State private var ErrorText: String?
 
     init(Entry: WordEntry? = nil) {
         self.Entry = Entry
+        _Group = State(initialValue: Entry?.Group ?? "")
+        _PartOfSpeech = State(initialValue: Entry?.PartOfSpeech ?? "")
+        _Mnemonic = State(initialValue: Entry?.Mnemonic ?? "")
+        _MySentence = State(initialValue: Entry?.MySentence ?? "")
+        _Suspended = State(initialValue: Entry?.Learning.Suspended ?? false)
         _Term = State(initialValue: Entry?.Term ?? "")
         _Translation = State(initialValue: Entry?.Translation ?? "")
         _Definition = State(initialValue: Entry?.Definition ?? "")
@@ -39,6 +49,12 @@ struct WordEditorView: View {
                         Text("For multiple accepted translations, separate them with a semicolon.")
                             .font(.system(size: 13))
                             .foregroundStyle(Palette.Muted)
+                        InputGroup(Title: "SYNONYM GROUP · OPTIONAL", Placeholder: "For example: increase", Value: $Group)
+                        InputGroup(Title: "PART OF SPEECH · OPTIONAL", Placeholder: "noun, verb, adjective…", Value: $PartOfSpeech)
+                        InputGroup(Title: "MEMORY HOOK · OPTIONAL", Placeholder: "A story or association that helps you remember", Value: $Mnemonic)
+                        InputGroup(Title: "MY SENTENCE · OPTIONAL", Placeholder: "Write your own sentence", Value: $MySentence)
+                        if !MySentence.isEmpty { ShareLink("Share my sentence", item: MySentence).padding(.vertical, 10) }
+                        Toggle("Pause this word", isOn: $Suspended).tint(Palette.Accent)
                         Button("Save word") { SaveWord() }
                             .buttonStyle(PrimaryActionStyle(Tint: Palette.White))
                             .disabled(Term.trimmingCharacters(in: .whitespaces).isEmpty ||
@@ -72,16 +88,17 @@ struct WordEditorView: View {
     }
 
     private func SaveWord() {
-        if var Entry {
-            Entry.Term = Term.trimmingCharacters(in: .whitespacesAndNewlines)
-            Entry.Translation = Translation.trimmingCharacters(in: .whitespacesAndNewlines)
-            Entry.Definition = Definition.trimmingCharacters(in: .whitespacesAndNewlines)
-            Entry.ExampleSentences = ExampleSentences.trimmingCharacters(in: .whitespacesAndNewlines)
-            Store.Update(Entry)
-        } else if !Store.Add(Term: Term, Translation: Translation, Definition: Definition, ExampleSentences: ExampleSentences) {
-            ErrorText = "This word and translation already exist, or they could not be saved."
-            return
-        }
+        var Updated = Entry ?? WordEntry(Term: Term, Translation: Translation)
+        Updated.Term = Term.trimmingCharacters(in: .whitespacesAndNewlines)
+        Updated.Translation = Translation.trimmingCharacters(in: .whitespacesAndNewlines)
+        Updated.Definition = Definition.trimmingCharacters(in: .whitespacesAndNewlines)
+        Updated.ExampleSentences = ExampleSentences.trimmingCharacters(in: .whitespacesAndNewlines)
+        Updated.Group = Group.trimmingCharacters(in: .whitespacesAndNewlines)
+        Updated.PartOfSpeech = PartOfSpeech.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        Updated.Mnemonic = Mnemonic.trimmingCharacters(in: .whitespacesAndNewlines)
+        Updated.MySentence = MySentence.trimmingCharacters(in: .whitespacesAndNewlines)
+        Updated.Learning.Suspended = Suspended
+        guard Store.SaveEntry(Updated) else { ErrorText = "Check the word and translation. This pair may already exist."; return }
         Dismiss()
     }
 }

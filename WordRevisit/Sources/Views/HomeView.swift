@@ -4,9 +4,11 @@ struct HomeView: View {
     @EnvironmentObject private var Store: WordRepository
     @Environment(\.scenePhase) private var ScenePhase
     @State private var ActiveQuiz: QuizSession?
+    @State private var ShowingPlan = false
+    @State private var Notice: String?
     @State private var Now = Date.now
 
-    private var DueCount: Int { Store.Entries.filter { ReviewSchedule.IsDue($0, Now: Now) }.count }
+    private var DueCount: Int { Store.Entries.filter { $0.Learning.IsAvailable(at: Now) && $0.Learning.IntroducedAt != nil && ReviewSchedule.IsDue($0, Now: Now) }.count }
 
     var body: some View {
         ZStack {
@@ -14,13 +16,17 @@ struct HomeView: View {
             ScrollView(showsIndicators: false) {
                 VStack(alignment: .leading, spacing: 28) {
                     Header
-                    Hero
-                    Stats
-                    ReviewStatus
-                    SectionEyebrow(Title: "Choose your challenge")
+                    DailyPlan
+                    SectionEyebrow(Title: "Free practice · no schedule changes")
                     ModeCard(Mode: .Easy, Tint: Palette.White) { StartQuiz(.Easy) }
                     ModeCard(Mode: .Hard, Tint: Palette.Accent) { StartQuiz(.Hard) }
-                    Footer
+                    if Store.Entries.contains(where: { !$0.Group.isEmpty }) {
+                        Button("Practise synonyms") {
+                            if Store.Learning.Session != nil { Notice = "Finish your saved session first, then start synonym practice." }
+                            else if Store.StartStudy(Synonyms: true) { Store.PresentStudy = true }
+                            else { Notice = "Add words to the same synonym group and bring at least two to stage 3. Four distinct answer options are needed." }
+                        }.buttonStyle(PrimaryActionStyle(Tint: Palette.Accent))
+                    }
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 20)
@@ -31,49 +37,57 @@ struct HomeView: View {
             QuizView(Session: Quiz)
                 .environmentObject(Store)
         }
+        .sheet(isPresented: $ShowingPlan) { StudySettingsView() }
+        .alert("Your learning", isPresented: Binding(get: { Notice != nil }, set: { if !$0 { Notice = nil } })) {
+            Button("OK") { Notice = nil }
+        } message: { Text(Notice ?? "") }
         .onAppear {
+            Store.RefreshDay()
             Now = .now
             #if DEBUG
             if ProcessInfo.processInfo.arguments.contains("-PreviewQuiz") { StartQuiz(.Easy) }
             #endif
         }
         .onChange(of: ScenePhase) { _, Phase in
-            if Phase == .active { Now = .now }
+            if Phase == .active { Now = .now; Store.RefreshDay() }
         }
     }
 
     private func StartQuiz(_ Mode: QuizMode) {
         Now = .now
-        let IsPractice = !Store.Entries.isEmpty && DueCount == 0
+        let IsPractice = true
         ActiveQuiz = QuizSession(Mode: Mode,
                                  Questions: QuizPlanner.MakeQuestions(From: Store.Entries, Mode: Mode,
                                                                       Now: Now, IncludeUpcoming: IsPractice),
                                  IsPractice: IsPractice)
     }
 
-    private var ReviewStatus: some View {
-        HStack(alignment: .top, spacing: 14) {
-            Image(systemName: DueCount > 0 ? "calendar.badge.clock" : "checkmark.seal")
-                .font(.system(size: 24))
-                .foregroundStyle(Palette.Accent)
-            VStack(alignment: .leading, spacing: 6) {
-                Text(DueCount > 0 ? "\(DueCount) \(DueCount == 1 ? "word" : "words") ready for review" : "All caught up")
-                    .font(.system(size: 17, weight: .bold, design: .rounded))
-                Text(DueCount > 0
-                     ? "New and due words first. Up to 20 per quiz."
-                     : "You can still practise. Extra practice keeps your review dates.")
-                    .font(.system(size: 13))
-                    .foregroundStyle(Palette.Muted)
-                if DueCount == 0, let Next = Store.Entries.compactMap(\.NextReviewAt).min() {
-                    Text("Next review: \(Next.formatted(date: .abbreviated, time: .shortened))")
-                        .font(.system(size: 12, weight: .medium))
-                        .foregroundStyle(Palette.Muted)
-                }
+    private var DailyPlan: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            SectionEyebrow(Title: Store.Today?.Comeback == true ? "Welcome back · a gentle start" : "Your daily plan")
+            Text(Store.Today?.FullMet == true ? "Today, well spent." : "A few words.\nA little progress.")
+                .font(.largeTitle.bold())
+            let Completed = Store.Today?.Completed.count ?? 0
+            let Target = Store.Today?.Target ?? 0
+            ProgressView(value: Double(min(Completed, Target)), total: Double(max(1, Target))).tint(Palette.Accent)
+                .accessibilityLabel("Today's progress").accessibilityValue("\(Completed) of \(Target)")
+            HStack {
+                Text("\(Completed) / \(Target) words")
+                Spacer()
+                Label("\(Store.Streak.Current) day streak", systemImage: "flame")
+            }.font(.subheadline).foregroundStyle(Palette.Muted)
+            if let Day = Store.Today {
+                Text("New: \(LearningEngine.NewEntries(Store.Entries, Excluding: Day.Introduced, Limit: max(0, Day.NewLimit - Day.Introduced.count), Now: Now).count) left · Reviews: \(min(DueCount, max(0, Day.ReviewLimit - Day.Reviewed.count))) due")
+                    .font(.subheadline)
+                Text(Day.MinimumMet ? "Daily minimum complete. Reminders are quiet for today." : "Daily minimum: \(Store.Today?.Attempted.count ?? 0) / \(min(Store.Learning.Settings.MinimumCards, Target)) words practised")
+                    .font(.caption).foregroundStyle(Palette.Muted)
             }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(20)
-        .FrostedCard(CornerRadius: 24)
+            Button(Store.Learning.Session == nil ? "Start today's plan" : "Continue saved session") {
+                if Store.StartStudy() { Store.PresentStudy = true }
+                else { Notice = "You're caught up for now. Your next words will appear when due. You can still use free practice below." }
+            }.buttonStyle(PrimaryActionStyle(Tint: Palette.White))
+            Button("Adjust my plan") { ShowingPlan = true }.frame(minHeight: 44)
+        }.padding(24).FrostedCard(CornerRadius: 30)
     }
 
     private var Header: some View {
@@ -94,77 +108,7 @@ struct HomeView: View {
         }
     }
 
-    private var Hero: some View {
-        VStack(alignment: .leading, spacing: 18) {
-            HStack(spacing: 7) {
-                Circle().fill(Palette.Accent).frame(width: 7, height: 7)
-                Text("YOUR DAILY PRACTICE")
-                    .font(.system(size: 11, weight: .bold, design: .rounded))
-                    .tracking(2)
-                    .foregroundStyle(Palette.Accent)
-            }
-            Text("Make every\nword count.")
-                .font(.system(size: 42, weight: .bold, design: .rounded))
-                .tracking(-1.5)
-                .fixedSize(horizontal: false, vertical: true)
-            Text("A few minutes of recall today, a stronger vocabulary tomorrow.")
-                .font(.system(size: 15))
-                .foregroundStyle(Palette.Muted)
-                .lineSpacing(4)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(28)
-        .background {
-            RoundedRectangle(cornerRadius: 32)
-                .fill(LinearGradient(colors: [Color(red: 0.24, green: 0.055, blue: 0.075),
-                                              Color(red: 0.08, green: 0.08, blue: 0.09)],
-                                     startPoint: .topLeading, endPoint: .bottomTrailing))
-                .overlay(alignment: .topTrailing) {
-                    Circle().stroke(.white.opacity(0.10), lineWidth: 30)
-                        .frame(width: 190, height: 190).offset(x: 76, y: -65)
-                        .clipped()
-                }
-                .clipShape(RoundedRectangle(cornerRadius: 32))
-        }
-        .overlay(RoundedRectangle(cornerRadius: 32).stroke(.white.opacity(0.15)))
-    }
 
-    private var Stats: some View {
-        HStack(spacing: 12) {
-            StatTile(Value: "\(Store.Entries.count)", Label: "Words saved", Symbol: "text.book.closed", Tint: Palette.Accent)
-            StatTile(Value: "\(Store.Accuracy)%", Label: "Recall rate", Symbol: "chart.line.uptrend.xyaxis", Tint: Palette.White)
-        }
-    }
-
-    private var Footer: some View {
-        HStack(spacing: 10) {
-            Image(systemName: "bell.badge")
-                .foregroundStyle(Palette.Accent)
-            Text(Store.RemindersEnabled ? "Morning and evening reminders are on" : "Set reminders to build a daily rhythm")
-                .font(.system(size: 13))
-                .foregroundStyle(Palette.Muted)
-        }
-        .padding(.top, 4)
-    }
-}
-
-private struct StatTile: View {
-    let Value: String
-    let Label: String
-    let Symbol: String
-    let Tint: Color
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Image(systemName: Symbol).foregroundStyle(Tint).font(.system(size: 18))
-            Text(Value).font(.system(size: 28, weight: .bold, design: .rounded))
-            Text(Label).font(.system(size: 12)).foregroundStyle(Palette.Muted)
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .padding(20)
-        .FrostedCard(CornerRadius: 24)
-    }
 }
 
 private struct ModeCard: View {

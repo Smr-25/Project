@@ -3,6 +3,8 @@ import SwiftUI
 struct SettingsView: View {
     @EnvironmentObject private var Store: WordRepository
     @State private var IsUpdating = false
+    @State private var ShowingPlan = false
+    @State private var ShowingBackup = false
     @State private var Notice: String?
 
     var body: some View {
@@ -14,6 +16,12 @@ struct SettingsView: View {
                     Text("Settings")
                         .font(.system(size: 38, weight: .bold, design: .rounded))
 
+                    Button { ShowingPlan = true } label: {
+                        Label("My learning plan", systemImage: "calendar").frame(maxWidth: .infinity, minHeight: 50)
+                    }.buttonStyle(PrimaryActionStyle(Tint: Palette.White))
+                    Button { ShowingBackup = true } label: {
+                        Label("Backup & restore", systemImage: "externaldrive").frame(maxWidth: .infinity, minHeight: 50)
+                    }.buttonStyle(PrimaryActionStyle(Tint: Palette.White))
                     VStack(alignment: .leading, spacing: 20) {
                         HStack(spacing: 14) {
                             Image(systemName: "bell.badge.fill")
@@ -24,7 +32,7 @@ struct SettingsView: View {
                             VStack(alignment: .leading, spacing: 4) {
                                 Text("Daily reminders")
                                     .font(.system(size: 18, weight: .bold, design: .rounded))
-                                Text("Two gentle nudges every day")
+                                Text("Quiet after your daily minimum")
                                     .font(.system(size: 13))
                                     .foregroundStyle(Palette.Muted)
                             }
@@ -105,7 +113,7 @@ struct SettingsView: View {
 
                     VStack(alignment: .leading, spacing: 12) {
                         SectionEyebrow(Title: "Your data")
-                        Text("Your words and quiz history stay on this iPhone. Export your words from My words before removing the app.")
+                        Text("Your data stays on this iPhone. Use Backup & restore to keep words, history, settings, and your saved session together.")
                             .font(.system(size: 14))
                             .foregroundStyle(Palette.Muted)
                             .lineSpacing(4)
@@ -114,6 +122,16 @@ struct SettingsView: View {
                     .padding(23)
                     .FrostedCard(CornerRadius: 25)
 
+                    VStack(alignment: .leading, spacing: 12) {
+                        SectionEyebrow(Title: "Quiet hours")
+                        Stepper("From \(Store.Learning.Settings.QuietStart):00", value: Binding(get: { Store.Learning.Settings.QuietStart }, set: { Value in
+                            var Settings = Store.Learning.Settings; Settings.QuietStart = Value; _ = Store.UpdateLearningSettings(Settings); UpdateReminders()
+                        }), in: 0...23)
+                        Stepper("Until \(Store.Learning.Settings.QuietEnd):00", value: Binding(get: { Store.Learning.Settings.QuietEnd }, set: { Value in
+                            var Settings = Store.Learning.Settings; Settings.QuietEnd = Value; _ = Store.UpdateLearningSettings(Settings); UpdateReminders()
+                        }), in: 0...23)
+                        Text("A final reminder at 22:00 is sent only if you have not started. Equal quiet-hour values turn this restriction off.").font(.caption).foregroundStyle(Palette.Muted)
+                    }.padding(22).FrostedCard()
                     Text("WordRevisit · Version \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—")")
                         .font(.system(size: 12))
                         .foregroundStyle(Palette.Muted.opacity(0.7))
@@ -125,6 +143,8 @@ struct SettingsView: View {
                 .padding(.bottom, 35)
             }
         }
+        .sheet(isPresented: $ShowingPlan) { StudySettingsView() }
+        .sheet(isPresented: $ShowingBackup) { BackupView() }
         .alert("Notifications unavailable", isPresented: Binding(
             get: { Notice != nil }, set: { if !$0 { Notice = nil } }
         )) { Button("OK") { Notice = nil } } message: { Text(Notice ?? "") }
@@ -134,8 +154,7 @@ struct SettingsView: View {
         Store.SaveSettings()
         IsUpdating = true
         Task {
-            let Scheduled = await ReminderScheduler.Set(Enabled: Store.RemindersEnabled,
-                                                        Morning: Store.Morning, Evening: Store.Evening)
+            let Scheduled = await Store.RefreshNotifications(RequestPermission: Store.RemindersEnabled)
             if !Scheduled {
                 Store.RemindersEnabled = false
                 Store.SaveSettings()

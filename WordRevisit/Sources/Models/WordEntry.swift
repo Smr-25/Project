@@ -11,6 +11,11 @@ struct WordEntry: Codable, Identifiable, Equatable {
     var ExampleSentences: String
     var ReviewStreak: Int
     var NextReviewAt: Date?
+    var Learning = WordLearning()
+    var PartOfSpeech = ""
+    var Group = ""
+    var Mnemonic = ""
+    var MySentence = ""
 
     var id: UUID { Id }
 
@@ -40,7 +45,7 @@ struct WordEntry: Codable, Identifiable, Equatable {
 
     private enum CodingKeys: String, CodingKey {
         case Id, Term, Translation, Definition, CorrectCount, IncorrectCount, LastReviewedAt
-        case ExampleSentences, ReviewStreak, NextReviewAt
+        case ExampleSentences, ReviewStreak, NextReviewAt, Learning, PartOfSpeech, Group, Mnemonic, MySentence
     }
 
     init(from Decoder: Decoder) throws {
@@ -55,6 +60,20 @@ struct WordEntry: Codable, Identifiable, Equatable {
         ExampleSentences = try Values.decodeIfPresent(String.self, forKey: .ExampleSentences) ?? ""
         ReviewStreak = try Values.decodeIfPresent(Int.self, forKey: .ReviewStreak) ?? 0
         NextReviewAt = try Values.decodeIfPresent(Date.self, forKey: .NextReviewAt)
+        PartOfSpeech = try Values.decodeIfPresent(String.self, forKey: .PartOfSpeech) ?? ""
+        Group = try Values.decodeIfPresent(String.self, forKey: .Group) ?? ""
+        Mnemonic = try Values.decodeIfPresent(String.self, forKey: .Mnemonic) ?? ""
+        MySentence = try Values.decodeIfPresent(String.self, forKey: .MySentence) ?? ""
+        if let Saved = try Values.decodeIfPresent(WordLearning.self, forKey: .Learning) {
+            Learning = Saved
+        } else {
+            // Preserve old due dates; map the old interval to the nearest new stage.
+            Learning.Stage = [0, 1, 3, 4, 5, 6][min(max(ReviewStreak, 0), 5)]
+            Learning.Reps = CorrectCount + IncorrectCount
+            Learning.Lapses = IncorrectCount
+            Learning.IntroducedAt = LastReviewedAt
+            Learning.LearningStep = LastReviewedAt == nil ? 0 : 3
+        }
     }
 }
 

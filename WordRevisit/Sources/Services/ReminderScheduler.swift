@@ -53,3 +53,36 @@ enum ReminderScheduler {
         }
     }
 }
+
+extension ReminderScheduler {
+    @MainActor private static var PlanRevision = 0
+
+    @MainActor
+    static func SetPlan(_ Plan: [PlannedReminder], RequestPermission: Bool) async -> Bool {
+        PlanRevision += 1
+        let Revision = PlanRevision
+        let Center = UNUserNotificationCenter.current()
+        if RequestPermission {
+            guard (try? await Center.requestAuthorization(options: [.alert, .badge, .sound])) == true else { return false }
+        }
+        let Pending = await Center.pendingNotificationRequests()
+        guard Revision == PlanRevision else { return true }
+        Center.removePendingNotificationRequests(withIdentifiers: Pending.filter { $0.identifier.hasPrefix("WordRevisit.Plan.") || Ids.contains($0.identifier) }.map(\.identifier))
+        let Authorization = await Center.notificationSettings().authorizationStatus
+        guard Revision == PlanRevision else { return true }
+        guard Authorization == .authorized || Authorization == .provisional else { return Plan.isEmpty }
+        do {
+            for Item in Plan {
+                guard Revision == PlanRevision else { return true }
+                let Content = UNMutableNotificationContent()
+                Content.title = Item.Title; Content.body = Item.Body; Content.sound = .default
+                Content.userInfo = ["OpenStudy": Item.Id != "WordRevisit.Plan.Backup"]
+                let Trigger = UNTimeIntervalNotificationTrigger(timeInterval: max(1, Item.Date.timeIntervalSinceNow), repeats: false)
+                let RequestId = "WordRevisit.Plan.\(Revision).\(Item.Id)"
+                try await Center.add(UNNotificationRequest(identifier: RequestId, content: Content, trigger: Trigger))
+                if Revision != PlanRevision { Center.removePendingNotificationRequests(withIdentifiers: [RequestId]); return true }
+            }
+            return true
+        } catch { return false }
+    }
+}
