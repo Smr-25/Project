@@ -12,9 +12,10 @@ enum LogicChecks {
         var First = WordEntry(Term: "array", Translation: "sıra")
         let Second = WordEntry(Term: "breed", Translation: "çoxalmaq")
         let Session = QuizSession(Mode: .Easy, Questions: QuizPlanner.MakeQuestions(From: [First, Second], Mode: .Easy))
+        let FrozenIds = Session.Questions.map(\.id)
         First.LastReviewedAt = .now // Recording an answer changes the planner order.
         assert(QuizPlanner.MakeQuestions(From: [First, Second], Mode: .Easy)[0].id == Second.id)
-        assert(Session.Questions[0].id == First.id)
+        assert(Session.Questions.map(\.id) == FrozenIds)
         assert(QuizPlanner.Matches(" DÖZÜMLÜ ", Answer: Difficult.Translation))
         assert(!QuizPlanner.Matches("curious", Answer: Difficult.Translation))
         var LegacyWords = [WordEntry(Term: "fell", Translation: "ağacı kəsmək"),
