@@ -2,7 +2,7 @@ import Foundation
 import SwiftUI
 
 struct SavedData: Codable {
-    var SchemaVersion: Int? = 2
+    var SchemaVersion: Int? = 3
     var Learning: LearningData?
     var Entries: [WordEntry]
     var History: [QuizRecord]
@@ -11,10 +11,12 @@ struct SavedData: Codable {
     var RemindersEnabled: Bool
     var XcodeInstalledAt: Date?
     var RenewalReminderEnabled: Bool?
+    var Appearance: AppAppearance?
 }
 
 @MainActor
 final class WordRepository: ObservableObject {
+    @Published private(set) var Appearance = AppAppearance.System
     @Published var PresentStudy = false
     @Published private(set) var Learning = LearningData()
     @Published private(set) var Entries: [WordEntry] = []
@@ -101,6 +103,13 @@ final class WordRepository: ObservableObject {
 
     func SaveSettings() { if CanSave { Save() } }
 
+    func SetAppearance(_ Value: AppAppearance) {
+        guard CanSave else { return }
+        let Previous = Appearance
+        Appearance = Value
+        if !Save() { Appearance = Previous }
+    }
+
     private func Load() {
         guard FileManager.default.fileExists(atPath: FileURL.path) else {
             Entries = StarterVocabulary.Entries
@@ -111,6 +120,13 @@ final class WordRepository: ObservableObject {
             let Data = try Data(contentsOf: FileURL)
             let Saved = try JSONDecoder().decode(SavedData.self, from: Data)
             try Validate(Saved)
+            if (Saved.SchemaVersion ?? 1) < 3 {
+                let RecoveryURL = FileURL.appendingPathExtension("before-schema-3")
+                if !FileManager.default.fileExists(atPath: RecoveryURL.path) {
+                    try Data.write(to: RecoveryURL, options: .atomic)
+                }
+            }
+            Appearance = Saved.Appearance ?? .System
             Learning = Saved.Learning ?? LearningData()
             if Saved.Learning == nil {
                 let OldDays = Set(Saved.History.filter { $0.Total > 0 }.map { StudyCalendar.Key($0.Date, Hour: Learning.Settings.DayStartHour) })
@@ -136,7 +152,7 @@ final class WordRepository: ObservableObject {
             let Snapshot = SavedData(Learning: Learning, Entries: Entries, History: History, Morning: Morning,
                                      Evening: Evening, RemindersEnabled: RemindersEnabled,
                                      XcodeInstalledAt: XcodeInstalledAt,
-                                     RenewalReminderEnabled: RenewalReminderEnabled)
+                                     RenewalReminderEnabled: RenewalReminderEnabled, Appearance: Appearance)
             let Data = try JSONEncoder().encode(Snapshot)
             try Data.write(to: FileURL, options: .atomic)
             return true
@@ -328,7 +344,7 @@ extension WordRepository {
     func ExportBackup() throws -> Data {
         guard CanSave else { throw BackupError.Invalid("Saved data is unavailable. The original file has been preserved.") }
         return try JSONEncoder().encode(SavedData(Learning: Learning, Entries: Entries, History: History, Morning: Morning,
-            Evening: Evening, RemindersEnabled: RemindersEnabled, XcodeInstalledAt: XcodeInstalledAt, RenewalReminderEnabled: RenewalReminderEnabled))
+            Evening: Evening, RemindersEnabled: RemindersEnabled, XcodeInstalledAt: XcodeInstalledAt, RenewalReminderEnabled: RenewalReminderEnabled, Appearance: Appearance))
     }
 
     func MarkBackup() {
@@ -355,7 +371,7 @@ extension WordRepository {
     }
 
     private func Validate(_ Snapshot: SavedData) throws {
-        guard (Snapshot.SchemaVersion ?? 1) <= 2, Snapshot.Entries.count <= 50_000,
+        guard (1...3).contains(Snapshot.SchemaVersion ?? 1), Snapshot.Entries.count <= 50_000,
               Set(Snapshot.Entries.map(\.Id)).count == Snapshot.Entries.count,
               Snapshot.Entries.allSatisfy({ !$0.Term.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && !$0.Translation.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && (0...9).contains($0.Learning.Stage) && (0...3).contains($0.Learning.LearningStep) && $0.Learning.Reps >= 0 && $0.Learning.Lapses >= 0 }),
               [Snapshot.Morning, Snapshot.Evening].allSatisfy({ (0...23).contains($0.Hour) && (0...59).contains($0.Minute) }) else {

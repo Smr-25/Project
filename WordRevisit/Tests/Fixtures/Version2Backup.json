@@ -1,0 +1,592 @@
+{
+  "Entries" : [
+    {
+      "CorrectCount" : 7,
+      "Definition" : "A saved definition.",
+      "ExampleSentences" : "My saved example.",
+      "Group" : "",
+      "Id" : "00000000-0000-0000-0000-000000000001",
+      "IncorrectCount" : 1,
+      "LastReviewedAt" : 813499200,
+      "Learning" : {
+        "CreatedAt" : 812894400,
+        "IntervalDays" : 8,
+        "IntroducedAt" : 812894400,
+        "Lapses" : 1,
+        "LearningStep" : 3,
+        "RecoveryRemaining" : 0,
+        "Reps" : 8,
+        "ResponseMs" : 41000,
+        "Stage" : 4,
+        "Suspended" : false
+      },
+      "Mnemonic" : "My saved memory hook",
+      "MySentence" : "My own saved sentence.",
+      "NextReviewAt" : 814190400,
+      "PartOfSpeech" : "noun",
+      "ReviewStreak" : 4,
+      "Term" : "forest",
+      "Translation" : "meşə"
+    },
+    {
+      "CorrectCount" : 7,
+      "Definition" : "A saved definition.",
+      "ExampleSentences" : "My saved example.",
+      "Group" : "",
+      "Id" : "00000000-0000-0000-0000-000000000002",
+      "IncorrectCount" : 1,
+      "LastReviewedAt" : 813499200,
+      "Learning" : {
+        "CreatedAt" : 812894400,
+        "IntervalDays" : 8,
+        "IntroducedAt" : 812894400,
+        "Lapses" : 1,
+        "LearningStep" : 3,
+        "RecoveryRemaining" : 0,
+        "Reps" : 8,
+        "ResponseMs" : 41000,
+        "Stage" : 4,
+        "Suspended" : false
+      },
+      "Mnemonic" : "My saved memory hook",
+      "MySentence" : "My own saved sentence.",
+      "NextReviewAt" : 814190400,
+      "PartOfSpeech" : "noun",
+      "ReviewStreak" : 4,
+      "Term" : "water",
+      "Translation" : "su"
+    },
+    {
+      "CorrectCount" : 7,
+      "Definition" : "A saved definition.",
+      "ExampleSentences" : "My saved example.",
+      "Group" : "",
+      "Id" : "00000000-0000-0000-0000-000000000003",
+      "IncorrectCount" : 1,
+      "LastReviewedAt" : 813499200,
+      "Learning" : {
+        "CreatedAt" : 812894400,
+        "IntervalDays" : 8,
+        "IntroducedAt" : 812894400,
+        "Lapses" : 1,
+        "LearningStep" : 3,
+        "RecoveryRemaining" : 0,
+        "Reps" : 8,
+        "ResponseMs" : 41000,
+        "Stage" : 4,
+        "Suspended" : false
+      },
+      "Mnemonic" : "My saved memory hook",
+      "MySentence" : "My own saved sentence.",
+      "NextReviewAt" : 814190400,
+      "PartOfSpeech" : "noun",
+      "ReviewStreak" : 4,
+      "Term" : "bird",
+      "Translation" : "quş"
+    },
+    {
+      "CorrectCount" : 7,
+      "Definition" : "A saved definition.",
+      "ExampleSentences" : "My saved example.",
+      "Group" : "size",
+      "Id" : "00000000-0000-0000-0000-000000000004",
+      "IncorrectCount" : 1,
+      "LastReviewedAt" : 813499200,
+      "Learning" : {
+        "CreatedAt" : 812894400,
+        "IntervalDays" : 8,
+        "IntroducedAt" : 812894400,
+        "Lapses" : 1,
+        "LearningStep" : 3,
+        "RecoveryRemaining" : 0,
+        "Reps" : 8,
+        "ResponseMs" : 41000,
+        "Stage" : 4,
+        "Suspended" : false
+      },
+      "Mnemonic" : "My saved memory hook",
+      "MySentence" : "My own saved sentence.",
+      "NextReviewAt" : 814190400,
+      "PartOfSpeech" : "noun",
+      "ReviewStreak" : 4,
+      "Term" : "large",
+      "Translation" : "böyük"
+    },
+    {
+      "CorrectCount" : 7,
+      "Definition" : "A saved definition.",
+      "ExampleSentences" : "My saved example.",
+      "Group" : "size",
+      "Id" : "00000000-0000-0000-0000-000000000005",
+      "IncorrectCount" : 1,
+      "LastReviewedAt" : 813499200,
+      "Learning" : {
+        "CreatedAt" : 812894400,
+        "IntervalDays" : 8,
+        "IntroducedAt" : 812894400,
+        "Lapses" : 1,
+        "LearningStep" : 3,
+        "RecoveryRemaining" : 0,
+        "Reps" : 8,
+        "ResponseMs" : 41000,
+        "Stage" : 4,
+        "Suspended" : false
+      },
+      "Mnemonic" : "My saved memory hook",
+      "MySentence" : "My own saved sentence.",
+      "NextReviewAt" : 814190400,
+      "PartOfSpeech" : "noun",
+      "ReviewStreak" : 4,
+      "Term" : "huge",
+      "Translation" : "iri"
+    },
+    {
+      "CorrectCount" : 7,
+      "Definition" : "A saved definition.",
+      "ExampleSentences" : "My saved example.",
+      "Group" : "",
+      "Id" : "00000000-0000-0000-0000-000000000006",
+      "IncorrectCount" : 1,
+      "LastReviewedAt" : 813499200,
+      "Learning" : {
+        "CreatedAt" : 812894400,
+        "IntervalDays" : 8,
+        "IntroducedAt" : 812894400,
+        "Lapses" : 1,
+        "LearningStep" : 3,
+        "RecoveryRemaining" : 0,
+        "Reps" : 8,
+        "ResponseMs" : 41000,
+        "Stage" : 4,
+        "Suspended" : false
+      },
+      "Mnemonic" : "My saved memory hook",
+      "MySentence" : "My own saved sentence.",
+      "NextReviewAt" : 814190400,
+      "PartOfSpeech" : "noun",
+      "ReviewStreak" : 4,
+      "Term" : "tree",
+      "Translation" : "ağac"
+    }
+  ],
+  "Evening" : {
+    "Hour" : 21,
+    "Minute" : 10
+  },
+  "History" : [
+    {
+      "Answers" : [
+        {
+          "Input" : "meşə",
+          "IsCorrect" : true,
+          "Question" : {
+            "Entry" : {
+              "CorrectCount" : 7,
+              "Definition" : "A saved definition.",
+              "ExampleSentences" : "My saved example.",
+              "Group" : "",
+              "Id" : "00000000-0000-0000-0000-000000000001",
+              "IncorrectCount" : 1,
+              "LastReviewedAt" : 813499200,
+              "Learning" : {
+                "CreatedAt" : 812894400,
+                "IntervalDays" : 8,
+                "IntroducedAt" : 812894400,
+                "Lapses" : 1,
+                "LearningStep" : 3,
+                "RecoveryRemaining" : 0,
+                "Reps" : 8,
+                "ResponseMs" : 41000,
+                "Stage" : 4,
+                "Suspended" : false
+              },
+              "Mnemonic" : "My saved memory hook",
+              "MySentence" : "My own saved sentence.",
+              "NextReviewAt" : 814190400,
+              "PartOfSpeech" : "noun",
+              "ReviewStreak" : 4,
+              "Term" : "forest",
+              "Translation" : "meşə"
+            },
+            "Mode" : "Easy"
+          }
+        }
+      ],
+      "Correct" : 1,
+      "Date" : 813499200,
+      "Id" : "EB53F4EE-4AC0-4EA1-80CA-AFB13A996DE0",
+      "IsPractice" : true,
+      "Mode" : "Easy",
+      "Total" : 1
+    }
+  ],
+  "Learning" : {
+    "CreatedAt" : 812894400,
+    "Days" : [
+      {
+        "Attempted" : [
+          "00000000-0000-0000-0000-000000000001",
+          "00000000-0000-0000-0000-000000000002",
+          "00000000-0000-0000-0000-000000000003",
+          "00000000-0000-0000-0000-000000000004",
+          "00000000-0000-0000-0000-000000000005",
+          "00000000-0000-0000-0000-000000000006"
+        ],
+        "Comeback" : false,
+        "Completed" : [
+          "00000000-0000-0000-0000-000000000001",
+          "00000000-0000-0000-0000-000000000002",
+          "00000000-0000-0000-0000-000000000003",
+          "00000000-0000-0000-0000-000000000004",
+          "00000000-0000-0000-0000-000000000005",
+          "00000000-0000-0000-0000-000000000006"
+        ],
+        "FullMet" : true,
+        "Introduced" : [
+          "00000000-0000-0000-0000-000000000001",
+          "00000000-0000-0000-0000-000000000002",
+          "00000000-0000-0000-0000-000000000003",
+          "00000000-0000-0000-0000-000000000004",
+          "00000000-0000-0000-0000-000000000005",
+          "00000000-0000-0000-0000-000000000006"
+        ],
+        "MinimumMet" : true,
+        "NewLimit" : 12,
+        "ReviewLimit" : 200,
+        "Reviewed" : [
+          "00000000-0000-0000-0000-000000000001",
+          "00000000-0000-0000-0000-000000000002",
+          "00000000-0000-0000-0000-000000000003",
+          "00000000-0000-0000-0000-000000000004",
+          "00000000-0000-0000-0000-000000000005",
+          "00000000-0000-0000-0000-000000000006"
+        ],
+        "Target" : 6,
+        "id" : "2026-10-05"
+      },
+      {
+        "Attempted" : [
+          "00000000-0000-0000-0000-000000000001",
+          "00000000-0000-0000-0000-000000000002",
+          "00000000-0000-0000-0000-000000000003",
+          "00000000-0000-0000-0000-000000000004",
+          "00000000-0000-0000-0000-000000000005",
+          "00000000-0000-0000-0000-000000000006"
+        ],
+        "Comeback" : false,
+        "Completed" : [
+          "00000000-0000-0000-0000-000000000001",
+          "00000000-0000-0000-0000-000000000002",
+          "00000000-0000-0000-0000-000000000003",
+          "00000000-0000-0000-0000-000000000004",
+          "00000000-0000-0000-0000-000000000005",
+          "00000000-0000-0000-0000-000000000006"
+        ],
+        "FullMet" : true,
+        "Introduced" : [
+
+        ],
+        "MinimumMet" : true,
+        "NewLimit" : 12,
+        "ReviewLimit" : 200,
+        "Reviewed" : [
+          "00000000-0000-0000-0000-000000000001",
+          "00000000-0000-0000-0000-000000000002",
+          "00000000-0000-0000-0000-000000000003",
+          "00000000-0000-0000-0000-000000000004",
+          "00000000-0000-0000-0000-000000000005",
+          "00000000-0000-0000-0000-000000000006"
+        ],
+        "Target" : 6,
+        "id" : "2026-10-06"
+      },
+      {
+        "Attempted" : [
+          "00000000-0000-0000-0000-000000000001",
+          "00000000-0000-0000-0000-000000000002",
+          "00000000-0000-0000-0000-000000000003",
+          "00000000-0000-0000-0000-000000000004",
+          "00000000-0000-0000-0000-000000000005",
+          "00000000-0000-0000-0000-000000000006"
+        ],
+        "Comeback" : false,
+        "Completed" : [
+          "00000000-0000-0000-0000-000000000001",
+          "00000000-0000-0000-0000-000000000002",
+          "00000000-0000-0000-0000-000000000003",
+          "00000000-0000-0000-0000-000000000004",
+          "00000000-0000-0000-0000-000000000005",
+          "00000000-0000-0000-0000-000000000006"
+        ],
+        "FullMet" : true,
+        "Introduced" : [
+
+        ],
+        "MinimumMet" : true,
+        "NewLimit" : 12,
+        "ReviewLimit" : 200,
+        "Reviewed" : [
+          "00000000-0000-0000-0000-000000000001",
+          "00000000-0000-0000-0000-000000000002",
+          "00000000-0000-0000-0000-000000000003",
+          "00000000-0000-0000-0000-000000000004",
+          "00000000-0000-0000-0000-000000000005",
+          "00000000-0000-0000-0000-000000000006"
+        ],
+        "Target" : 6,
+        "id" : "2026-10-07"
+      },
+      {
+        "Attempted" : [
+          "00000000-0000-0000-0000-000000000001",
+          "00000000-0000-0000-0000-000000000002",
+          "00000000-0000-0000-0000-000000000003",
+          "00000000-0000-0000-0000-000000000004",
+          "00000000-0000-0000-0000-000000000005",
+          "00000000-0000-0000-0000-000000000006"
+        ],
+        "Comeback" : false,
+        "Completed" : [
+          "00000000-0000-0000-0000-000000000001",
+          "00000000-0000-0000-0000-000000000002",
+          "00000000-0000-0000-0000-000000000003",
+          "00000000-0000-0000-0000-000000000004",
+          "00000000-0000-0000-0000-000000000005",
+          "00000000-0000-0000-0000-000000000006"
+        ],
+        "FullMet" : true,
+        "Introduced" : [
+
+        ],
+        "MinimumMet" : true,
+        "NewLimit" : 12,
+        "ReviewLimit" : 200,
+        "Reviewed" : [
+          "00000000-0000-0000-0000-000000000001",
+          "00000000-0000-0000-0000-000000000002",
+          "00000000-0000-0000-0000-000000000003",
+          "00000000-0000-0000-0000-000000000004",
+          "00000000-0000-0000-0000-000000000005",
+          "00000000-0000-0000-0000-000000000006"
+        ],
+        "Target" : 6,
+        "id" : "2026-10-08"
+      },
+      {
+        "Attempted" : [
+          "00000000-0000-0000-0000-000000000001",
+          "00000000-0000-0000-0000-000000000002",
+          "00000000-0000-0000-0000-000000000003",
+          "00000000-0000-0000-0000-000000000004",
+          "00000000-0000-0000-0000-000000000005",
+          "00000000-0000-0000-0000-000000000006"
+        ],
+        "Comeback" : false,
+        "Completed" : [
+          "00000000-0000-0000-0000-000000000001",
+          "00000000-0000-0000-0000-000000000002",
+          "00000000-0000-0000-0000-000000000003",
+          "00000000-0000-0000-0000-000000000004",
+          "00000000-0000-0000-0000-000000000005",
+          "00000000-0000-0000-0000-000000000006"
+        ],
+        "FullMet" : true,
+        "Introduced" : [
+
+        ],
+        "MinimumMet" : true,
+        "NewLimit" : 12,
+        "ReviewLimit" : 200,
+        "Reviewed" : [
+          "00000000-0000-0000-0000-000000000001",
+          "00000000-0000-0000-0000-000000000002",
+          "00000000-0000-0000-0000-000000000003",
+          "00000000-0000-0000-0000-000000000004",
+          "00000000-0000-0000-0000-000000000005",
+          "00000000-0000-0000-0000-000000000006"
+        ],
+        "Target" : 6,
+        "id" : "2026-10-09"
+      },
+      {
+        "Attempted" : [
+          "00000000-0000-0000-0000-000000000001",
+          "00000000-0000-0000-0000-000000000002",
+          "00000000-0000-0000-0000-000000000003",
+          "00000000-0000-0000-0000-000000000004",
+          "00000000-0000-0000-0000-000000000005",
+          "00000000-0000-0000-0000-000000000006"
+        ],
+        "Comeback" : false,
+        "Completed" : [
+          "00000000-0000-0000-0000-000000000001",
+          "00000000-0000-0000-0000-000000000002",
+          "00000000-0000-0000-0000-000000000003",
+          "00000000-0000-0000-0000-000000000004",
+          "00000000-0000-0000-0000-000000000005",
+          "00000000-0000-0000-0000-000000000006"
+        ],
+        "FullMet" : true,
+        "Introduced" : [
+
+        ],
+        "MinimumMet" : true,
+        "NewLimit" : 12,
+        "ReviewLimit" : 200,
+        "Reviewed" : [
+          "00000000-0000-0000-0000-000000000001",
+          "00000000-0000-0000-0000-000000000002",
+          "00000000-0000-0000-0000-000000000003",
+          "00000000-0000-0000-0000-000000000004",
+          "00000000-0000-0000-0000-000000000005",
+          "00000000-0000-0000-0000-000000000006"
+        ],
+        "Target" : 6,
+        "id" : "2026-10-10"
+      },
+      {
+        "Attempted" : [
+          "00000000-0000-0000-0000-000000000001",
+          "00000000-0000-0000-0000-000000000002",
+          "00000000-0000-0000-0000-000000000003",
+          "00000000-0000-0000-0000-000000000004",
+          "00000000-0000-0000-0000-000000000005",
+          "00000000-0000-0000-0000-000000000006"
+        ],
+        "Comeback" : false,
+        "Completed" : [
+          "00000000-0000-0000-0000-000000000001",
+          "00000000-0000-0000-0000-000000000002",
+          "00000000-0000-0000-0000-000000000003",
+          "00000000-0000-0000-0000-000000000004",
+          "00000000-0000-0000-0000-000000000005",
+          "00000000-0000-0000-0000-000000000006"
+        ],
+        "FullMet" : true,
+        "Introduced" : [
+
+        ],
+        "MinimumMet" : true,
+        "NewLimit" : 12,
+        "ReviewLimit" : 200,
+        "Reviewed" : [
+          "00000000-0000-0000-0000-000000000001",
+          "00000000-0000-0000-0000-000000000002",
+          "00000000-0000-0000-0000-000000000003",
+          "00000000-0000-0000-0000-000000000004",
+          "00000000-0000-0000-0000-000000000005",
+          "00000000-0000-0000-0000-000000000006"
+        ],
+        "Target" : 6,
+        "id" : "2026-10-11"
+      }
+    ],
+    "IntakePaused" : false,
+    "LastBackupAt" : 813499200,
+    "Logs" : [
+      {
+        "Date" : 813499200,
+        "Day" : "2026-10-11",
+        "Expected" : "forest",
+        "Input" : "forest",
+        "IsPractice" : false,
+        "Kind" : "TranslationWriting",
+        "Prompt" : "meşə",
+        "ResponseMs" : 2500,
+        "Result" : "Correct",
+        "StageAfter" : 4,
+        "StageBefore" : 3,
+        "WordId" : "00000000-0000-0000-0000-000000000001",
+        "id" : "66EFEB65-F8B6-44D5-935D-261836E29AAF"
+      }
+    ],
+    "Session" : {
+      "Cards" : [
+        {
+          "Expected" : "water",
+          "HintUsed" : true,
+          "Input" : "wat",
+          "Kind" : "TranslationWriting",
+          "Options" : [
+
+          ],
+          "Prompt" : "su",
+          "ReadyAt" : 813499200,
+          "WordId" : "00000000-0000-0000-0000-000000000002",
+          "id" : "F5B28A71-5E1A-4FA7-87FA-7763FF300F06"
+        }
+      ],
+      "Finished" : [
+        {
+          "Date" : 813499200,
+          "Day" : "2026-10-11",
+          "Expected" : "forest",
+          "Input" : "forest",
+          "IsPractice" : false,
+          "Kind" : "TranslationWriting",
+          "Prompt" : "meşə",
+          "ResponseMs" : 2500,
+          "Result" : "Correct",
+          "StageAfter" : 4,
+          "StageBefore" : 3,
+          "WordId" : "00000000-0000-0000-0000-000000000001",
+          "id" : "66EFEB65-F8B6-44D5-935D-261836E29AAF"
+        }
+      ],
+      "IsPractice" : false,
+      "id" : "1609CDBB-0F0E-415F-AEF8-58EB9754F32C"
+    },
+    "Settings" : {
+      "ActiveLeeches" : 15,
+      "AllowTypos" : true,
+      "BackupDays" : 7,
+      "BackupReminder" : true,
+      "Batches" : 2,
+      "ChoiceSeconds" : 5,
+      "ComebackDays" : 2,
+      "ComebackLimit" : 40,
+      "CorrectAfterWrong" : 2,
+      "DayStartHour" : 4,
+      "FreezeEvery" : 7,
+      "FuzzPercent" : 10,
+      "HalfAbove" : 100,
+      "Intervals" : [
+        1,
+        2,
+        4,
+        8,
+        16,
+        30,
+        60,
+        120,
+        180
+      ],
+      "LearningMinutes" : [
+        1,
+        10
+      ],
+      "LeechPauseDays" : 7,
+      "LeechThreshold" : 4,
+      "MaxFreezes" : 2,
+      "MinimumCards" : 6,
+      "NewPerDay" : 12,
+      "PauseAbove" : 150,
+      "QuietEnd" : 7,
+      "QuietStart" : 23,
+      "RepeatGap" : 3,
+      "ResumeBelow" : 100,
+      "ReviewLimit" : 200,
+      "SimilarGap" : 5,
+      "TypingSeconds" : 12,
+      "WrongDrop" : 2
+    }
+  },
+  "Morning" : {
+    "Hour" : 8,
+    "Minute" : 15
+  },
+  "RemindersEnabled" : true,
+  "RenewalReminderEnabled" : true,
+  "SchemaVersion" : 2,
+  "XcodeInstalledAt" : 813499200
+}

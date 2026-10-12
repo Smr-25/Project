@@ -42,6 +42,65 @@ enum RepositoryChecks {
         assert(!Broken.Add(Term: "word", Translation: "söz", Definition: ""))
         let PreservedData = try Data(contentsOf: BrokenURL)
         assert(PreservedData == BrokenData)
+        try CheckVersion2Upgrade(Directory: Directory)
         print("Repository migration and persistence checks passed")
     }
+    @MainActor
+    private static func CheckVersion2Upgrade(Directory: URL) throws {
+        // This fixture was encoded by the unchanged 2.0 app with seven study days and a saved session.
+        let FixtureURL = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
+            .appendingPathComponent("Fixtures/Version2Backup.json")
+        let Original = try Data(contentsOf: FixtureURL)
+        let URL = Directory.appendingPathComponent("Version2.json")
+        try Original.write(to: URL)
+        let Store = WordRepository(FileURL: URL)
+        assert(Store.ErrorMessage == nil && Store.Appearance == .System)
+        assert(Store.Learning.Days.count == 7 && Store.Learning.Session?.Current?.Input == "wat")
+        assert(Store.History[0].Answers?[0].Question.Options == nil)
+        let Recovery = URL.appendingPathExtension("before-schema-3")
+        let RecoveryData = try Data(contentsOf: Recovery)
+        assert(RecoveryData == Original)
+        func Content(_ Data: Data) throws -> NSDictionary {
+            var Object = try JSONSerialization.jsonObject(with: Data) as! [String: Any]
+            Object.removeValue(forKey: "SchemaVersion"); Object.removeValue(forKey: "Appearance")
+            return Object as NSDictionary
+        }
+        func AssertContent(_ Data: Data, Expected: NSDictionary) throws {
+            let Actual = try Content(Data)
+            assert(Actual == Expected)
+        }
+        let Expected = try Content(Original)
+        let Upgraded = try Store.ExportBackup()
+        let UpgradedContent = try Content(Upgraded)
+        assert(UpgradedContent == Expected)
+        Store.SetAppearance(.Light)
+        let Reopened = WordRepository(FileURL: URL)
+        assert(Reopened.Appearance == .Light)
+        try AssertContent(Reopened.ExportBackup(), Expected: Expected)
+        let CleanURL = Directory.appendingPathComponent("CleanInstall.json")
+        let Clean = WordRepository(FileURL: CleanURL)
+        try Clean.RestoreBackup(Original)
+        assert(Clean.Appearance == .System)
+        try AssertContent(Clean.ExportBackup(), Expected: Expected)
+        Clean.SetAppearance(.Dark)
+        let NewBackup = try Clean.ExportBackup()
+        try Reopened.RestoreBackup(NewBackup)
+        assert(Reopened.Appearance == .Dark)
+        try AssertContent(Reopened.ExportBackup(), Expected: Expected)
+        let BeforeInvalid = try Data(contentsOf: URL)
+        var Future = try JSONSerialization.jsonObject(with: Original) as! [String: Any]
+        Future["SchemaVersion"] = 99
+        do {
+            try Reopened.RestoreBackup(JSONSerialization.data(withJSONObject: Future))
+            assertionFailure("Future schema accepted")
+        } catch {}
+        let AfterInvalid = try Data(contentsOf: URL)
+        assert(AfterInvalid == BeforeInvalid)
+        try Reopened.RestoreBackup(Original)
+        try AssertContent(Reopened.ExportBackup(), Expected: Expected)
+        let StillPreserved = try Data(contentsOf: Recovery)
+        assert(StillPreserved == Original)
+        print("2.0 upgrade, seven-day history, saved session, appearance and backup restore checks passed")
+    }
+
 }

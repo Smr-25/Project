@@ -42,10 +42,55 @@ enum LogicChecks {
         let RoundTrip = try WordCSV.Decode(WordCSV.Encode(StarterVocabulary.Entries))
         assert(RoundTrip.count == 59)
         try CheckMigrationAndExamples()
+        try CheckChoicePractice()
         CheckQuizFlow()
         CheckReviewSchedule()
         CheckProgress()
         print("Logic checks passed")
+    }
+
+    private static func CheckChoicePractice() throws {
+        let Words = [WordEntry(Term: "large", Translation: "böyük; iri"),
+                     WordEntry(Term: "huge", Translation: "iri"),
+                     WordEntry(Term: "large", Translation: "geniş"),
+                     WordEntry(Term: "water", Translation: "su"),
+                     WordEntry(Term: "bird", Translation: "quş"),
+                     WordEntry(Term: "tree", Translation: "ağac")]
+        for Mode in [QuizMode.Easy, .EasyReverse] {
+            let Questions = QuizPlanner.MakeQuestions(From: Words, Mode: Mode, IncludeUpcoming: true, Choices: true)
+            let Question = Questions.first { $0.id == Words[0].id }!
+            let Options = Question.Options!
+            assert(Options.count == 4 && Set(Options.map(QuizPlanner.Normalize)).count == 4)
+            assert(Options.filter { QuizPlanner.Matches($0, Answer: Question.Answer) }.count == 1)
+            assert(!Options.contains(Mode == .Easy ? "iri" : "huge"))
+            assert(!Options.contains(Mode == .Easy ? "geniş" : "huge"))
+            assert(Question.Prompt == (Mode == .Easy ? "large" : "böyük; iri"))
+            var Run = QuizRun(Session: QuizSession(Mode: Mode, Questions: [Question]))
+            assert(Run.Submit("not an option", For: Question.id) == nil)
+            let Wrong = Options.first { !QuizPlanner.Matches($0, Answer: Question.Answer) }!
+            assert(Run.Submit(Wrong, For: Question.id)?.IsCorrect == false)
+            assert(Run.Submit(Wrong, For: Question.id) == nil)
+            assert(Run.CurrentQuestion?.Options == Options)
+            assert(Run.Advance(From: Question.id))
+            Run.RetryMissed()
+            assert(Run.CurrentQuestion?.Options == Options)
+            let Correct = Options.first { QuizPlanner.Matches($0, Answer: Question.Answer) }!
+            assert(Run.Submit(Correct, For: Question.id)?.IsCorrect == true)
+            let Restored = try JSONDecoder().decode(QuizAnswer.self, from: JSONEncoder().encode(Run.Answers[0]))
+            assert(Restored.Question.Mode == Mode && Restored.Question.Options == Options)
+        }
+        var CommaWord = Words[0]
+        CommaWord.Translation = "böyük, iri"
+        let CommaOptions = QuizPlanner.ChoiceOptions(For: CommaWord, From: Words, EnglishPrompt: true, Now: .now)!
+        assert(CommaOptions.contains("böyük"))
+        assert(CommaOptions.filter { QuizPlanner.Matches($0, Answer: CommaWord.Translation) }.count == 1)
+        assert(QuizPlanner.MakeQuestions(From: Array(Words.prefix(2)), Mode: .Easy, Choices: true).isEmpty)
+        assert(QuizPlanner.MakeQuestions(From: Words, Mode: .Hard, Choices: true).allSatisfy { $0.Options == nil })
+        let Legacy = QuizQuestion(Entry: Words[0], Mode: .Easy)
+        var Object = try JSONSerialization.jsonObject(with: JSONEncoder().encode(Legacy)) as! [String: Any]
+        Object.removeValue(forKey: "Options")
+        let Decoded = try JSONDecoder().decode(QuizQuestion.self, from: JSONSerialization.data(withJSONObject: Object))
+        assert(Decoded.Options == nil && Decoded.Answer == "böyük; iri")
     }
 
     private static func CheckQuizFlow() {

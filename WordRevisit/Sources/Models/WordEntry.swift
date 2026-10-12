@@ -80,17 +80,19 @@ struct WordEntry: Codable, Identifiable, Equatable {
 enum QuizMode: String, Codable, CaseIterable, Identifiable {
     case Easy
     case Hard
+    case EasyReverse
 
     var id: String { rawValue }
 
-    var Title: String { self == .Easy ? "Easy recall" : "Hard recall" }
+    var Title: String { self == .Hard ? "Hard recall" : "Easy recall" }
     var Subtitle: String { self == .Easy ? "English → Azerbaijani" : "Azerbaijani → English" }
-    var Symbol: String { self == .Easy ? "character.bubble.fill" : "bolt.fill" }
+    var Symbol: String { self != .Hard ? "character.bubble.fill" : "bolt.fill" }
 }
 
 struct QuizQuestion: Codable, Identifiable {
     let Entry: WordEntry
     let Mode: QuizMode
+    var Options: [String]? = nil
 
     var id: UUID { Entry.Id }
     var Prompt: String { Mode == .Easy ? Entry.Term : Entry.Translation }
@@ -142,4 +144,9 @@ struct ReminderTime: Codable, Equatable {
         Hour = Components.hour ?? 9
         Minute = Components.minute ?? 0
     }
+}
+
+enum AppAppearance: String, Codable, CaseIterable, Identifiable {
+    case System, Light, Dark
+    var id: String { rawValue }
 }

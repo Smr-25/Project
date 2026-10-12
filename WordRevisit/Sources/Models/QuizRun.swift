@@ -30,6 +30,7 @@ struct QuizRun {
     mutating func Submit(_ Input: String, For QuestionId: UUID) -> QuizAnswer? {
         guard let Question = CurrentQuestion, Question.id == QuestionId, SubmittedAnswer == nil,
               !Input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return nil }
+        if let Options = Question.Options, !Options.contains(Input) { return nil }
         let Answer = QuizAnswer(Question: Question, Input: Input,
                                 IsCorrect: QuizPlanner.Matches(Input, Answer: Question.Answer))
         Answers.append(Answer)

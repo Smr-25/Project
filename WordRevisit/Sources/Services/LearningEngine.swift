@@ -97,20 +97,9 @@ enum LearningEngine {
         let Expected = Kind == .EnglishChoice ? Entry.Translation : Entry.Term
         var Card = StudyCard(WordId: Entry.Id, Kind: Kind, Prompt: Prompt, Expected: Expected, ReadyAt: ReadyAt ?? Now)
         if Kind.IsChoice {
-            let Correct = Kind == .EnglishChoice ? String(Entry.Translation.split(separator: ";").first ?? "") : Entry.Term
-            let Candidates = Entries.filter {
-                $0.Id != Entry.Id && $0.Learning.IsAvailable(at: Now) && !Similar(Entry, $0)
-                && (Entry.PartOfSpeech.isEmpty || $0.PartOfSpeech.localizedCaseInsensitiveCompare(Entry.PartOfSpeech) == .orderedSame)
-                && QuizPlanner.Normalize($0.Term) != QuizPlanner.Normalize(Entry.Term)
-            }.shuffled().sorted { abs($0.Term.count - Entry.Term.count) < abs($1.Term.count - Entry.Term.count) }
-            var Options = [Correct]
-            for Other in Candidates {
-                let Option = Kind == .EnglishChoice ? String(Other.Translation.split(separator: ";").first ?? "") : Other.Term
-                if !Options.contains(where: { QuizPlanner.Normalize($0) == QuizPlanner.Normalize(Option) }) { Options.append(Option) }
-                if Options.count == 4 { break }
-            }
-            if Options.count == 4 { Card.Options = Options.shuffled() }
-            else { Card.Kind = .TranslationWriting; Card.Prompt = Entry.Translation; Card.Expected = Entry.Term }
+            if let Options = QuizPlanner.ChoiceOptions(For: Entry, From: Entries, EnglishPrompt: Kind == .EnglishChoice, Now: Now) {
+                Card.Options = Options
+            } else { Card.Kind = .TranslationWriting; Card.Prompt = Entry.Translation; Card.Expected = Entry.Term }
         }
         return Card
     }
