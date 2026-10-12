@@ -50,11 +50,11 @@ final class QuizUITests: XCTestCase {
     func testFreeQuizRandomOrderReviewAndRetry() throws {
         let App = Launch()
         App.swipeUp()
-        App.buttons.containing(.staticText, identifier: "Easy recall").firstMatch.tap()
+        App.buttons.containing(.staticText, identifier: "Hard recall").firstMatch.tap()
         let Prompt = App.staticTexts["QuizPrompt"]
         XCTAssertTrue(Prompt.waitForExistence(timeout: 5))
         let First = Prompt.label
-        let Correct = try XCTUnwrap(Words[First])
+        let Correct = try XCTUnwrap(Words.first { $0.value == First }?.key)
         for Index in 0..<6 {
             let Current = Prompt.label
             let Answer = App.textFields["QuizAnswer"]
@@ -71,6 +71,56 @@ final class QuizUITests: XCTestCase {
         App.buttons["Retry 5 missed words"].tap()
         XCTAssertTrue(Prompt.waitForExistence(timeout: 5))
         XCTAssertNotEqual(Prompt.label, First)
+    }
+
+    @MainActor
+    func testEasyBothDirectionsAndAppearance() throws {
+        let App = Launch()
+        App.tabBars.buttons["Settings"].tap()
+        let Appearance = App.segmentedControls["AppearancePicker"]
+        XCTAssertTrue(Appearance.waitForExistence(timeout: 5))
+        Appearance.buttons["Dark"].tap()
+        App.tabBars.buttons["Today"].tap()
+        Capture(App, Name: "today-dark-21")
+        App.tabBars.buttons["Settings"].tap()
+        Appearance.buttons["Light"].tap()
+        App.terminate(); App.launch()
+        App.tabBars.buttons["Settings"].tap()
+        XCTAssertTrue(Appearance.buttons["Light"].isSelected)
+        Capture(App, Name: "settings-light-21")
+        App.buttons["My learning plan"].tap()
+        Capture(App, Name: "plan-light-21")
+        App.buttons["Cancel"].tap()
+        App.tabBars.buttons["Today"].tap()
+        Capture(App, Name: "today-light-21")
+        for Direction in ["English → Azerbaijani", "Azerbaijani → English"] {
+            App.swipeUp()
+            App.buttons.containing(.staticText, identifier: "Easy recall").firstMatch.tap()
+            App.buttons[Direction].tap()
+            let Prompt = App.staticTexts["QuizPrompt"]
+            XCTAssertTrue(Prompt.waitForExistence(timeout: 5))
+            let Original = Prompt.label
+            XCTAssertFalse(App.textFields["QuizAnswer"].exists)
+            let Options = App.buttons.matching(identifier: "QuizOption")
+            XCTAssertEqual(Options.count, 4)
+            let Correct = try XCTUnwrap(Direction.hasPrefix("English") ? Words[Original] : Words.first { $0.value == Original }?.key)
+            let CorrectButton = Options.allElementsBoundByIndex.first { $0.label == Correct }!
+            if !CorrectButton.isHittable { App.swipeUp() }
+            CorrectButton.tap()
+            XCTAssertEqual(Prompt.label, Original)
+            XCTAssertTrue(Options.allElementsBoundByIndex.allSatisfy { !$0.isEnabled })
+            App.swipeUp()
+            XCTAssertTrue(App.staticTexts["You got it"].exists)
+            Capture(App, Name: Direction.hasPrefix("English") ? "choice-en-az-light-21" : "choice-az-en-light-21")
+            App.buttons["Next word"].tap()
+            XCTAssertNotEqual(Prompt.label, Original)
+            App.buttons["Close quiz"].tap()
+        }
+        App.tabBars.buttons["Settings"].tap()
+        Appearance.buttons["System"].tap()
+        App.terminate(); App.launch()
+        App.tabBars.buttons["Settings"].tap()
+        XCTAssertTrue(Appearance.buttons["System"].isSelected)
     }
 
     @MainActor

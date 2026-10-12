@@ -36,7 +36,7 @@ struct WordRevisitApp: App {
         WindowGroup {
             RootView()
                 .environmentObject(Store)
-                .preferredColorScheme(.dark)
+                .preferredColorScheme(Store.Appearance.ColorScheme)
                 .task { Store.RefreshDay(); await Store.RefreshNotifications() }
                 .onChange(of: Phase) { _, New in
                     if New == .active { Store.RefreshDay(); Task { await Store.RefreshNotifications() } }

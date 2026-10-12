@@ -28,13 +28,13 @@ struct ImportWordsView: View {
                         LabeledContent("Merged words", value: "\(Preview.Merged)")
                         LabeledContent("Duplicates skipped", value: "\(Preview.Duplicates)")
                         LabeledContent("Invalid rows skipped", value: "\(Preview.Errors.count)")
-                        ForEach(Preview.Errors.prefix(20), id: \.self) { Text($0).font(.caption).foregroundStyle(.red) }
+                        ForEach(Preview.Errors.prefix(20), id: \.self) { Text($0).font(.caption).foregroundStyle(Palette.Danger) }
                         Button("Import \(Preview.Added + Preview.Merged) words") {
                             if Store.ApplyImport(Text: SourceText, Policy: Policy, Paste: CSV == nil) { Dismiss() }
                         }.disabled(Preview.Added + Preview.Merged == 0)
                     }
                 }
-                if let ErrorText { Text(ErrorText).foregroundStyle(.red) }
+                if let ErrorText { Text(ErrorText).foregroundStyle(Palette.Danger) }
             }
             .navigationTitle(CSV == nil ? "Paste words" : "Import CSV")
             .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { Dismiss() } } }

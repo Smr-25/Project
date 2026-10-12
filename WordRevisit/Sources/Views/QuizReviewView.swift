@@ -23,12 +23,12 @@ struct QuizReviewView: View {
                                         .font(.system(size: 23, weight: .bold, design: .rounded))
                                     Spacer()
                                     Image(systemName: Answer.IsCorrect ? "checkmark.circle.fill" : "arrow.uturn.backward.circle.fill")
-                                        .foregroundStyle(Answer.IsCorrect ? Palette.White : Palette.Accent)
+                                        .foregroundStyle(Answer.IsCorrect ? Palette.Success : Palette.Danger)
                                         .accessibilityLabel(Answer.IsCorrect ? "Correct" : "Incorrect")
                                 }
                                 VStack(alignment: .leading, spacing: 5) {
-                                    SectionEyebrow(Title: "You wrote")
-                                    Text(Answer.Input).foregroundStyle(Answer.IsCorrect ? Palette.White : Palette.Accent)
+                                    SectionEyebrow(Title: Answer.Question.Options == nil ? "You wrote" : "You selected")
+                                    Text(Answer.Input).foregroundStyle(Answer.IsCorrect ? Palette.Success : Palette.Danger)
                                 }
                                 VStack(alignment: .leading, spacing: 5) {
                                     SectionEyebrow(Title: "Accepted answer")
@@ -56,6 +56,6 @@ struct QuizReviewView: View {
             }
             .toolbarBackground(.hidden)
         }
-        .preferredColorScheme(.dark)
+
     }
 }

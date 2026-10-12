@@ -16,12 +16,22 @@ struct SettingsView: View {
                     Text("Settings")
                         .font(.system(size: 38, weight: .bold, design: .rounded))
 
+                    VStack(alignment: .leading, spacing: 14) {
+                        SectionEyebrow(Title: "Appearance")
+                        Picker("Appearance", selection: Binding(get: { Store.Appearance }, set: { Store.SetAppearance($0) })) {
+                            ForEach(AppAppearance.allCases) { Text($0.rawValue).tag($0) }
+                        }
+                        .pickerStyle(.segmented)
+                        .accessibilityIdentifier("AppearancePicker")
+                        Text("System follows your iPhone's appearance.").font(.caption).foregroundStyle(Palette.Muted)
+                    }.padding(21).FrostedCard(CornerRadius: 27)
+
                     Button { ShowingPlan = true } label: {
                         Label("My learning plan", systemImage: "calendar").frame(maxWidth: .infinity, minHeight: 50)
-                    }.buttonStyle(PrimaryActionStyle(Tint: Palette.White))
+                    }.buttonStyle(PrimaryActionStyle(Tint: Palette.Primary))
                     Button { ShowingBackup = true } label: {
                         Label("Backup & restore", systemImage: "externaldrive").frame(maxWidth: .infinity, minHeight: 50)
-                    }.buttonStyle(PrimaryActionStyle(Tint: Palette.White))
+                    }.buttonStyle(PrimaryActionStyle(Tint: Palette.Primary))
                     VStack(alignment: .leading, spacing: 20) {
                         HStack(spacing: 14) {
                             Image(systemName: "bell.badge.fill")
@@ -48,7 +58,7 @@ struct SettingsView: View {
                             .tint(Palette.Accent)
                             .disabled(IsUpdating)
                         }
-                        Divider().overlay(.white.opacity(0.08))
+                        Divider().overlay(Palette.Primary.opacity(0.08))
                         TimeRow(Title: "Morning quiz", Symbol: "sunrise.fill", Tint: Palette.Accent,
                                 Time: Binding(get: { Store.Morning.DateValue }, set: { Store.Morning = ReminderTime(DateValue: $0); UpdateReminders() }))
                             .disabled(IsUpdating)
@@ -87,7 +97,7 @@ struct SettingsView: View {
                             .disabled(IsUpdating)
                         }
                         if Store.RenewalReminderEnabled {
-                            Divider().overlay(.white.opacity(0.08))
+                            Divider().overlay(Palette.Primary.opacity(0.08))
                             if let InstalledAt = Store.XcodeInstalledAt,
                                let ReminderAt = ReminderScheduler.RenewalDate(From: InstalledAt) {
                                 Text(ReminderAt > .now

@@ -48,7 +48,7 @@ struct LearningProgressView: View {
                     VStack(alignment: .leading, spacing: 6) {
                         Text(Log.Prompt).font(.headline)
                         Text("You: \(Log.Input)").foregroundStyle(.secondary)
-                        Text(Log.Expected).foregroundStyle(Log.Result.IsCorrect ? Palette.White : Palette.Accent)
+                        Text(Log.Expected).foregroundStyle(Log.Result.IsCorrect ? Palette.Success : Palette.Danger)
                         Text("\(Log.Result.rawValue) · \(Log.Date.formatted(date: .abbreviated, time: .shortened))").font(.caption)
                     }
                 }.navigationTitle("Study answers")

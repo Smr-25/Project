@@ -14,7 +14,7 @@
                         <rect key="frame" x="0.0" y="0.0" width="393" height="852"/>
                         <viewLayoutGuide key="safeArea" id="LaunchSafeArea"/>
                         <subviews>
-                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="LaunchLogo" translatesAutoresizingMaskIntoConstraints="NO" id="LaunchImage">
+                            <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" image="BrandLogo" translatesAutoresizingMaskIntoConstraints="NO" id="LaunchImage">
                                 <rect key="frame" x="106.5" y="336" width="180" height="180"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="180" id="LaunchWidth"/>
@@ -22,7 +22,7 @@
                                 </constraints>
                             </imageView>
                         </subviews>
-                        <color key="backgroundColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                        <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                         <constraints>
                             <constraint firstItem="LaunchImage" firstAttribute="centerX" secondItem="LaunchView" secondAttribute="centerX" id="LaunchCenterX"/>
                             <constraint firstItem="LaunchImage" firstAttribute="centerY" secondItem="LaunchView" secondAttribute="centerY" id="LaunchCenterY"/>
@@ -34,6 +34,7 @@
         </scene>
     </scenes>
     <resources>
-        <image name="LaunchLogo" width="1024" height="1024"/>
+        <image name="BrandLogo" width="1024" height="1024"/>
+        <systemColor name="systemBackgroundColor"><color white="1" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/></systemColor>
     </resources>
 </document>

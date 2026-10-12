@@ -64,7 +64,7 @@ struct StudySessionView: View {
             Text("You will recall this word after a short gap. You can leave and continue later.")
                 .font(.subheadline).foregroundStyle(Palette.Muted)
             Button("Learn this word") { Store.Introduce(CardId: Card.id, Known: false, Skip: false, Mnemonic: Mnemonic) }
-                .buttonStyle(PrimaryActionStyle(Tint: Palette.White))
+                .buttonStyle(PrimaryActionStyle(Tint: Palette.Primary))
             Button("I already know this") { Store.Introduce(CardId: Card.id, Known: true, Skip: false, Mnemonic: Mnemonic) }
                 .frame(maxWidth: .infinity, minHeight: 44)
             Button("Leave for tomorrow") { Store.Introduce(CardId: Card.id, Known: false, Skip: true, Mnemonic: Mnemonic) }
@@ -79,7 +79,7 @@ struct StudySessionView: View {
             Text(Card.ReadyAt, style: .relative).font(.title.monospacedDigit()).foregroundStyle(Palette.Accent)
             Text("Your progress is saved. You can close the session and come back when this word is ready.")
                 .foregroundStyle(Palette.Muted)
-            Button("Save and return home") { Dismiss() }.buttonStyle(PrimaryActionStyle(Tint: Palette.White))
+            Button("Save and return home") { Dismiss() }.buttonStyle(PrimaryActionStyle(Tint: Palette.Primary))
         }
     }
 
@@ -92,7 +92,15 @@ struct StudySessionView: View {
             if Card.Kind.IsChoice {
                 ForEach(Card.Options, id: \.self) { Option in
                     Button { Input = Option; Submit(Card) } label: {
-                        HStack { Text(Option); Spacer(); if Card.Input == Option { Image(systemName: "checkmark.circle") } }
+                        HStack {
+                            Text(Option)
+                            Spacer()
+                            if Card.Result != nil && QuizPlanner.Matches(Option, Answer: Card.Expected) {
+                                Image(systemName: "checkmark.circle.fill").foregroundStyle(Palette.Success)
+                            } else if Card.Result != nil && Card.Input == Option {
+                                Image(systemName: "xmark.circle.fill").foregroundStyle(Palette.Danger)
+                            }
+                        }
                             .padding(18).frame(maxWidth: .infinity, minHeight: 50).FrostedCard(CornerRadius: 18).contentShape(Rectangle())
                     }.buttonStyle(.plain).disabled(Card.Result != nil)
                 }
@@ -109,7 +117,7 @@ struct StudySessionView: View {
                     else { Button("Show sentence hint") { Hint = true; SaveDraft() }.frame(minHeight: 44) }
                 }
                 if !Card.Kind.IsChoice {
-                    Button("Check answer") { Submit(Card) }.buttonStyle(PrimaryActionStyle(Tint: Palette.White))
+                    Button("Check answer") { Submit(Card) }.buttonStyle(PrimaryActionStyle(Tint: Palette.Primary))
                         .disabled(Input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                 }
                 Button("I don't know") { Submit(Card, DontKnow: true) }
@@ -126,7 +134,7 @@ struct StudySessionView: View {
         VStack(alignment: .leading, spacing: 12) {
             Label(Card.Result == .Correct ? "You got it" : Card.Result == .Hard ? "Correct · keep practising" : "Let's revisit this one",
                   systemImage: Card.Result?.IsCorrect == true ? "checkmark.circle.fill" : "arrow.uturn.backward.circle.fill")
-                .foregroundStyle(Palette.Accent).font(.headline)
+                .foregroundStyle(Card.Result?.IsCorrect == true ? Palette.Success : Palette.Danger).font(.headline)
             Text(Card.Expected).font(.title2.bold())
             if Card.Result == .Hard { Text("A hint, a longer response, or a small spelling error keeps this interval steady.").font(.caption).foregroundStyle(Palette.Muted) }
             ForEach([Entry.Definition, Entry.ExampleSentences, Entry.MySentence, Entry.Mnemonic].filter { !$0.isEmpty }, id: \.self) { Text($0) }
@@ -148,10 +156,10 @@ struct StudySessionView: View {
                 VStack(alignment: .leading, spacing: 7) {
                     Text(Log.Prompt).font(.headline)
                     Text("You: \(Log.Input)").foregroundStyle(Palette.Muted)
-                    Text(Log.Expected).foregroundStyle(Log.Result.IsCorrect ? Palette.White : Palette.Accent)
+                    Text(Log.Expected).foregroundStyle(Log.Result.IsCorrect ? Palette.Success : Palette.Danger)
                 }.frame(maxWidth: .infinity, alignment: .leading).padding(18).FrostedCard(CornerRadius: 20)
             }
-            Button("Back to today") { Store.FinishStudy(); Dismiss() }.buttonStyle(PrimaryActionStyle(Tint: Palette.White))
+            Button("Back to today") { Store.FinishStudy(); Dismiss() }.buttonStyle(PrimaryActionStyle(Tint: Palette.Primary))
         }
     }
 

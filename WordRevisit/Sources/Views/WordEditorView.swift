@@ -56,7 +56,7 @@ struct WordEditorView: View {
                         if !MySentence.isEmpty { ShareLink("Share my sentence", item: MySentence).padding(.vertical, 10) }
                         Toggle("Pause this word", isOn: $Suspended).tint(Palette.Accent)
                         Button("Save word") { SaveWord() }
-                            .buttonStyle(PrimaryActionStyle(Tint: Palette.White))
+                            .buttonStyle(PrimaryActionStyle(Tint: Palette.Primary))
                             .disabled(Term.trimmingCharacters(in: .whitespaces).isEmpty ||
                                       Translation.trimmingCharacters(in: .whitespaces).isEmpty)
                         if Entry != nil {
@@ -84,7 +84,7 @@ struct WordEditorView: View {
                 get: { ErrorText != nil }, set: { if !$0 { ErrorText = nil } }
             )) { Button("OK") { ErrorText = nil } } message: { Text(ErrorText ?? "") }
         }
-        .preferredColorScheme(.dark)
+
     }
 
     private func SaveWord() {

@@ -144,7 +144,7 @@ struct LibraryView: View {
                         .font(.system(size: 18, weight: .bold))
                         .foregroundStyle(Palette.Background)
                         .frame(width: 46, height: 46)
-                        .background(Palette.White, in: RoundedRectangle(cornerRadius: 15))
+                        .background(Palette.Primary, in: RoundedRectangle(cornerRadius: 15))
                 }
                 .accessibilityLabel("Add word")
             }
@@ -200,7 +200,7 @@ private struct WordRow: View {
     var body: some View {
         HStack(spacing: 14) {
             RoundedRectangle(cornerRadius: 2)
-                .fill(Entry.IncorrectCount > Entry.CorrectCount ? Palette.Accent : Palette.White)
+                .fill(Entry.IncorrectCount > Entry.CorrectCount ? Palette.Accent : Palette.Primary)
                 .frame(width: 3, height: 47)
             VStack(alignment: .leading, spacing: 5) {
                 Text(Entry.Term).font(.system(size: 18, weight: .semibold, design: .rounded))

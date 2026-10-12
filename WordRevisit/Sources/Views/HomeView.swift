@@ -4,6 +4,7 @@ struct HomeView: View {
     @EnvironmentObject private var Store: WordRepository
     @Environment(\.scenePhase) private var ScenePhase
     @State private var ActiveQuiz: QuizSession?
+    @State private var ChoosingDirection = false
     @State private var ShowingPlan = false
     @State private var Notice: String?
     @State private var Now = Date.now
@@ -18,7 +19,7 @@ struct HomeView: View {
                     Header
                     DailyPlan
                     SectionEyebrow(Title: "Free practice · no schedule changes")
-                    ModeCard(Mode: .Easy, Tint: Palette.White) { StartQuiz(.Easy) }
+                    ModeCard(Mode: .Easy, Tint: Palette.Accent) { ChoosingDirection = true }
                     ModeCard(Mode: .Hard, Tint: Palette.Accent) { StartQuiz(.Hard) }
                     if Store.Entries.contains(where: { !$0.Group.isEmpty }) {
                         Button("Practise synonyms") {
@@ -36,6 +37,11 @@ struct HomeView: View {
         .fullScreenCover(item: $ActiveQuiz) { Quiz in
             QuizView(Session: Quiz)
                 .environmentObject(Store)
+        }
+        .confirmationDialog("Easy recall · choose a direction", isPresented: $ChoosingDirection, titleVisibility: .visible) {
+            Button("English → Azerbaijani") { StartQuiz(.Easy) }
+            Button("Azerbaijani → English") { StartQuiz(.EasyReverse) }
+            Button("Cancel", role: .cancel) {}
         }
         .sheet(isPresented: $ShowingPlan) { StudySettingsView() }
         .alert("Your learning", isPresented: Binding(get: { Notice != nil }, set: { if !$0 { Notice = nil } })) {
@@ -55,11 +61,13 @@ struct HomeView: View {
 
     private func StartQuiz(_ Mode: QuizMode) {
         Now = .now
-        let IsPractice = true
-        ActiveQuiz = QuizSession(Mode: Mode,
-                                 Questions: QuizPlanner.MakeQuestions(From: Store.Entries, Mode: Mode,
-                                                                      Now: Now, IncludeUpcoming: IsPractice),
-                                 IsPractice: IsPractice)
+        let Questions = QuizPlanner.MakeQuestions(From: Store.Entries, Mode: Mode,
+            Now: Now, IncludeUpcoming: true, Choices: Mode != .Hard)
+        if Questions.isEmpty && Mode != .Hard {
+            Notice = "Easy recall needs four distinct answer options. Add more words with different meanings; if you use parts of speech, add words of the same type. You can use Hard recall for written practice."
+            return
+        }
+        ActiveQuiz = QuizSession(Mode: Mode, Questions: Questions, IsPractice: true)
     }
 
     private var DailyPlan: some View {
@@ -85,7 +93,7 @@ struct HomeView: View {
             Button(Store.Learning.Session == nil ? "Start today's plan" : "Continue saved session") {
                 if Store.StartStudy() { Store.PresentStudy = true }
                 else { Notice = "You're caught up for now. Your next words will appear when due. You can still use free practice below." }
-            }.buttonStyle(PrimaryActionStyle(Tint: Palette.White))
+            }.buttonStyle(PrimaryActionStyle(Tint: Palette.Primary))
             Button("Adjust my plan") { ShowingPlan = true }.frame(minHeight: 44)
         }.padding(24).FrostedCard(CornerRadius: 30)
     }
@@ -100,11 +108,12 @@ struct HomeView: View {
                     .font(.system(size: 24, weight: .bold, design: .rounded))
             }
             Spacer()
-                Image(systemName: "arrow.triangle.2.circlepath")
-                .font(.system(size: 22, weight: .medium))
-                .foregroundStyle(Palette.Accent)
-                .frame(width: 48, height: 48)
-                .FrostedCard(CornerRadius: 16)
+            Image("BrandLogo")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 44, height: 44)
+                .clipShape(Circle())
+                .accessibilityHidden(true)
         }
     }
 
@@ -126,7 +135,7 @@ private struct ModeCard: View {
                     .background(Tint.opacity(0.13), in: RoundedRectangle(cornerRadius: 17))
                 VStack(alignment: .leading, spacing: 5) {
                     Text(Mode.Title).font(.system(size: 18, weight: .bold, design: .rounded))
-                    Text(Mode.Subtitle).font(.system(size: 13)).foregroundStyle(Palette.Muted)
+                    Text(Mode == .Hard ? "Azerbaijani → English · write" : "Both directions · choose from 4").font(.system(size: 13)).foregroundStyle(Palette.Muted)
                 }
                 Spacer(minLength: 2)
                 Image(systemName: "arrow.up.right")

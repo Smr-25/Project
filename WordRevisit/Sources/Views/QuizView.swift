@@ -64,7 +64,7 @@ struct QuizView: View {
                 .font(.system(size: 14, weight: .semibold, design: .rounded))
                 .frame(width: 44)
         }
-        .foregroundStyle(.white)
+        .foregroundStyle(Palette.Primary)
     }
 
     private var QuestionState: some View {
@@ -78,8 +78,8 @@ struct QuizView: View {
             }
             GeometryReader { Geometry in
                 ZStack(alignment: .leading) {
-                    Capsule().fill(.white.opacity(0.12))
-                    Capsule().fill(Mode == .Easy ? Palette.White : Palette.Accent)
+                    Capsule().fill(Palette.Primary.opacity(0.12))
+                    Capsule().fill(Mode == .Easy ? Palette.Primary : Palette.Accent)
                         .frame(width: Geometry.size.width * CGFloat(Index + 1) / CGFloat(Questions.count))
                 }
             }
@@ -90,7 +90,7 @@ struct QuizView: View {
                 SectionEyebrow(Title: Mode == .Easy ? "Translate this word" : "Find the English word")
                 Text(Question.Prompt)
                     .accessibilityIdentifier("QuizPrompt")
-                    .font(.system(size: 42, weight: .bold, design: .rounded))
+                    .font(.system(size: Question.Options == nil ? 42 : 34, weight: .bold, design: .rounded))
                     .minimumScaleFactor(0.7)
                     .lineLimit(3)
                     .fixedSize(horizontal: false, vertical: true)
@@ -98,7 +98,7 @@ struct QuizView: View {
                     .font(.system(size: 15))
                     .foregroundStyle(Palette.Muted)
             }
-            .frame(maxWidth: .infinity, minHeight: 155, alignment: .leading)
+            .frame(maxWidth: .infinity, minHeight: Question.Options == nil ? 155 : 110, alignment: .leading)
             .padding(28)
             .FrostedCard(CornerRadius: 30)
 
@@ -117,29 +117,55 @@ struct QuizView: View {
                 .FrostedCard(CornerRadius: 22)
             }
 
-            VStack(alignment: .leading, spacing: 13) {
-                SectionEyebrow(Title: "Your answer")
-                TextField("Type what you remember...", text: $Input)
-                    .id(Question.id)
-                    .textInputAutocapitalization(.never)
-                    .autocorrectionDisabled()
-                    .submitLabel(.done)
-                    .focused($AnswerFocused)
-                    .onSubmit { CheckAnswer(For: Question) }
-                    .font(.system(size: 18, weight: .medium))
-                    .padding(18)
-                    .background(.white.opacity(0.08), in: RoundedRectangle(cornerRadius: 18))
-                    .overlay(RoundedRectangle(cornerRadius: 18).stroke(.white.opacity(0.14)))
-                    .disabled(Submitted)
-                    .accessibilityLabel("Your answer")
-                    .accessibilityIdentifier("QuizAnswer")
+            if let Options = Question.Options {
+                VStack(spacing: 12) {
+                    ForEach(Options, id: \.self) { Option in
+                        Button {
+                            Input = Option
+                            CheckAnswer(For: Question)
+                        } label: {
+                            HStack(spacing: 12) {
+                                Text(Option).font(.body.weight(.medium))
+                                Spacer(minLength: 8)
+                                if Submitted && QuizPlanner.Matches(Option, Answer: Question.Answer) {
+                                    Image(systemName: "checkmark.circle.fill").foregroundStyle(Palette.Success)
+                                } else if Submitted && Run.SubmittedAnswer?.Input == Option {
+                                    Image(systemName: "xmark.circle.fill").foregroundStyle(Palette.Danger)
+                                }
+                            }
+                            .padding(18).frame(maxWidth: .infinity, minHeight: 56, alignment: .leading)
+                            .FrostedCard(CornerRadius: 18).contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
+                        .disabled(Submitted)
+                        .accessibilityIdentifier("QuizOption")
+                    }
+                }
+            } else {
+                VStack(alignment: .leading, spacing: 13) {
+                    SectionEyebrow(Title: "Your answer")
+                    TextField("Type what you remember...", text: $Input)
+                        .id(Question.id)
+                        .textInputAutocapitalization(.never)
+                        .autocorrectionDisabled()
+                        .submitLabel(.done)
+                        .focused($AnswerFocused)
+                        .onSubmit { CheckAnswer(For: Question) }
+                        .font(.system(size: 18, weight: .medium))
+                        .padding(18)
+                        .background(Palette.Primary.opacity(0.08), in: RoundedRectangle(cornerRadius: 18))
+                        .overlay(RoundedRectangle(cornerRadius: 18).stroke(Palette.Primary.opacity(0.14)))
+                        .disabled(Submitted)
+                        .accessibilityLabel("Your answer")
+                        .accessibilityIdentifier("QuizAnswer")
+                }
             }
 
             if Submitted {
                 VStack(alignment: .leading, spacing: 8) {
                     Label(WasCorrect ? "You got it" : "Keep this one close", systemImage: WasCorrect ? "checkmark.circle.fill" : "arrow.uturn.backward.circle.fill")
                         .font(.system(size: 16, weight: .bold, design: .rounded))
-                        .foregroundStyle(WasCorrect ? Palette.White : Palette.Accent)
+                        .foregroundStyle(WasCorrect ? Palette.Success : Palette.Danger)
                     Text(Question.Answer)
                         .font(.system(size: 24, weight: .bold, design: .rounded))
                     if !Question.Entry.Definition.isEmpty {
@@ -157,10 +183,10 @@ struct QuizView: View {
                 Button(Index == Questions.count - 1 ? "See results" : "Next word") {
                     Advance(From: Question)
                 }
-                .buttonStyle(PrimaryActionStyle(Tint: Mode == .Easy ? Palette.White : Palette.Accent))
-            } else {
+                .buttonStyle(PrimaryActionStyle(Tint: Mode == .Easy ? Palette.Primary : Palette.Accent))
+            } else if Question.Options == nil {
                 Button("Check answer") { CheckAnswer(For: Question) }
-                    .buttonStyle(PrimaryActionStyle(Tint: Mode == .Easy ? Palette.White : Palette.Accent))
+                    .buttonStyle(PrimaryActionStyle(Tint: Mode == .Easy ? Palette.Primary : Palette.Accent))
                     .disabled(Input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                     .opacity(Input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0.5 : 1)
             }
@@ -188,7 +214,7 @@ struct QuizView: View {
         VStack(spacing: 22) {
             Image(systemName: "sparkles")
                 .font(.system(size: 54))
-                .foregroundStyle(Palette.White)
+                .foregroundStyle(Palette.Primary)
                 .padding(.top, 55)
             Text(Run.IsRetry ? "Another step." : "Nicely done.")
                 .font(.system(size: 42, weight: .bold, design: .rounded))
@@ -197,7 +223,7 @@ struct QuizView: View {
             VStack(spacing: 5) {
                 Text("\(Run.CorrectCount) / \(Questions.count)")
                     .font(.system(size: 54, weight: .bold, design: .rounded))
-                    .foregroundStyle(Palette.White)
+                    .foregroundStyle(Palette.Primary)
                 Text(Run.IsRetry ? "REMEMBERED THIS TIME" : "WORDS REMEMBERED")
                     .font(.system(size: 11, weight: .bold))
                     .tracking(2)
@@ -220,10 +246,10 @@ struct QuizView: View {
             }
             Button("Review my answers") { ShowingReview = true }
                 .font(.system(size: 16, weight: .semibold))
-                .foregroundStyle(Palette.White)
+                .foregroundStyle(Palette.Primary)
                 .padding(.vertical, 8)
             Button("Back to today") { Dismiss() }
-                .buttonStyle(PrimaryActionStyle(Tint: Palette.White))
+                .buttonStyle(PrimaryActionStyle(Tint: Palette.Primary))
         }
         .frame(maxWidth: .infinity)
     }
