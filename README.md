@@ -17,7 +17,7 @@ Three independent applications in one repository: two ASP.NET Core web apps and 
 
 ### WordRevisit
 
-WordRevisit **2.0.0** includes a daily learning plan, resumable sessions, staged reviews, synonym practice, bulk word management, and full backups. Vocabulary and learning history stay on the iPhone.
+WordRevisit **2.1.0** includes a daily learning plan, resumable sessions, staged reviews, synonym practice, bulk word management, and full backups. Vocabulary and learning history stay on the iPhone.
 
 <p align="center">
   <img src="WordRevisit/docs/screenshots/today.png" alt="WordRevisit daily plan" width="205">
