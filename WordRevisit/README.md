@@ -4,11 +4,11 @@ An offline English–Azerbaijani vocabulary app for iPhone and iPad. **Version 1
 
 ## Screenshots
 
-Screenshots use sample vocabulary in the simulator. The black, white and red interface supports System, Light and Dark appearance, with emerald feedback for correct answers and cherry red for incorrect answers.
+Screenshots show WordRevisit 1.3.0 with sample vocabulary in the simulator. The black, white and red interface supports System, Light and Dark appearance, with emerald feedback for correct answers and cherry red for incorrect answers.
 
 | Practice | Answers | Synonyms |
 |:---:|:---:|:---:|
-| ![Current practice cycle](docs/screenshots/today.png) | ![Practice answer feedback](docs/screenshots/study.png) | ![Vocabulary grouped by synonym family](docs/screenshots/synonyms.png) |
+| ![WordRevisit 1.3.0 practice cycle](docs/screenshots/practice-1.3.0.png) | ![WordRevisit 1.3.0 answer feedback](docs/screenshots/answers-1.3.0.png) | ![Vocabulary grouped by synonym family](docs/screenshots/synonyms.png) |
 
 ## Start here
 
