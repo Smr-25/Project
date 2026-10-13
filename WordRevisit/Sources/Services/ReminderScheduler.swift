@@ -2,34 +2,18 @@ import Foundation
 import UserNotifications
 
 enum ReminderScheduler {
-    private static let Ids = ["WordRevisit.Morning", "WordRevisit.Evening"]
     private static let RenewalId = "WordRevisit.XcodeRenewal"
 
     static func RenewalDate(From InstalledAt: Date, Calendar: Calendar = .current) -> Date? {
         Calendar.date(byAdding: .day, value: 6, to: InstalledAt)
     }
 
-    static func Set(Enabled: Bool, Morning: ReminderTime, Evening: ReminderTime) async -> Bool {
+    static func RemoveStudyReminders() async {
         let Center = UNUserNotificationCenter.current()
-        Center.removePendingNotificationRequests(withIdentifiers: Ids)
-        guard Enabled else { return true }
-
-        do {
-            guard try await Center.requestAuthorization(options: [.alert, .badge, .sound]) else { return false }
-            for (Index, Time) in [Morning, Evening].enumerated() {
-                let Content = UNMutableNotificationContent()
-                Content.title = Index == 0 ? "A fresh start for your words" : "One more round before the day ends"
-                Content.body = "Your WordRevisit quiz is ready. Take a few minutes to remember more."
-                Content.sound = .default
-                let Trigger = UNCalendarNotificationTrigger(
-                    dateMatching: DateComponents(hour: Time.Hour, minute: Time.Minute), repeats: true
-                )
-                try await Center.add(UNNotificationRequest(identifier: Ids[Index], content: Content, trigger: Trigger))
-            }
-            return true
-        } catch {
-            return false
-        }
+        let Pending = await Center.pendingNotificationRequests()
+        Center.removePendingNotificationRequests(withIdentifiers: Pending.filter { $0.identifier != RenewalId && $0.identifier.hasPrefix("WordRevisit.") }.map(\.identifier))
+        let Delivered = await Center.deliveredNotifications()
+        Center.removeDeliveredNotifications(withIdentifiers: Delivered.filter { $0.request.identifier != RenewalId && $0.request.identifier.hasPrefix("WordRevisit.") }.map { $0.request.identifier })
     }
 
     static func SetRenewal(Enabled: Bool, InstalledAt: Date?) async -> Bool {
@@ -51,38 +35,5 @@ enum ReminderScheduler {
         } catch {
             return false
         }
-    }
-}
-
-extension ReminderScheduler {
-    @MainActor private static var PlanRevision = 0
-
-    @MainActor
-    static func SetPlan(_ Plan: [PlannedReminder], RequestPermission: Bool) async -> Bool {
-        PlanRevision += 1
-        let Revision = PlanRevision
-        let Center = UNUserNotificationCenter.current()
-        if RequestPermission {
-            guard (try? await Center.requestAuthorization(options: [.alert, .badge, .sound])) == true else { return false }
-        }
-        let Pending = await Center.pendingNotificationRequests()
-        guard Revision == PlanRevision else { return true }
-        Center.removePendingNotificationRequests(withIdentifiers: Pending.filter { $0.identifier.hasPrefix("WordRevisit.Plan.") || Ids.contains($0.identifier) }.map(\.identifier))
-        let Authorization = await Center.notificationSettings().authorizationStatus
-        guard Revision == PlanRevision else { return true }
-        guard Authorization == .authorized || Authorization == .provisional else { return Plan.isEmpty }
-        do {
-            for Item in Plan {
-                guard Revision == PlanRevision else { return true }
-                let Content = UNMutableNotificationContent()
-                Content.title = Item.Title; Content.body = Item.Body; Content.sound = .default
-                Content.userInfo = ["OpenStudy": Item.Id != "WordRevisit.Plan.Backup"]
-                let Trigger = UNTimeIntervalNotificationTrigger(timeInterval: max(1, Item.Date.timeIntervalSinceNow), repeats: false)
-                let RequestId = "WordRevisit.Plan.\(Revision).\(Item.Id)"
-                try await Center.add(UNNotificationRequest(identifier: RequestId, content: Content, trigger: Trigger))
-                if Revision != PlanRevision { Center.removePendingNotificationRequests(withIdentifiers: [RequestId]); return true }
-            }
-            return true
-        } catch { return false }
     }
 }

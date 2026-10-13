@@ -1,109 +1,67 @@
 import SwiftUI
-import UserNotifications
 
 @main
 struct WordRevisitApp: App {
-    @UIApplicationDelegateAdaptor(NotificationDelegate.self) private var Delegate
-    @Environment(\.scenePhase) private var Phase
     @StateObject private var Store: WordRepository
-
     init() {
         #if DEBUG
-        if let Value = ProcessInfo.processInfo.environment["WORDREVISIT_TEST_STORE"],
-           let Id = UUID(uuidString: Value) {
+        if let Value = ProcessInfo.processInfo.environment["WORDREVISIT_TEST_STORE"], let Id = UUID(uuidString: Value) {
             let URL = FileManager.default.temporaryDirectory.appendingPathComponent("UITest-\(Id).json")
-            let Existing = FileManager.default.fileExists(atPath: URL.path)
-            let TestStore = WordRepository(FileURL: URL)
-            if !Existing && ProcessInfo.processInfo.environment["WORDREVISIT_UI_FIXTURE"] == "Study" {
-                TestStore.Delete(Ids: Set(TestStore.Entries.map(\.Id)))
-                for (Term, Translation) in [("forest", "meşə"), ("water", "su"), ("bird", "quş"), ("large", "böyük"), ("huge", "iri"), ("tree", "ağac")] {
-                    var Word = WordEntry(Term: Term, Translation: Translation)
-                    Word.Learning.IntroducedAt = Date.now.addingTimeInterval(-86400)
-                    Word.Learning.Stage = 4; Word.Learning.LearningStep = 3
-                    Word.NextReviewAt = Date.now.addingTimeInterval(-3600)
-                    if ["large", "huge"].contains(Term) { Word.Group = "size" }
-                    _ = TestStore.SaveEntry(Word)
-                }
+            if !FileManager.default.fileExists(atPath: URL.path) {
+                let Words = [("forest", "meşə", "nature"), ("water", "su", ""), ("bird", "quş", "nature"), ("large", "böyük", "size"), ("huge", "böyük", "size"), ("tree", "ağac", "nature")].map { WordEntry(Term: $0.0, Translation: $0.1, Group: $0.2) }
+                let Data = PracticeData(Entries: Words, Bag: PracticeBag(Entries: Words))
+                try? JSONEncoder().encode(Data).write(to: URL, options: .atomic)
             }
-            _Store = StateObject(wrappedValue: TestStore)
-            return
+            _Store = StateObject(wrappedValue: WordRepository(FileURL: URL)); return
         }
         #endif
         _Store = StateObject(wrappedValue: WordRepository())
     }
-
     var body: some Scene {
         WindowGroup {
-            RootView()
-                .environmentObject(Store)
-                .preferredColorScheme(Store.Appearance.ColorScheme)
-                .task { Store.RefreshDay(); await Store.RefreshNotifications() }
-                .onChange(of: Phase) { _, New in
-                    if New == .active { Store.RefreshDay(); Task { await Store.RefreshNotifications() } }
-                }
-                .alert("Storage issue", isPresented: Binding(
-                    get: { Store.ErrorMessage != nil },
-                    set: { if !$0 { Store.ErrorMessage = nil } }
-                )) {
-                    Button("OK", role: .cancel) { Store.ErrorMessage = nil }
-                } message: {
-                    Text(Store.ErrorMessage ?? "")
-                }
+            Group {
+                if Store.StorageBlocked { StorageRecoveryView() }
+                else { RootView() }
+            }.environmentObject(Store).preferredColorScheme(Store.Appearance.ColorScheme).tint(Palette.Accent)
+                .alert("WordRevisit", isPresented: Binding(get: { Store.ErrorMessage != nil && !Store.StorageBlocked }, set: { if !$0 { Store.ErrorMessage = nil } })) {
+                    Button("OK") { Store.ErrorMessage = nil }
+                } message: { Text(Store.ErrorMessage ?? "") }
         }
     }
 }
 
 private struct RootView: View {
-    @State private var SelectedTab = 0
     @EnvironmentObject private var Store: WordRepository
-
     var body: some View {
-        TabView(selection: $SelectedTab) {
-            HomeView()
-                .tabItem { Label("Today", systemImage: "house.fill") }
-                .tag(0)
-            LibraryView()
-                .tabItem { Label("My words", systemImage: "text.book.closed.fill") }
-                .tag(1)
-            LearningProgressView()
-                .tabItem { Label("Progress", systemImage: "chart.bar.xaxis") }
-                .tag(3)
-            SettingsView()
-                .tabItem { Label("Settings", systemImage: "slider.horizontal.3") }
-                .tag(2)
-        }
-        .tint(Palette.Accent)
-        .fullScreenCover(isPresented: $Store.PresentStudy) { StudySessionView() }
-        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("OpenStudy"))) { _ in OpenPendingStudy() }
-        .task { OpenPendingStudy() }
-        .onAppear {
-            #if DEBUG
-            if ProcessInfo.processInfo.arguments.contains("-PreviewLibrary") { SelectedTab = 1 }
-            if ProcessInfo.processInfo.arguments.contains("-PreviewSettings") { SelectedTab = 2 }
-            if ProcessInfo.processInfo.arguments.contains("-PreviewProgress") { SelectedTab = 3 }
-            #endif
-        }
-    }
-    private func OpenPendingStudy() {
-        if UserDefaults.standard.bool(forKey: "OpenStudyFromNotification") {
-            UserDefaults.standard.removeObject(forKey: "OpenStudyFromNotification")
-            SelectedTab = 0
-            if Store.StartStudy() { Store.PresentStudy = true }
+        TabView {
+            HomeView().tabItem { Label("Practice", systemImage: "house.fill") }
+            LibraryView().tabItem { Label("My words", systemImage: "text.book.closed.fill") }
+            SynonymsView().tabItem { Label("Synonyms", systemImage: "rectangle.3.group.fill") }
+            SettingsView().tabItem { Label("Settings", systemImage: "slider.horizontal.3") }
+        }.task {
+            await ReminderScheduler.RemoveStudyReminders()
+            _ = await ReminderScheduler.SetRenewal(Enabled: Store.Data.RenewalReminderEnabled, InstalledAt: Store.Data.XcodeInstalledAt)
         }
     }
 }
 
-final class NotificationDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
-    func application(_ application: UIApplication, didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
-        UNUserNotificationCenter.current().delegate = self
-        return true
-    }
-    func userNotificationCenter(_ center: UNUserNotificationCenter, didReceive response: UNNotificationResponse) async {
-        if response.notification.request.content.userInfo["OpenStudy"] as? Bool == true {
-            await MainActor.run {
-                UserDefaults.standard.set(true, forKey: "OpenStudyFromNotification")
-                NotificationCenter.default.post(name: Notification.Name("OpenStudy"), object: nil)
-            }
+private struct StorageRecoveryView: View {
+    @EnvironmentObject private var Store: WordRepository
+    @State private var Confirm = false
+    var body: some View {
+        NavigationStack {
+            ScrollView {
+                VStack(alignment: .leading, spacing: 22) {
+                    Text("Existing file preserved").font(.largeTitle.bold())
+                    Text(Store.ErrorMessage ?? "This file cannot be opened by version 1.3.")
+                    Text("To bring words from 2.x, export CSV in that version first. You can then start 1.3 and import that CSV. Practice history and schedules from 2.x are not migrated.")
+                    Button("Start with the new vocabulary") { Confirm = true }
+                        .buttonStyle(PrimaryActionStyle())
+                }.padding(24)
+            }.confirmationDialog("Start a fresh 1.3 vocabulary?", isPresented: $Confirm, titleVisibility: .visible) {
+                Button("Keep old file and start fresh", role: .destructive) { Store.StartFresh() }
+                Button("Cancel", role: .cancel) {}
+            } message: { Text("The old file will be retained separately on this device. Version 1.3 starts with 287 words and an empty practice history. Export CSV from your previous version first if you need its vocabulary.") }
         }
     }
 }

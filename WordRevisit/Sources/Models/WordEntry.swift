@@ -1,152 +1,92 @@
 import Foundation
 
 struct WordEntry: Codable, Identifiable, Equatable {
-    var Id: UUID
+    var Id = UUID()
     var Term: String
     var Translation: String
-    var Definition: String
-    var CorrectCount: Int
-    var IncorrectCount: Int
-    var LastReviewedAt: Date?
-    var ExampleSentences: String
-    var ReviewStreak: Int
-    var NextReviewAt: Date?
-    var Learning = WordLearning()
-    var PartOfSpeech = ""
     var Group = ""
-    var Mnemonic = ""
-    var MySentence = ""
-
     var id: UUID { Id }
 
-    init(
-        Id: UUID = UUID(),
-        Term: String,
-        Translation: String,
-        Definition: String = "",
-        CorrectCount: Int = 0,
-        IncorrectCount: Int = 0,
-        LastReviewedAt: Date? = nil,
-        ExampleSentences: String = "",
-        ReviewStreak: Int = 0,
-        NextReviewAt: Date? = nil
-    ) {
-        self.Id = Id
-        self.Term = Term
-        self.Translation = Translation
-        self.Definition = Definition
-        self.CorrectCount = CorrectCount
-        self.IncorrectCount = IncorrectCount
-        self.LastReviewedAt = LastReviewedAt
-        self.ExampleSentences = ExampleSentences
-        self.ReviewStreak = ReviewStreak
-        self.NextReviewAt = NextReviewAt
+    init(Id: UUID = UUID(), Term: String, Translation: String, Group: String = "") {
+        self.Id = Id; self.Term = Term; self.Translation = Translation; self.Group = Group
     }
 
-    private enum CodingKeys: String, CodingKey {
-        case Id, Term, Translation, Definition, CorrectCount, IncorrectCount, LastReviewedAt
-        case ExampleSentences, ReviewStreak, NextReviewAt, Learning, PartOfSpeech, Group, Mnemonic, MySentence
-    }
-
+    private enum CodingKeys: String, CodingKey { case Id, Term, Translation, Group }
     init(from Decoder: Decoder) throws {
         let Values = try Decoder.container(keyedBy: CodingKeys.self)
         Id = try Values.decode(UUID.self, forKey: .Id)
         Term = try Values.decode(String.self, forKey: .Term)
         Translation = try Values.decode(String.self, forKey: .Translation)
-        Definition = try Values.decode(String.self, forKey: .Definition)
-        CorrectCount = try Values.decode(Int.self, forKey: .CorrectCount)
-        IncorrectCount = try Values.decode(Int.self, forKey: .IncorrectCount)
-        LastReviewedAt = try Values.decodeIfPresent(Date.self, forKey: .LastReviewedAt)
-        ExampleSentences = try Values.decodeIfPresent(String.self, forKey: .ExampleSentences) ?? ""
-        ReviewStreak = try Values.decodeIfPresent(Int.self, forKey: .ReviewStreak) ?? 0
-        NextReviewAt = try Values.decodeIfPresent(Date.self, forKey: .NextReviewAt)
-        PartOfSpeech = try Values.decodeIfPresent(String.self, forKey: .PartOfSpeech) ?? ""
         Group = try Values.decodeIfPresent(String.self, forKey: .Group) ?? ""
-        Mnemonic = try Values.decodeIfPresent(String.self, forKey: .Mnemonic) ?? ""
-        MySentence = try Values.decodeIfPresent(String.self, forKey: .MySentence) ?? ""
-        if let Saved = try Values.decodeIfPresent(WordLearning.self, forKey: .Learning) {
-            Learning = Saved
-        } else {
-            // Preserve old due dates; map the old interval to the nearest new stage.
-            Learning.Stage = [0, 1, 3, 4, 5, 6][min(max(ReviewStreak, 0), 5)]
-            Learning.Reps = CorrectCount + IncorrectCount
-            Learning.Lapses = IncorrectCount
-            Learning.IntroducedAt = LastReviewedAt
-            Learning.LearningStep = LastReviewedAt == nil ? 0 : 3
-        }
     }
 }
 
 enum QuizMode: String, Codable, CaseIterable, Identifiable {
-    case Easy
-    case Hard
-    case EasyReverse
-
+    case Easy, Hard
     var id: String { rawValue }
-
-    var Title: String { self == .Hard ? "Hard recall" : "Easy recall" }
-    var Subtitle: String { self == .Easy ? "English → Azerbaijani" : "Azerbaijani → English" }
-    var Symbol: String { self != .Hard ? "character.bubble.fill" : "bolt.fill" }
+    var Title: String { self == .Easy ? "Easy practice" : "Hard practice" }
+    var Subtitle: String { self == .Easy ? "Mixed directions · choose an answer" : "Azerbaijani → English · write" }
 }
+
+enum QuizDirection: String, Codable { case EnglishToAzerbaijani, AzerbaijaniToEnglish }
 
 struct QuizQuestion: Codable, Identifiable {
-    let Entry: WordEntry
-    let Mode: QuizMode
-    var Options: [String]? = nil
-
+    var Entry: WordEntry
+    var Mode: QuizMode
+    // Optional fields allow the original 1.2 answer history to remain readable.
+    var Direction: QuizDirection?
+    var Options: [String]?
+    var Alternatives: [String]?
     var id: UUID { Entry.Id }
-    var Prompt: String { Mode == .Easy ? Entry.Term : Entry.Translation }
-    var Answer: String { Mode == .Easy ? Entry.Translation : Entry.Term }
-}
-
-struct QuizSession: Identifiable {
-    let id = UUID()
-    let Mode: QuizMode
-    let Questions: [QuizQuestion]
-    var IsPractice = false
+    var IsEnglishPrompt: Bool { (Direction ?? (Mode == .Easy ? .EnglishToAzerbaijani : .AzerbaijaniToEnglish)) == .EnglishToAzerbaijani }
+    var Prompt: String { IsEnglishPrompt ? Entry.Term : Entry.Translation }
+    var Answer: String { IsEnglishPrompt ? Entry.Translation : Entry.Term }
 }
 
 struct QuizAnswer: Codable, Identifiable {
-    let Question: QuizQuestion
-    let Input: String
-    let IsCorrect: Bool
-
+    var Question: QuizQuestion
+    var Input: String
+    var IsCorrect: Bool
+    var Alternative: Bool? = nil
     var id: UUID { Question.id }
 }
 
 struct QuizRecord: Codable, Identifiable {
-    var Id: UUID = UUID()
-    var Date: Date = .now
+    var Id = UUID()
+    var Date = Foundation.Date.now
     var Mode: String
     var Correct: Int
     var Total: Int
     var Answers: [QuizAnswer]?
-    var IsPractice: Bool?
-
+    var RetryAnswers: [QuizAnswer]?
     var id: UUID { Id }
-}
-
-struct ReminderTime: Codable, Equatable {
-    var Hour: Int
-    var Minute: Int
-
-    var DateValue: Date {
-        Calendar.current.date(from: DateComponents(hour: Hour, minute: Minute)) ?? .now
-    }
-
-    init(Hour: Int, Minute: Int) {
-        self.Hour = Hour
-        self.Minute = Minute
-    }
-
-    init(DateValue: Date) {
-        let Components = Calendar.current.dateComponents([.hour, .minute], from: DateValue)
-        Hour = Components.hour ?? 9
-        Minute = Components.minute ?? 0
-    }
 }
 
 enum AppAppearance: String, Codable, CaseIterable, Identifiable {
     case System, Light, Dark
     var id: String { rawValue }
+}
+
+struct VocabularyGroup: Identifiable {
+    let Name: String
+    let Words: [WordEntry]
+    var id: String { QuizPlanner.Normalize(Name) }
+
+    static func Make(_ Entries: [WordEntry], Search: String = "") -> [VocabularyGroup] {
+        var Names: [String] = []
+        var Groups: [String: [WordEntry]] = [:]
+        for Word in Entries where !Word.Group.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+            let Key = QuizPlanner.Normalize(Word.Group)
+            if Groups[Key] == nil { Names.append(Key) }
+            Groups[Key, default: []].append(Word)
+        }
+        return Names.compactMap { Key in
+            guard let Words = Groups[Key], let First = Words.first else { return nil }
+            let Query = QuizPlanner.Normalize(Search)
+            guard Query.isEmpty || QuizPlanner.Normalize(First.Group).contains(Query) || Words.contains(where: {
+                QuizPlanner.Normalize($0.Term).contains(Query) || QuizPlanner.Normalize($0.Translation).contains(Query)
+            }) else { return nil }
+            return VocabularyGroup(Name: First.Group, Words: Words)
+        }
+    }
 }

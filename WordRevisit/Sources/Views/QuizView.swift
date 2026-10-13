@@ -4,270 +4,134 @@ struct QuizView: View {
     @EnvironmentObject private var Store: WordRepository
     @Environment(\.dismiss) private var Dismiss
     @FocusState private var AnswerFocused: Bool
-
-    @State private var Run: QuizRun
     @State private var Input = ""
-    @State private var ShowingReview = false
-
-    init(Session: QuizSession) {
-        _Run = State(initialValue: QuizRun(Session: Session))
-    }
-
-    private var Mode: QuizMode { Run.Session.Mode }
-    private var Questions: [QuizQuestion] { Run.Questions }
-    private var Index: Int { Run.Index }
-    private var Submitted: Bool { Run.SubmittedAnswer != nil }
-    private var WasCorrect: Bool { Run.SubmittedAnswer?.IsCorrect == true }
+    private var Session: PracticeSession? { Store.Session }
+    private var Question: QuizQuestion? { Session?.Current }
+    private var Answer: QuizAnswer? { Session?.Submitted }
 
     var body: some View {
-        ZStack {
-            AppBackground()
-            ScrollView {
-                VStack(alignment: .leading, spacing: 30) {
-                    Header
-                    if Questions.isEmpty {
-                        EmptyState
-                    } else if Run.IsFinished {
-                        FinishedState
-                    } else {
-                        QuestionState
-                    }
-                }
-                .padding(.horizontal, 24)
-                .padding(.top, 28)
-                .padding(.bottom, 40)
+        NavigationStack {
+            ZStack {
+                AppBackground()
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 24) {
+                        if let Question { QuestionContent(Question) }
+                        else { Results }
+                    }.padding(24)
+                }.scrollDismissesKeyboard(.interactively)
+                    .id(Question?.id)
             }
-            .scrollDismissesKeyboard(.interactively)
-            .id(Run.CurrentQuestion?.id)
+            .safeAreaInset(edge: .bottom) { ActionPanel }
+            .navigationTitle(Session?.IsRetry == true ? "Missed words · one retry" : "\(Session?.Mode.rawValue ?? "") practice")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Button { Dismiss() } label: { Image(systemName: "xmark").frame(width: 44, height: 44) }
+                        .accessibilityLabel("Save and close practice")
+                }
+            }
         }
-        .sheet(isPresented: $ShowingReview) {
-            QuizReviewView(Answers: Run.OriginalAnswers, Title: "Your first answers")
-        }
+        .onAppear { LoadDraft() }
+        .onChange(of: Question?.id) { _, _ in LoadDraft() }
+        .onChange(of: Session?.IsRetry) { _, _ in LoadDraft() }
+        .onChange(of: Input) { _, Value in if let Question { Store.SaveDraft(Value, For: Question.id) } }
     }
 
-    private var Header: some View {
-        HStack {
-            Button { Dismiss() } label: {
-                Image(systemName: "xmark")
-                    .font(.system(size: 14, weight: .bold))
-                    .frame(width: 44, height: 44)
-                    .FrostedCard(CornerRadius: 15)
+    private func QuestionContent(_ Question: QuizQuestion) -> some View {
+        VStack(alignment: .leading, spacing: 22) {
+            HStack {
+                SectionEyebrow(Title: Question.IsEnglishPrompt ? "English → Azerbaijani" : "Azerbaijani → English")
+                Spacer()
+                Text("\((Session?.Index ?? 0) + 1)/\(Session?.CurrentQuestions.count ?? 0)").monospacedDigit()
             }
-            .accessibilityLabel("Close quiz")
-            Spacer()
-            Text(Run.IsRetry ? "TRY AGAIN" : Mode.Title.uppercased())
-                .font(.system(size: 12, weight: .bold, design: .rounded))
-                .tracking(2)
-                .foregroundStyle(Palette.Muted)
-            Spacer()
-            Text(Questions.isEmpty ? "0/0" : "\(min(Index + 1, Questions.count))/\(Questions.count)")
-                .font(.system(size: 14, weight: .semibold, design: .rounded))
-                .frame(width: 44)
-        }
-        .foregroundStyle(Palette.Primary)
-    }
-
-    private var QuestionState: some View {
-        let Question = Questions[Index]
-        return VStack(alignment: .leading, spacing: 28) {
-            if Run.IsRetry || Run.Session.IsPractice {
-                Text(Run.IsRetry ? "A second look. Your original score stays the same."
-                     : "Extra practice · your review dates stay the same.")
-                    .font(.system(size: 13))
-                    .foregroundStyle(Palette.Muted)
-            }
-            GeometryReader { Geometry in
-                ZStack(alignment: .leading) {
-                    Capsule().fill(Palette.Primary.opacity(0.12))
-                    Capsule().fill(Mode == .Easy ? Palette.Primary : Palette.Accent)
-                        .frame(width: Geometry.size.width * CGFloat(Index + 1) / CGFloat(Questions.count))
-                }
-            }
-            .frame(height: 5)
-            .padding(.top, 4)
-
-            VStack(alignment: .leading, spacing: 12) {
-                SectionEyebrow(Title: Mode == .Easy ? "Translate this word" : "Find the English word")
-                Text(Question.Prompt)
-                    .accessibilityIdentifier("QuizPrompt")
-                    .font(.system(size: Question.Options == nil ? 42 : 34, weight: .bold, design: .rounded))
-                    .minimumScaleFactor(0.7)
-                    .lineLimit(3)
-                    .fixedSize(horizontal: false, vertical: true)
-                Text(Mode == .Easy ? "What does it mean in Azerbaijani?" : "What is this word in English?")
-                    .font(.system(size: 15))
-                    .foregroundStyle(Palette.Muted)
-            }
-            .frame(maxWidth: .infinity, minHeight: Question.Options == nil ? 155 : 110, alignment: .leading)
-            .padding(28)
-            .FrostedCard(CornerRadius: 30)
-
-            if !Question.Entry.ExampleSentences.isEmpty {
-                VStack(alignment: .leading, spacing: 10) {
-                    Label("YOUR EXAMPLES", systemImage: "quote.opening")
-                        .font(.system(size: 11, weight: .bold, design: .rounded))
-                        .foregroundStyle(Palette.Accent)
-                    Text(Question.Entry.ExampleSentences)
-                        .font(.system(size: 16))
-                        .lineSpacing(5)
-                        .fixedSize(horizontal: false, vertical: true)
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(21)
-                .FrostedCard(CornerRadius: 22)
-            }
-
+            Text(Question.Prompt).font(.largeTitle.bold()).fixedSize(horizontal: false, vertical: true)
+                .accessibilityIdentifier("QuizPrompt")
+                .frame(maxWidth: .infinity, alignment: .leading).padding(24).FrostedCard()
             if let Options = Question.Options {
-                VStack(spacing: 12) {
-                    ForEach(Options, id: \.self) { Option in
-                        Button {
-                            Input = Option
-                            CheckAnswer(For: Question)
-                        } label: {
-                            HStack(spacing: 12) {
-                                Text(Option).font(.body.weight(.medium))
-                                Spacer(minLength: 8)
-                                if Submitted && QuizPlanner.Matches(Option, Answer: Question.Answer) {
-                                    Image(systemName: "checkmark.circle.fill").foregroundStyle(Palette.Success)
-                                } else if Submitted && Run.SubmittedAnswer?.Input == Option {
-                                    Image(systemName: "xmark.circle.fill").foregroundStyle(Palette.Danger)
-                                }
+                if Options.count < 4 { Text("\(Options.count) distinct choices are available for this word.").font(.caption).foregroundStyle(Palette.Muted) }
+                ForEach(Options, id: \.self) { Option in
+                    Button { Submit(Option, For: Question) } label: {
+                        HStack {
+                            Text(Option).font(.body.weight(.medium)).fixedSize(horizontal: false, vertical: true)
+                            Spacer(minLength: 10)
+                            if Answer != nil && IsCorrectOption(Option, Question) {
+                                Image(systemName: "checkmark.circle.fill").foregroundStyle(Palette.Success)
+                            } else if Answer?.Input == Option {
+                                Image(systemName: "xmark.circle.fill").foregroundStyle(Palette.Danger)
                             }
-                            .padding(18).frame(maxWidth: .infinity, minHeight: 56, alignment: .leading)
+                        }.padding(18).frame(maxWidth: .infinity, minHeight: 54, alignment: .leading)
                             .FrostedCard(CornerRadius: 18).contentShape(Rectangle())
-                        }
-                        .buttonStyle(.plain)
-                        .disabled(Submitted)
-                        .accessibilityIdentifier("QuizOption")
-                    }
+                    }.buttonStyle(.plain).disabled(Answer != nil).accessibilityIdentifier("QuizOption")
                 }
             } else {
-                VStack(alignment: .leading, spacing: 13) {
-                    SectionEyebrow(Title: "Your answer")
-                    TextField("Type what you remember...", text: $Input)
-                        .id(Question.id)
-                        .textInputAutocapitalization(.never)
-                        .autocorrectionDisabled()
-                        .submitLabel(.done)
-                        .focused($AnswerFocused)
-                        .onSubmit { CheckAnswer(For: Question) }
-                        .font(.system(size: 18, weight: .medium))
-                        .padding(18)
-                        .background(Palette.Primary.opacity(0.08), in: RoundedRectangle(cornerRadius: 18))
-                        .overlay(RoundedRectangle(cornerRadius: 18).stroke(Palette.Primary.opacity(0.14)))
-                        .disabled(Submitted)
-                        .accessibilityLabel("Your answer")
-                        .accessibilityIdentifier("QuizAnswer")
+                if Question.Mode == .Easy {
+                    Text("No distinct alternatives for this word. Write the English answer to keep it in your cycle.")
+                        .font(.caption).foregroundStyle(Palette.Muted)
                 }
-            }
-
-            if Submitted {
-                VStack(alignment: .leading, spacing: 8) {
-                    Label(WasCorrect ? "You got it" : "Keep this one close", systemImage: WasCorrect ? "checkmark.circle.fill" : "arrow.uturn.backward.circle.fill")
-                        .font(.system(size: 16, weight: .bold, design: .rounded))
-                        .foregroundStyle(WasCorrect ? Palette.Success : Palette.Danger)
-                    Text(Question.Answer)
-                        .font(.system(size: 24, weight: .bold, design: .rounded))
-                    if !Question.Entry.Definition.isEmpty {
-                        Text(Question.Entry.Definition)
-                            .font(.system(size: 14))
-                            .foregroundStyle(Palette.Muted)
-                    }
-                }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(21)
-                .FrostedCard(CornerRadius: 22)
-            }
-
-            if Submitted {
-                Button(Index == Questions.count - 1 ? "See results" : "Next word") {
-                    Advance(From: Question)
-                }
-                .buttonStyle(PrimaryActionStyle(Tint: Mode == .Easy ? Palette.Primary : Palette.Accent))
-            } else if Question.Options == nil {
-                Button("Check answer") { CheckAnswer(For: Question) }
-                    .buttonStyle(PrimaryActionStyle(Tint: Mode == .Easy ? Palette.Primary : Palette.Accent))
-                    .disabled(Input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                    .opacity(Input.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? 0.5 : 1)
+                TextField("Write the English word", text: $Input)
+                    .font(.title3).textInputAutocapitalization(.never).autocorrectionDisabled()
+                    .focused($AnswerFocused).submitLabel(.done)
+                    .onSubmit { Submit(Input, For: Question) }
+                    .padding(18).FrostedCard(CornerRadius: 18)
+                    .disabled(Answer != nil).accessibilityIdentifier("QuizAnswer")
             }
         }
     }
 
-    private var EmptyState: some View {
-        VStack(spacing: 18) {
-            Image(systemName: "text.book.closed")
-                .font(.system(size: 50))
-                .foregroundStyle(Palette.Accent)
-            Text("Your words come first")
-                .font(.system(size: 27, weight: .bold, design: .rounded))
-            Text("Add a few words in My words, then come back for your first quiz.")
+    private var ActionPanel: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            if let Question {
+                if let Answer {
+                    VStack(alignment: .leading, spacing: 5) {
+                        Label(Answer.IsCorrect ? "Correct" : "Incorrect", systemImage: Answer.IsCorrect ? "checkmark.circle.fill" : "xmark.circle.fill")
+                            .font(.headline).foregroundStyle(Answer.IsCorrect ? Palette.Success : Palette.Danger)
+                        if Answer.Alternative == true {
+                            Text("This is also correct: \(Answer.Input). Vocabulary answer: \(Question.Answer).")
+                                .font(.subheadline).accessibilityIdentifier("AlternativeAnswer")
+                        } else { Text(Question.Answer).font(.body.weight(.semibold)) }
+                    }.accessibilityElement(children: .combine)
+                    Button("Next") { AnswerFocused = false; Store.Advance(From: Question.id) }
+                        .buttonStyle(PrimaryActionStyle()).accessibilityIdentifier("NextQuestion")
+                } else if Question.Options == nil {
+                    Button("Check answer") { Submit(Input, For: Question) }
+                        .buttonStyle(PrimaryActionStyle())
+                        .disabled(QuizPlanner.Normalize(Input).isEmpty)
+                }
+            } else {
+                Button(Store.Data.Bag.CycleComplete ? "Start next cycle" : "Next group") { _ = Store.StartPractice() }
+                    .buttonStyle(PrimaryActionStyle()).disabled(Store.Entries.isEmpty)
+                    .accessibilityIdentifier("NextGroup")
+                Button("Back to home") { Dismiss() }.frame(maxWidth: .infinity, minHeight: 44)
+            }
+        }.padding(.horizontal, 20).padding(.vertical, 14).frame(maxWidth: .infinity)
+            .background(.regularMaterial)
+    }
+
+    private var Results: some View {
+        VStack(alignment: .leading, spacing: 22) {
+            Image(systemName: "checkmark.circle.fill").font(.system(size: 46)).foregroundStyle(Palette.Success)
+            Text(Store.Data.Bag.CycleComplete ? "Cycle complete" : "Group complete").font(.largeTitle.bold())
+            if let Session {
+                Text("\(Session.Answers.filter(\.IsCorrect).count) / \(Session.Answers.count) correct on the first try").font(.title3)
+                if !Session.RetryAnswers.isEmpty {
+                    Text("\(Session.RetryAnswers.count) missed words revisited once.").foregroundStyle(Palette.Muted)
+                }
+            }
+            Text(Store.Data.Bag.CycleComplete ? "Every word has had its turn. The next cycle will be shuffled again." : "\(Store.Data.Bag.Remaining.count) words are waiting in this cycle.")
                 .foregroundStyle(Palette.Muted)
-                .multilineTextAlignment(.center)
-            Button("Back to today") { Dismiss() }
-                .buttonStyle(PrimaryActionStyle(Tint: Palette.Accent))
+            ModePicker(Identifier: "NextMode")
         }
-        .frame(maxWidth: .infinity)
-        .padding(.top, 90)
     }
 
-    private var FinishedState: some View {
-        VStack(spacing: 22) {
-            Image(systemName: "sparkles")
-                .font(.system(size: 54))
-                .foregroundStyle(Palette.Primary)
-                .padding(.top, 55)
-            Text(Run.IsRetry ? "Another step." : "Nicely done.")
-                .font(.system(size: 42, weight: .bold, design: .rounded))
-            Text("Every answer makes the next one easier.")
-                .foregroundStyle(Palette.Muted)
-            VStack(spacing: 5) {
-                Text("\(Run.CorrectCount) / \(Questions.count)")
-                    .font(.system(size: 54, weight: .bold, design: .rounded))
-                    .foregroundStyle(Palette.Primary)
-                Text(Run.IsRetry ? "REMEMBERED THIS TIME" : "WORDS REMEMBERED")
-                    .font(.system(size: 11, weight: .bold))
-                    .tracking(2)
-                    .foregroundStyle(Palette.Muted)
-            }
-            .frame(maxWidth: .infinity)
-            .padding(30)
-            .FrostedCard(CornerRadius: 28)
-            if Run.IsRetry {
-                Text("Original score: \(Run.OriginalAnswers.filter(\.IsCorrect).count) / \(Run.OriginalAnswers.count)")
-                    .font(.system(size: 14))
-                    .foregroundStyle(Palette.Muted)
-            }
-            if !Run.MissedQuestions.isEmpty {
-                Button("Retry \(Run.MissedQuestions.count) missed \(Run.MissedQuestions.count == 1 ? "word" : "words")") {
-                    Run.RetryMissed()
-                    Input = ""
-                }
-                .buttonStyle(PrimaryActionStyle(Tint: Palette.Accent))
-            }
-            Button("Review my answers") { ShowingReview = true }
-                .font(.system(size: 16, weight: .semibold))
-                .foregroundStyle(Palette.Primary)
-                .padding(.vertical, 8)
-            Button("Back to today") { Dismiss() }
-                .buttonStyle(PrimaryActionStyle(Tint: Palette.Primary))
-        }
-        .frame(maxWidth: .infinity)
+    private func IsCorrectOption(_ Option: String, _ Question: QuizQuestion) -> Bool {
+        Question.IsEnglishPrompt ? QuizPlanner.Meanings(Question.Answer).contains(QuizPlanner.Normalize(Option)) : QuizPlanner.Normalize(Option) == QuizPlanner.Normalize(Question.Answer)
     }
-
-    private func CheckAnswer(For Question: QuizQuestion) {
-        guard let Answer = Run.Submit(Input, For: Question.id) else { return }
-        if !Run.IsRetry {
-            Store.RecordAnswer(For: Question.Entry.Id, IsCorrect: Answer.IsCorrect,
-                               UpdatesSchedule: !Run.Session.IsPractice)
-        }
+    private func LoadDraft() { Input = Session?.Submitted?.Input ?? Session?.Draft ?? ""; AnswerFocused = false }
+    private func Submit(_ Value: String, For Question: QuizQuestion) {
+        guard Answer == nil else { return }
+        Store.Submit(Value, For: Question.id)
+        guard let Answer else { return }
         AnswerFocused = false
-    }
-
-    private func Advance(From Question: QuizQuestion) {
-        guard Run.CurrentQuestion?.id == Question.id, Run.SubmittedAnswer != nil else { return }
-        if Run.Advance(From: Question.id), !Run.IsRetry {
-            Store.FinishQuiz(Mode: Mode, Answers: Run.OriginalAnswers, IsPractice: Run.Session.IsPractice)
-        }
-        Input = ""
+        UINotificationFeedbackGenerator().notificationOccurred(Answer.IsCorrect ? .success : .warning)
     }
 }

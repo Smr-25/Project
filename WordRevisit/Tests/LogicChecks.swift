@@ -1,191 +1,127 @@
 import Foundation
 
-@main
-enum LogicChecks {
+@main enum LogicChecks {
     static func main() throws {
-        let Difficult = WordEntry(Term: "resilient", Translation: "dözümlü; davamlı", IncorrectCount: 3)
-        let Recent = WordEntry(Term: "curious", Translation: "maraqlı", LastReviewedAt: .now)
-        let Questions = QuizPlanner.MakeQuestions(From: [Recent, Difficult], Mode: .Hard)
-        assert(Questions.count == 2)
-        assert(Questions[0].Prompt == "dözümlü; davamlı")
-        assert(Questions[0].Answer == "resilient")
-        var First = WordEntry(Term: "array", Translation: "sıra")
-        let Second = WordEntry(Term: "breed", Translation: "çoxalmaq")
-        let Session = QuizSession(Mode: .Easy, Questions: QuizPlanner.MakeQuestions(From: [First, Second], Mode: .Easy))
-        let FrozenIds = Session.Questions.map(\.id)
-        First.LastReviewedAt = .now // Recording an answer changes the planner order.
-        assert(QuizPlanner.MakeQuestions(From: [First, Second], Mode: .Easy)[0].id == Second.id)
-        assert(Session.Questions.map(\.id) == FrozenIds)
-        assert(QuizPlanner.Matches(" DÖZÜMLÜ ", Answer: Difficult.Translation))
-        assert(!QuizPlanner.Matches("curious", Answer: Difficult.Translation))
-        var LegacyWords = [WordEntry(Term: "fell", Translation: "ağacı kəsmək"),
-                           WordEntry(Term: "fell", Translation: "my custom answer")]
-        assert(StarterVocabulary.UpgradeLegacyFellTranslation(&LegacyWords))
-        assert(QuizPlanner.Matches("agac kesmek", Answer: LegacyWords[0].Translation))
-        assert(QuizPlanner.Matches("yasayis muhiti", Answer: "yaşayış mühiti"))
-        assert(LegacyWords[1].Translation == "my custom answer")
-
-        var Calendar = Calendar(identifier: .gregorian)
-        Calendar.timeZone = TimeZone(identifier: "Europe/Berlin")!
-        let InstalledAt = Calendar.date(from: DateComponents(year: 2026, month: 10, day: 23, hour: 9))!
-        let ReminderAt = ReminderScheduler.RenewalDate(From: InstalledAt, Calendar: Calendar)!
-        let ReminderDay = Calendar.dateComponents([.year, .month, .day, .hour], from: ReminderAt)
-        assert(ReminderDay.year == 2026 && ReminderDay.month == 10 && ReminderDay.day == 29 && ReminderDay.hour == 9)
-
-        let CSV = WordCSV.Encode([WordEntry(Term: "a,b", Translation: "söz", Definition: "A \"quoted\" meaning")])
-        let Parsed = try WordCSV.Decode(CSV)
-        assert(Parsed.count == 1)
-        assert(Parsed[0].Term == "a,b")
-        assert(Parsed[0].Definition == "A \"quoted\" meaning")
-        assert(StarterVocabulary.Entries.count == 59)
-        assert(Set(StarterVocabulary.Entries.map(\.Term)).count == 59)
-        let RoundTrip = try WordCSV.Decode(WordCSV.Encode(StarterVocabulary.Entries))
-        assert(RoundTrip.count == 59)
-        try CheckMigrationAndExamples()
-        try CheckChoicePractice()
-        CheckQuizFlow()
-        CheckReviewSchedule()
-        CheckProgress()
-        print("Logic checks passed")
+        CheckBag()
+        CheckAnswers()
+        try CheckCSV()
+        CheckGroups()
+        print("Practice bag, exact grading, alternatives, CSV and synonym checks passed")
     }
 
-    private static func CheckChoicePractice() throws {
-        let Words = [WordEntry(Term: "large", Translation: "böyük; iri"),
-                     WordEntry(Term: "huge", Translation: "iri"),
-                     WordEntry(Term: "large", Translation: "geniş"),
-                     WordEntry(Term: "water", Translation: "su"),
-                     WordEntry(Term: "bird", Translation: "quş"),
-                     WordEntry(Term: "tree", Translation: "ağac")]
-        for Mode in [QuizMode.Easy, .EasyReverse] {
-            let Questions = QuizPlanner.MakeQuestions(From: Words, Mode: Mode, IncludeUpcoming: true, Choices: true)
-            let Question = Questions.first { $0.id == Words[0].id }!
-            let Options = Question.Options!
-            assert(Options.count == 4 && Set(Options.map(QuizPlanner.Normalize)).count == 4)
-            assert(Options.filter { QuizPlanner.Matches($0, Answer: Question.Answer) }.count == 1)
-            assert(!Options.contains(Mode == .Easy ? "iri" : "huge"))
-            assert(!Options.contains(Mode == .Easy ? "geniş" : "huge"))
-            assert(Question.Prompt == (Mode == .Easy ? "large" : "böyük; iri"))
-            var Run = QuizRun(Session: QuizSession(Mode: Mode, Questions: [Question]))
-            assert(Run.Submit("not an option", For: Question.id) == nil)
-            let Wrong = Options.first { !QuizPlanner.Matches($0, Answer: Question.Answer) }!
-            assert(Run.Submit(Wrong, For: Question.id)?.IsCorrect == false)
-            assert(Run.Submit(Wrong, For: Question.id) == nil)
-            assert(Run.CurrentQuestion?.Options == Options)
-            assert(Run.Advance(From: Question.id))
-            Run.RetryMissed()
-            assert(Run.CurrentQuestion?.Options == Options)
-            let Correct = Options.first { QuizPlanner.Matches($0, Answer: Question.Answer) }!
-            assert(Run.Submit(Correct, For: Question.id)?.IsCorrect == true)
-            let Restored = try JSONDecoder().decode(QuizAnswer.self, from: JSONEncoder().encode(Run.Answers[0]))
-            assert(Restored.Question.Mode == Mode && Restored.Question.Options == Options)
+    static func Words(_ Count: Int) -> [WordEntry] {
+        (0..<Count).map { WordEntry(Term: "word\($0)", Translation: "məna\($0)") }
+    }
+    static func Finish(_ Bag: inout PracticeBag, Wrong: Bool = false) {
+        var SeenRetry: Set<UUID> = []
+        while let Question = Bag.Session?.Current {
+            let Retry = Bag.Session!.IsRetry
+            if Retry { assert(SeenRetry.insert(Question.id).inserted) }
+            let Input = Wrong ? "wrong" : Question.Entry.Term
+            assert(Bag.Session!.Submit(Input, For: Question.id))
+            assert(!Bag.Session!.Submit(Input, For: Question.id))
+            assert(Bag.Session!.Current?.id == Question.id)
+            assert(Bag.Session!.Advance(From: Question.id))
         }
-        var CommaWord = Words[0]
-        CommaWord.Translation = "böyük, iri"
-        let CommaOptions = QuizPlanner.ChoiceOptions(For: CommaWord, From: Words, EnglishPrompt: true, Now: .now)!
-        assert(CommaOptions.contains("böyük"))
-        assert(CommaOptions.filter { QuizPlanner.Matches($0, Answer: CommaWord.Translation) }.count == 1)
-        assert(QuizPlanner.MakeQuestions(From: Array(Words.prefix(2)), Mode: .Easy, Choices: true).isEmpty)
-        assert(QuizPlanner.MakeQuestions(From: Words, Mode: .Hard, Choices: true).allSatisfy { $0.Options == nil })
-        let Legacy = QuizQuestion(Entry: Words[0], Mode: .Easy)
-        var Object = try JSONSerialization.jsonObject(with: JSONEncoder().encode(Legacy)) as! [String: Any]
-        Object.removeValue(forKey: "Options")
-        let Decoded = try JSONDecoder().decode(QuizQuestion.self, from: JSONSerialization.data(withJSONObject: Object))
-        assert(Decoded.Options == nil && Decoded.Answer == "böyük; iri")
+        assert(Bag.Session!.IsFinished)
     }
-
-    private static func CheckQuizFlow() {
-        let First = WordEntry(Term: "fell", Translation: "ağacı kəsmək; ağac kəsmək", ExampleSentences: "They fell old trees.")
-        let Second = WordEntry(Term: "breed", Translation: "çoxalmaq")
-        let Questions = [First, Second].map { QuizQuestion(Entry: $0, Mode: .Easy) }
-        var Run = QuizRun(Session: QuizSession(Mode: .Easy, Questions: Questions))
-        assert(Run.Submit(" ", For: First.id) == nil)
-        assert(!Run.Advance(From: First.id))
-        assert(Run.Submit("agac   kesmek", For: First.id)?.IsCorrect == true)
-        assert(Run.CurrentQuestion?.id == First.id)
-        assert(Run.Submit("agac kesmek", For: First.id) == nil)
-        assert(Run.Answers.count == 1)
-        assert(!Run.Advance(From: First.id))
-        assert(Run.CurrentQuestion?.id == Second.id)
-        assert(Run.Submit("agac kesmek", For: First.id) == nil)
-        assert(Run.Submit("wrong", For: Second.id)?.IsCorrect == false)
-        assert(Run.Advance(From: Second.id))
-        assert(!Run.Advance(From: Second.id))
-        assert(Run.OriginalAnswers.count == 2 && Run.CorrectCount == 1)
-        Run.RetryMissed()
-        assert(Run.IsRetry && Run.Questions.count == 1 && Run.CurrentQuestion?.id == Second.id)
-        assert(Run.Submit("coxalmaq", For: Second.id)?.IsCorrect == true)
-        assert(Run.Advance(From: Second.id))
-        assert(Run.MissedQuestions.isEmpty && Run.CorrectCount == 1)
-        assert(Run.OriginalAnswers.filter(\.IsCorrect).count == 1)
-        Run.RetryMissed()
-        assert(Run.IsFinished)
-        let Hard = QuizQuestion(Entry: First, Mode: .Hard)
-        assert(Hard.Prompt == First.Translation && Hard.Answer == "fell")
-        assert(Hard.Entry.ExampleSentences == Questions[0].Entry.ExampleSentences)
-        let Empty = QuizRun(Session: QuizSession(Mode: .Easy, Questions: []))
-        assert(Empty.CurrentQuestion == nil && Empty.SubmittedAnswer == nil)
-    }
-
-    private static func CheckReviewSchedule() {
-        var Calendar = Calendar(identifier: .gregorian)
-        Calendar.timeZone = TimeZone(identifier: "Europe/Berlin")!
-        let Now = Calendar.date(from: DateComponents(year: 2026, month: 10, day: 24, hour: 10))!
-        var Word = WordEntry(Term: "fell", Translation: "ağac kəsmək")
-        assert(ReviewSchedule.IsDue(Word, Now: Now))
-        for Interval in [1, 3, 7, 14, 30, 30] {
-            ReviewSchedule.Record(&Word, IsCorrect: true, Now: Now, Calendar: Calendar)
-            assert(Word.NextReviewAt == Calendar.date(byAdding: .day, value: Interval, to: Now))
-            assert(!ReviewSchedule.IsDue(Word, Now: Now))
+    static func CheckBag() {
+        var Entries = Words(57)
+        var Bag = PracticeBag(Entries: Entries)
+        var Seen: Set<UUID> = []
+        for Count in [20, 20, 17] {
+            Bag.Start(.Hard, Entries: Entries)
+            assert(Bag.Session!.Questions.count == Count)
+            for Question in Bag.Session!.Questions { assert(Seen.insert(Question.id).inserted) }
+            Finish(&Bag, Wrong: true)
+            assert(Bag.Session!.RetryAnswers.count == Count)
         }
-        assert(Word.CorrectCount == 6)
-        let Scheduled = Word.NextReviewAt
-        ReviewSchedule.Record(&Word, IsCorrect: false, Now: Now, UpdatesSchedule: false)
-        assert(Word.NextReviewAt == Scheduled && Word.ReviewStreak == 5)
-        assert(QuizPlanner.MakeQuestions(From: [Word], Mode: .Easy, Now: Now).isEmpty)
-        assert(QuizPlanner.MakeQuestions(From: [Word], Mode: .Easy, Now: Now, IncludeUpcoming: true).count == 1)
-        ReviewSchedule.Record(&Word, IsCorrect: false, Now: Now)
-        assert(Word.ReviewStreak == 0 && ReviewSchedule.IsDue(Word, Now: Now))
-        assert(Word.IncorrectCount == 2)
-    }
-
-    private static func CheckMigrationAndExamples() throws {
-        let Id = UUID()
-        let Legacy = """
-        {"Id":"\(Id)","Term":"fell","Translation":"ağacı kəsmək","Definition":"","CorrectCount":3,"IncorrectCount":1}
-        """
-        let Word = try JSONDecoder().decode(WordEntry.self, from: Data(Legacy.utf8))
-        assert(Word.Id == Id && Word.CorrectCount == 3)
-        assert(Word.ExampleSentences.isEmpty && Word.ReviewStreak == 0 && Word.NextReviewAt == nil)
-        let OldRecord = """
-        {"Id":"\(UUID())","Date":0,"Mode":"Easy","Correct":12,"Total":20}
-        """
-        let Record = try JSONDecoder().decode(QuizRecord.self, from: Data(OldRecord.utf8))
-        assert(Record.Answers == nil && Record.Correct == 12)
-        let Example = "They said, \"Try again.\"\nSmall efforts accumulate."
-        let WithExample = WordEntry(Term: "accumulate", Translation: "toplamaq", ExampleSentences: Example)
-        let Imported = try WordCSV.Decode(WordCSV.Encode([WithExample]))
-        assert(Imported[0].ExampleSentences == Example)
-        let OldCSV = try WordCSV.Decode("English,Azerbaijani,Definition\nfell,ağac kəsmək,To cut down a tree\n")
-        assert(OldCSV[0].ExampleSentences.isEmpty)
-        let SavedWord = try JSONDecoder().decode(WordEntry.self, from: JSONEncoder().encode(WithExample))
-        assert(SavedWord == WithExample)
-    }
-
-    private static func CheckProgress() {
-        var Calendar = Calendar(identifier: .gregorian)
-        Calendar.timeZone = TimeZone(identifier: "Asia/Baku")!
-        let Now = Calendar.date(from: DateComponents(year: 2026, month: 10, day: 9, hour: 0, minute: 30))!
-        func Record(_ Days: Int, _ Correct: Int, _ Total: Int) -> QuizRecord {
-            QuizRecord(Date: Calendar.date(byAdding: .day, value: Days, to: Now)!, Mode: "Easy", Correct: Correct, Total: Total)
+        assert(Bag.CycleComplete && Seen == Set(Entries.map(\.Id)))
+        let Added = WordEntry(Term: "newcomer", Translation: "yeni")
+        Entries.append(Added); Bag.Reconcile(Entries)
+        assert(!Bag.CycleComplete && Bag.Remaining == [Added.Id])
+        Bag.Start(.Hard, Entries: Entries)
+        assert(Bag.Cycle == 1 && Bag.Session!.Questions.count == 1)
+        Finish(&Bag)
+        Bag.Start(.Easy, Entries: Entries)
+        assert(Bag.Cycle == 2 && Bag.Session!.Questions.count == 20)
+        assert(Bag.Session!.Questions.filter(\.IsEnglishPrompt).count == 10)
+        let Current = Bag.Session!.Current!.id
+        let Before = Bag.Remaining
+        Bag.Start(.Hard, Entries: Entries)
+        assert(Bag.Session!.Current!.id == Current && Bag.Session!.Mode == .Easy && Bag.Remaining == Before)
+        Entries.removeAll { $0.Id == Current }
+        Bag.Reconcile(Entries)
+        assert(Bag.Session!.Current?.id != Current && !Bag.Known.contains(Current))
+        Bag.Reconcile([])
+        assert(Bag.Remaining.isEmpty && Bag.Session!.IsFinished)
+        var Small = PracticeBag(Entries: Words(3))
+        let Three = Words(3)
+        Small = PracticeBag(Entries: Three); Small.Start(.Easy, Entries: Three)
+        assert(Small.Session!.Questions.allSatisfy { $0.Options?.count == 3 })
+        assert((1...2).contains(Small.Session!.Questions.filter(\.IsEnglishPrompt).count))
+        let Alone = [WordEntry(Term: "alone", Translation: "tək")]
+        let One = QuizPlanner.MakeQuestions(Alone, From: Alone, Mode: .Easy)[0]
+        assert(One.Options == nil && !One.IsEnglishPrompt)
+        var Orders = Set<String>()
+        for _ in 0..<12 {
+            var Random = PracticeBag(Entries: Three); Random.Start(.Hard, Entries: Three)
+            Orders.insert(Random.Session!.Questions.map(\.Entry.Term).joined(separator: ","))
         }
-        let History = [Record(0, 10, 20), Record(0, 5, 5), Record(-1, 7, 10), Record(-2, 2, 5), Record(-6, 1, 2), Record(-7, 1, 2)]
-        let Progress = StudyProgress(History: History, Now: Now, Calendar: Calendar)
-        assert(Progress.Week.count == 7 && Progress.WeeklyAnswers == 42)
-        assert(Progress.ActiveDays == 4 && Progress.Streak == 3)
-        assert(Progress.Accuracy == 59)
-        let Yesterday = StudyProgress(History: [Record(-1, 1, 2)], Now: Now, Calendar: Calendar)
-        assert(Yesterday.Streak == 1)
-        assert(StudyProgress(History: [Record(-2, 1, 2)], Now: Now, Calendar: Calendar).Streak == 0)
-        assert(StudyProgress(History: [], Now: Now, Calendar: Calendar).WeeklyAnswers == 0)
+        assert(Orders.count > 1)
+    }
+    static func CheckAnswers() {
+        let Large = WordEntry(Term: "large", Translation: "böyük; iri", Group: "size")
+        let Huge = WordEntry(Term: "huge", Translation: "böyük", Group: "size")
+        let Entries = [Large, Huge] + Words(4)
+        let Question = QuizPlanner.MakeQuestions([Large], From: Entries, Mode: .Hard)[0]
+        var Session = PracticeSession(Mode: .Hard, Questions: [Question])
+        assert(Session.Submit("  HUGE  ", For: Large.id))
+        assert(Session.Submitted?.IsCorrect == true && Session.Submitted?.Alternative == true)
+        assert(Session.Advance(From: Large.id) && Session.IsFinished)
+        for Bad in ["larg", "lárge", "la rge"] {
+            var Trial = PracticeSession(Mode: .Hard, Questions: [Question])
+            assert(Trial.Submit(Bad, For: Large.id) && Trial.Submitted?.IsCorrect == false)
+        }
+        assert(QuizPlanner.Normalize("  Take   OFF ") == "take off")
+        assert(QuizPlanner.Normalize("şey") != QuizPlanner.Normalize("sey"))
+        for _ in 0..<10 {
+            let Easy = QuizPlanner.MakeQuestions(Entries, From: Entries, Mode: .Easy)
+            let Target = Easy.first { $0.id == Large.id }!
+            let Options = Target.Options!
+            assert(Options.count == 4 && Set(Options).count == 4)
+            if !Target.IsEnglishPrompt { assert(!Options.contains("huge")) }
+            var Run = PracticeSession(Mode: .Easy, Questions: [Target])
+            assert(!Run.Submit("not listed", For: Large.id))
+            let Correct = Target.IsEnglishPrompt ? "böyük" : "large"
+            assert(Run.Submit(Correct, For: Large.id) && Run.Submitted?.IsCorrect == true)
+        }
+    }
+    static func CheckCSV() throws {
+        let URL = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent().appendingPathComponent("Data/Vocabulary.csv")
+        let Original = try String(contentsOf: URL, encoding: .utf8)
+        let Preview = try ImportPreview(Text: Original, Existing: [])
+        assert(Preview.Added == 287 && Preview.Duplicates == 11 && Preview.Errors.isEmpty)
+        assert(Preview.AddedEntries.map(\.Term) == StarterVocabulary.Entries.map(\.Term))
+        let Text = "Definition,Group,Azerbaijani,English,Examples\nignored,size,iri,large,ignored\nignored,,su,water,ignored\nignored,,another,WATER,ignored\nignored,,,missing,ignored\n"
+        let Existing = [WordEntry(Term: "large", Translation: "böyük", Group: "original")]
+        let Result = try ImportPreview(Text: Text, Existing: Existing)
+        assert(Result.Added == 1 && Result.Duplicates == 2 && Result.Errors.count == 1)
+        assert(Existing[0].Translation == "böyük" && Existing[0].Group == "original")
+        let Quoted = [WordEntry(Term: "take, off", Translation: "a\"b\nc", Group: "phrases")]
+        let RoundTrip = try ImportPreview(Text: WordCSV.Encode(Quoted), Existing: [])
+        assert(RoundTrip.AddedEntries[0].Translation == Quoted[0].Translation)
+        assert(WordCSV.Encode(Quoted).hasPrefix("English,Azerbaijani,Group\n"))
+        let TwoColumns = try ImportPreview(Text: "English,Azerbaijani\nword,söz\n", Existing: [])
+        assert(TwoColumns.Added == 1 && TwoColumns.AddedEntries[0].Group.isEmpty)
+        do { _ = try ImportPreview(Text: "word,söz\n", Existing: []); assertionFailure("Missing header accepted") } catch {}
+        do { _ = try ImportPreview(Text: "English,Azerbaijani\nword,\"broken", Existing: []); assertionFailure("Broken CSV accepted") } catch {}
+    }
+    static func CheckGroups() {
+        let Entries = [WordEntry(Term: "large", Translation: "böyük", Group: "Size"), WordEntry(Term: "alone", Translation: "tək"), WordEntry(Term: "huge", Translation: "iri", Group: "size")]
+        let Groups = VocabularyGroup.Make(Entries, Search: "huge")
+        assert(Groups.count == 1 && Groups[0].Words.map(\.Term) == ["large", "huge"])
+        assert(VocabularyGroup.Make(Entries).count == 1)
+        assert(VocabularyGroup.Make(Entries, Search: "alone").isEmpty)
     }
 }

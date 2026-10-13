@@ -1,183 +1,146 @@
 import XCTest
 
 final class QuizUITests: XCTestCase {
-    private let Words = ["forest": "meşə", "water": "su", "bird": "quş", "large": "böyük", "huge": "iri", "tree": "ağac"]
-    @MainActor
-    private func Launch() -> XCUIApplication {
+    private let Words = ["forest": "meşə", "water": "su", "bird": "quş", "large": "böyük", "huge": "böyük", "tree": "ağac"]
+    @MainActor private func Launch() -> XCUIApplication {
         let App = XCUIApplication()
         App.launchEnvironment["WORDREVISIT_TEST_STORE"] = UUID().uuidString
-        App.launchEnvironment["WORDREVISIT_UI_FIXTURE"] = "Study"
         App.launch()
-        if App.staticTexts["Quickly Change Keyboards"].exists { App.buttons["Continue"].tap() }
         return App
     }
-
-    @MainActor
-    func testDailyAnswerIsStableAndRestoresAfterRelaunch() throws {
-        let App = Launch()
-        Capture(App, Name: "today-2")
-        App.buttons["Start today's plan"].tap()
-        let Prompt = App.staticTexts["StudyPrompt"]
-        XCTAssertTrue(Prompt.waitForExistence(timeout: 10))
-        let Original = Prompt.label
-        let Expected = try XCTUnwrap(Words.first { $0.value == Original }?.key)
-        let Answer = App.textFields["StudyAnswer"]
-        Answer.tap(); Answer.typeText(Expected + "\n")
-        XCTAssertTrue(App.buttons["Continue"].waitForExistence(timeout: 5))
-        XCTAssertEqual(Prompt.label, Original)
-        Capture(App, Name: "study-feedback")
-        App.terminate(); App.launch()
-        App.buttons["Continue saved session"].tap()
-        XCTAssertTrue(Prompt.waitForExistence(timeout: 5))
-        XCTAssertEqual(Prompt.label, Original)
-        XCTAssertTrue(App.buttons["Continue"].exists)
-        App.swipeUp(); App.buttons["Continue"].tap()
-        XCTAssertNotEqual(Prompt.label, Original)
-        let Next = Prompt.label
-        App.buttons["I don't know"].tap()
-        XCTAssertEqual(Prompt.label, Next)
-        App.swipeUp(); App.buttons["Continue"].tap()
-        App.buttons["Save and close session"].tap()
-        App.tabBars.buttons["Progress"].tap()
-        XCTAssertTrue(App.staticTexts["Your progress"].waitForExistence(timeout: 5))
-        Capture(App, Name: "progress-2")
-        App.swipeUp(); App.buttons["Review study answers"].tap()
-        XCTAssertTrue(App.staticTexts["Study answers"].waitForExistence(timeout: 5))
-        XCTAssertTrue(App.staticTexts["You: " + Expected].exists)
+    @MainActor private func OpenTab(_ Name: String, In App: XCUIApplication) {
+        let PhoneTab = App.tabBars.buttons[Name]
+        if PhoneTab.exists { PhoneTab.tap() }
+        else if App.buttons[Name].firstMatch.exists { App.buttons[Name].firstMatch.tap() }
+        else { App.cells[Name].firstMatch.tap() }
+    }
+    @MainActor private func Capture(_ App: XCUIApplication, _ Name: String) {
+        let Attachment = XCTAttachment(screenshot: App.screenshot())
+        Attachment.name = Name; Attachment.lifetime = .keepAlways; add(Attachment)
     }
 
-    @MainActor
-    func testFreeQuizRandomOrderReviewAndRetry() throws {
+    @MainActor func testHardDraftResumePinnedNextAndOneRetry() throws {
         let App = Launch()
-        App.swipeUp()
-        App.buttons.containing(.staticText, identifier: "Hard recall").firstMatch.tap()
+        App.segmentedControls["PracticeMode"].buttons["Hard"].tap()
+        App.buttons["Start practice"].tap()
         let Prompt = App.staticTexts["QuizPrompt"]
         XCTAssertTrue(Prompt.waitForExistence(timeout: 5))
-        let First = Prompt.label
-        let Correct = try XCTUnwrap(Words.first { $0.value == First }?.key)
-        for Index in 0..<6 {
-            let Current = Prompt.label
-            let Answer = App.textFields["QuizAnswer"]
-            if !Answer.isHittable { App.swipeUp() }
-            Answer.tap(); Answer.typeText((Index == 0 ? Correct : "incorrect answer") + "\n")
-            XCTAssertEqual(Prompt.label, Current)
-            App.swipeUp()
-            App.buttons[Index == 5 ? "See results" : "Next word"].tap()
+        let FirstPrompt = Prompt.label
+        let Field = App.textFields["QuizAnswer"]
+        Field.tap(); Field.typeText("draft")
+        App.terminate(); App.launch()
+        App.buttons["Continue group"].tap()
+        XCTAssertTrue(Field.waitForExistence(timeout: 5))
+        XCTAssertEqual(Field.value as? String, "draft")
+        XCTAssertEqual(Prompt.label, FirstPrompt)
+        // Complete all primary questions incorrectly, then all six retries incorrectly.
+        for Index in 0..<12 {
+            if Index != 0 { Field.tap(); Field.typeText("wrong") }
+            let Before = Prompt.label
+            XCTAssertTrue(App.buttons["Check answer"].isHittable)
+            App.buttons["Check answer"].tap()
+            let Next = App.buttons["NextQuestion"]
+            XCTAssertTrue(Next.waitForExistence(timeout: 5))
+            XCTAssertTrue(Next.isHittable, "Next must be reachable without scrolling")
+            XCTAssertEqual(Prompt.label, Before)
+            if Index == 0 {
+                Capture(App, "hard-feedback-13")
+                App.terminate(); App.launch(); App.buttons["Continue group"].tap()
+                XCTAssertTrue(Next.waitForExistence(timeout: 5)); XCTAssertEqual(Prompt.label, Before)
+            }
+            Next.tap()
         }
-        XCTAssertTrue(App.staticTexts["1 / 6"].waitForExistence(timeout: 5))
-        App.swipeUp(); App.buttons["Review my answers"].tap()
-        XCTAssertTrue(App.staticTexts["Your first answers"].waitForExistence(timeout: 5))
-        App.buttons["Done"].tap()
-        App.buttons["Retry 5 missed words"].tap()
-        XCTAssertTrue(Prompt.waitForExistence(timeout: 5))
-        XCTAssertNotEqual(Prompt.label, First)
+        XCTAssertTrue(App.staticTexts["Cycle complete"].waitForExistence(timeout: 5))
+        XCTAssertTrue(App.buttons["NextGroup"].isHittable)
+        App.buttons["Back to home"].tap()
+        OpenTab("Settings", In: App)
+        App.buttons.containing(.staticText, identifier: "Practice history").firstMatch.tap()
+        XCTAssertTrue(App.staticTexts["0/6"].waitForExistence(timeout: 5))
+        App.buttons.containing(.staticText, identifier: "0/6").firstMatch.tap()
+        XCTAssertTrue(App.staticTexts["Answer review"].waitForExistence(timeout: 5))
+        Capture(App, "history-13")
     }
 
-    @MainActor
-    func testEasyBothDirectionsAndAppearance() throws {
+    @MainActor func testEasyMixedDirectionsPinnedNextAndModeSwitch() throws {
         let App = Launch()
-        App.tabBars.buttons["Settings"].tap()
-        let Appearance = App.segmentedControls["AppearancePicker"]
-        XCTAssertTrue(Appearance.waitForExistence(timeout: 5))
-        Appearance.buttons["Dark"].tap()
-        App.tabBars.buttons["Today"].tap()
-        Capture(App, Name: "today-dark-21")
-        App.tabBars.buttons["Settings"].tap()
-        Appearance.buttons["Light"].tap()
-        App.terminate(); App.launch()
-        App.tabBars.buttons["Settings"].tap()
-        XCTAssertTrue(Appearance.buttons["Light"].isSelected)
-        Capture(App, Name: "settings-light-21")
-        App.buttons["My learning plan"].tap()
-        Capture(App, Name: "plan-light-21")
-        App.buttons["Cancel"].tap()
-        App.tabBars.buttons["Today"].tap()
-        Capture(App, Name: "today-light-21")
-        for Direction in ["English → Azerbaijani", "Azerbaijani → English"] {
-            App.swipeUp()
-            App.buttons.containing(.staticText, identifier: "Easy recall").firstMatch.tap()
-            App.buttons[Direction].tap()
-            let Prompt = App.staticTexts["QuizPrompt"]
+        App.buttons["Start practice"].tap()
+        let Prompt = App.staticTexts["QuizPrompt"]
+        var Seen: Set<String> = []
+        var EnglishPrompts = 0
+        for Index in 0..<6 {
             XCTAssertTrue(Prompt.waitForExistence(timeout: 5))
-            let Original = Prompt.label
-            XCTAssertFalse(App.textFields["QuizAnswer"].exists)
+            let Value = Prompt.label
+            Seen.insert(Value)
             let Options = App.buttons.matching(identifier: "QuizOption")
             XCTAssertEqual(Options.count, 4)
-            let Correct = try XCTUnwrap(Direction.hasPrefix("English") ? Words[Original] : Words.first { $0.value == Original }?.key)
-            let CorrectButton = Options.allElementsBoundByIndex.first { $0.label == Correct }!
-            if !CorrectButton.isHittable { App.swipeUp() }
-            CorrectButton.tap()
-            XCTAssertEqual(Prompt.label, Original)
-            XCTAssertTrue(Options.allElementsBoundByIndex.allSatisfy { !$0.isEnabled })
-            App.swipeUp()
-            XCTAssertTrue(App.staticTexts["You got it"].exists)
-            Capture(App, Name: Direction.hasPrefix("English") ? "choice-en-az-light-21" : "choice-az-en-light-21")
-            App.buttons["Next word"].tap()
-            XCTAssertNotEqual(Prompt.label, Original)
-            App.buttons["Close quiz"].tap()
+            let Correct: String
+            if let Translation = Words[Value] { Correct = Translation; EnglishPrompts += 1 }
+            else {
+                Correct = try XCTUnwrap(Options.allElementsBoundByIndex.first { Words[$0.label] == Value }?.label)
+            }
+            let Choice = try XCTUnwrap(Options.allElementsBoundByIndex.first { $0.label == Correct })
+            if !Choice.isHittable { App.swipeUp() }
+            Choice.tap()
+            let Next = App.buttons["NextQuestion"]
+            XCTAssertTrue(Next.isHittable)
+            if Index == 0 { Capture(App, "easy-feedback-13") }
+            Next.tap()
         }
-        App.tabBars.buttons["Settings"].tap()
-        Appearance.buttons["System"].tap()
-        App.terminate(); App.launch()
-        App.tabBars.buttons["Settings"].tap()
-        XCTAssertTrue(Appearance.buttons["System"].isSelected)
+        XCTAssertEqual(EnglishPrompts, 3)
+        XCTAssertTrue(App.staticTexts["Cycle complete"].waitForExistence(timeout: 5))
+        let Mode = App.segmentedControls["NextMode"]
+        Mode.buttons["Hard"].tap()
+        App.buttons["NextGroup"].tap()
+        XCTAssertTrue(App.textFields["QuizAnswer"].waitForExistence(timeout: 5))
+        XCTAssertEqual(App.buttons.matching(identifier: "QuizOption").count, 0)
     }
 
-    @MainActor
-    func testBulkDeletePastePreviewAndSettings() throws {
+    @MainActor func testSynonymsAppearanceAndSimpleEditor() throws {
         let App = Launch()
-        App.tabBars.buttons["My words"].tap()
+        OpenTab("Settings", In: App)
+        let Appearance = App.segmentedControls["AppearancePicker"]
+        Appearance.buttons["Dark"].tap()
+        OpenTab("Practice", In: App)
+        Capture(App, "home-dark-13")
+        OpenTab("Settings", In: App); Appearance.buttons["Light"].tap()
+        App.terminate(); App.launch()
+        OpenTab("Settings", In: App)
+        XCTAssertTrue(Appearance.buttons["Light"].isSelected)
+        Capture(App, "settings-light-13")
+        OpenTab("Synonyms", In: App)
+        XCTAssertTrue(App.staticTexts["large"].waitForExistence(timeout: 5))
+        Capture(App, "synonyms-light-13")
+        App.textFields["SearchGroups"].tap(); App.textFields["SearchGroups"].typeText("huge")
+        XCTAssertTrue(App.staticTexts["large"].exists && App.staticTexts["huge"].exists)
+        XCTAssertFalse(App.staticTexts["forest"].exists)
+        OpenTab("My words", In: App)
+        App.buttons["Add word"].tap()
+        let English = App.textFields["EditEnglish"]
+        XCTAssertTrue(English.waitForExistence(timeout: 5))
+        XCTAssertFalse(App.staticTexts["Pause this word"].exists)
+        XCTAssertFalse(App.staticTexts["Definition"].exists)
+        Capture(App, "editor-light-13")
+        App.buttons["Cancel"].tap()
+    }
+
+    @MainActor func testBulkDeleteAndDuplicateImport() throws {
+        let App = Launch()
+        OpenTab("My words", In: App)
         App.buttons["Manage words"].tap(); App.buttons["Select words"].tap()
-        App.buttons["Select visible"].tap()
-        Capture(App, Name: "bulk-delete")
-        App.buttons["Delete (6)"].tap(); App.buttons["Delete 6 words"].tap()
+        App.buttons["Select visible"].tap(); App.buttons["Delete (6)"].tap(); App.buttons["Delete 6 words"].tap()
         XCTAssertTrue(App.staticTexts["A fresh page"].waitForExistence(timeout: 5))
         App.buttons["Manage words"].tap(); App.buttons["Paste words"].tap()
         let Editor = App.textViews["PasteWords"]
         XCTAssertTrue(Editor.waitForExistence(timeout: 5))
-        Editor.tap(); Editor.typeText("calm - sakit\nquiet - sessiz\nbad row")
-        App.swipeUp(); App.buttons["Preview import"].tap()
-        App.swipeUp()
-        XCTAssertTrue(App.buttons["Import 2 words"].waitForExistence(timeout: 5))
-        Capture(App, Name: "import-preview")
+        Editor.tap(); Editor.typeText("calm - sakit\nCALM - different\nquiet - sessiz\nbad row")
+        XCTAssertTrue(App.buttons["Preview import"].isHittable)
+        App.buttons["Preview import"].tap()
+        XCTAssertTrue(App.buttons["Import 2 words"].isHittable)
+        Capture(App, "import-13")
         App.buttons["Import 2 words"].tap()
         XCTAssertTrue(App.buttons.containing(.staticText, identifier: "calm").firstMatch.waitForExistence(timeout: 5))
-        App.tabBars.buttons["Settings"].tap()
-        App.buttons["My learning plan"].tap()
-        XCTAssertTrue(App.staticTexts["My learning plan"].waitForExistence(timeout: 5))
-        Capture(App, Name: "learning-plan")
-        App.buttons["Save"].tap()
-        App.buttons["Backup & restore"].tap()
-        XCTAssertTrue(App.buttons["Export full backup"].waitForExistence(timeout: 5))
-        Capture(App, Name: "backup")
-        App.buttons["Done"].tap()
-        App.tabBars.buttons["Today"].tap(); App.buttons["Start today's plan"].tap()
-        XCTAssertTrue(App.staticTexts["StudyIntroduction"].waitForExistence(timeout: 5))
-        Capture(App, Name: "learn")
-        App.swipeUp(); App.buttons["Learn this word"].tap()
-        if App.buttons["Learn this word"].waitForExistence(timeout: 2) { App.buttons["Learn this word"].tap() }
-        XCTAssertTrue(App.buttons["Save and return home"].waitForExistence(timeout: 5))
-    }
-
-    @MainActor
-    func testSynonymsUseEligibleGroups() throws {
-        let App = Launch()
-        App.swipeUp()
-        App.buttons["Practise synonyms"].tap()
-        let Prompt = App.staticTexts["StudyPrompt"]
-        XCTAssertTrue(Prompt.waitForExistence(timeout: 5))
-        let Original = Prompt.label
-        XCTAssertTrue(["large", "huge"].contains(Original))
-        App.buttons[Original == "large" ? "huge" : "large"].tap()
-        XCTAssertEqual(Prompt.label, Original)
-        Capture(App, Name: "synonyms")
-        App.swipeUp(); App.buttons["Continue"].tap()
-        XCTAssertNotEqual(Prompt.label, Original)
-    }
-
-    @MainActor
-    private func Capture(_ App: XCUIApplication, Name: String) {
-        let Attachment = XCTAttachment(screenshot: App.screenshot())
-        Attachment.name = Name; Attachment.lifetime = .keepAlways; add(Attachment)
+        OpenTab("Practice", In: App); App.buttons["Start practice"].tap()
+        XCTAssertTrue(App.staticTexts["QuizPrompt"].waitForExistence(timeout: 5))
+        XCTAssertEqual(App.buttons.matching(identifier: "QuizOption").count, 2)
     }
 }

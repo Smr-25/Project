@@ -2,210 +2,65 @@ import SwiftUI
 
 struct SettingsView: View {
     @EnvironmentObject private var Store: WordRepository
-    @State private var IsUpdating = false
-    @State private var ShowingPlan = false
-    @State private var ShowingBackup = false
-    @State private var Notice: String?
-
+    @State private var ShowingHistory = false
+    @State private var Updating = false
+    @State private var Notice = false
     var body: some View {
         ZStack {
             AppBackground()
-            ScrollView(showsIndicators: false) {
+            ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
-                    SectionEyebrow(Title: "Shape your routine")
-                    Text("Settings")
-                        .font(.system(size: 38, weight: .bold, design: .rounded))
-
+                    SectionEyebrow(Title: "Make it yours")
+                    Text("Settings").font(.largeTitle.bold())
                     VStack(alignment: .leading, spacing: 14) {
                         SectionEyebrow(Title: "Appearance")
                         Picker("Appearance", selection: Binding(get: { Store.Appearance }, set: { Store.SetAppearance($0) })) {
                             ForEach(AppAppearance.allCases) { Text($0.rawValue).tag($0) }
-                        }
-                        .pickerStyle(.segmented)
-                        .accessibilityIdentifier("AppearancePicker")
+                        }.pickerStyle(.segmented).accessibilityIdentifier("AppearancePicker")
                         Text("System follows your iPhone's appearance.").font(.caption).foregroundStyle(Palette.Muted)
-                    }.padding(21).FrostedCard(CornerRadius: 27)
-
-                    Button { ShowingPlan = true } label: {
-                        Label("My learning plan", systemImage: "calendar").frame(maxWidth: .infinity, minHeight: 50)
-                    }.buttonStyle(PrimaryActionStyle(Tint: Palette.Primary))
-                    Button { ShowingBackup = true } label: {
-                        Label("Backup & restore", systemImage: "externaldrive").frame(maxWidth: .infinity, minHeight: 50)
-                    }.buttonStyle(PrimaryActionStyle(Tint: Palette.Primary))
-                    VStack(alignment: .leading, spacing: 20) {
-                        HStack(spacing: 14) {
-                            Image(systemName: "bell.badge.fill")
-                                .font(.system(size: 20))
-                                .foregroundStyle(Palette.Accent)
-                                .frame(width: 48, height: 48)
-                                .background(Palette.Accent.opacity(0.16), in: RoundedRectangle(cornerRadius: 15))
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Daily reminders")
-                                    .font(.system(size: 18, weight: .bold, design: .rounded))
-                                Text("Quiet after your daily minimum")
-                                    .font(.system(size: 13))
-                                    .foregroundStyle(Palette.Muted)
-                            }
+                    }.padding(22).FrostedCard()
+                    Button { ShowingHistory = true } label: {
+                        HStack {
+                            Label("Practice history", systemImage: "clock.arrow.circlepath")
                             Spacer()
-                            Toggle("Daily reminders", isOn: Binding(
-                                get: { Store.RemindersEnabled },
-                                set: { Enabled in
-                                    Store.RemindersEnabled = Enabled
-                                    UpdateReminders()
-                                }
-                            ))
-                            .labelsHidden()
-                            .tint(Palette.Accent)
-                            .disabled(IsUpdating)
-                        }
-                        Divider().overlay(Palette.Primary.opacity(0.08))
-                        TimeRow(Title: "Morning quiz", Symbol: "sunrise.fill", Tint: Palette.Accent,
-                                Time: Binding(get: { Store.Morning.DateValue }, set: { Store.Morning = ReminderTime(DateValue: $0); UpdateReminders() }))
-                            .disabled(IsUpdating)
-                        TimeRow(Title: "Evening quiz", Symbol: "moon.stars.fill", Tint: Palette.Accent,
-                                Time: Binding(get: { Store.Evening.DateValue }, set: { Store.Evening = ReminderTime(DateValue: $0); UpdateReminders() }))
-                            .disabled(IsUpdating)
-                    }
-                    .padding(21)
-                    .FrostedCard(CornerRadius: 27)
-
-                    VStack(alignment: .leading, spacing: 18) {
-                        HStack(spacing: 14) {
-                            Image(systemName: "iphone")
-                                .font(.system(size: 20))
-                                .foregroundStyle(Palette.Accent)
-                                .frame(width: 48, height: 48)
-                                .background(Palette.Accent.opacity(0.16), in: RoundedRectangle(cornerRadius: 15))
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Xcode renewal")
-                                    .font(.system(size: 18, weight: .bold, design: .rounded))
-                                Text("A reminder before your free install may expire")
-                                    .font(.system(size: 13))
-                                    .foregroundStyle(Palette.Muted)
-                            }
-                            Spacer()
-                            Toggle("Xcode renewal reminder", isOn: Binding(
-                                get: { Store.RenewalReminderEnabled },
-                                set: { Enabled in
-                                    Store.RenewalReminderEnabled = Enabled
-                                    if Enabled && Store.XcodeInstalledAt == nil { Store.XcodeInstalledAt = .now }
-                                    UpdateRenewalReminder()
-                                }
-                            ))
-                            .labelsHidden()
-                            .tint(Palette.Accent)
-                            .disabled(IsUpdating)
-                        }
-                        if Store.RenewalReminderEnabled {
-                            Divider().overlay(Palette.Primary.opacity(0.08))
-                            if let InstalledAt = Store.XcodeInstalledAt,
-                               let ReminderAt = ReminderScheduler.RenewalDate(From: InstalledAt) {
-                                Text(ReminderAt > .now
-                                     ? "Next reminder: \(ReminderAt.formatted(date: .abbreviated, time: .shortened))"
-                                     : "Time to reinstall from Xcode.")
-                                    .font(.system(size: 14))
-                                    .foregroundStyle(Palette.Muted)
+                            Text("\(Store.History.count)").monospacedDigit()
+                            Image(systemName: "chevron.right")
+                        }.padding(22).FrostedCard().contentShape(Rectangle())
+                    }.buttonStyle(.plain)
+                    VStack(alignment: .leading, spacing: 16) {
+                        Toggle("Xcode renewal", isOn: Binding(get: { Store.Data.RenewalReminderEnabled }, set: {
+                            Store.SetRenewal(Enabled: $0); UpdateRenewal()
+                        })).disabled(Updating)
+                        Text("A reminder six days after your last Xcode install.").font(.subheadline).foregroundStyle(Palette.Muted)
+                        if Store.Data.RenewalReminderEnabled {
+                            if let Installed = Store.Data.XcodeInstalledAt, let Date = ReminderScheduler.RenewalDate(From: Installed) {
+                                Text(Date > .now ? "Next reminder: \(Date.formatted(date: .abbreviated, time: .shortened))" : "Time to reinstall from Xcode.")
+                                    .font(.subheadline)
                             }
                             Button("I reinstalled from Xcode") {
-                                Store.XcodeInstalledAt = .now
-                                UpdateRenewalReminder()
-                            }
-                            .font(.system(size: 15, weight: .semibold))
-                            .foregroundStyle(Palette.Accent)
-                            .disabled(IsUpdating)
-                            Text("Tap after each Xcode install to restart the six-day countdown.")
-                                .font(.system(size: 12))
-                                .foregroundStyle(Palette.Muted)
+                                Store.SetRenewal(Enabled: true, Reinstalled: true); UpdateRenewal()
+                            }.frame(minHeight: 44).disabled(Updating)
+                            Text("Tap after reinstalling to restart the reminder. The app cannot renew the install itself.").font(.caption).foregroundStyle(Palette.Muted)
                         }
-                    }
-                    .padding(21)
-                    .FrostedCard(CornerRadius: 27)
-
-                    VStack(alignment: .leading, spacing: 12) {
-                        SectionEyebrow(Title: "Your data")
-                        Text("Your data stays on this iPhone. Use Backup & restore to keep words, history, settings, and your saved session together.")
-                            .font(.system(size: 14))
-                            .foregroundStyle(Palette.Muted)
-                            .lineSpacing(4)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(23)
-                    .FrostedCard(CornerRadius: 25)
-
-                    VStack(alignment: .leading, spacing: 12) {
-                        SectionEyebrow(Title: "Quiet hours")
-                        Stepper("From \(Store.Learning.Settings.QuietStart):00", value: Binding(get: { Store.Learning.Settings.QuietStart }, set: { Value in
-                            var Settings = Store.Learning.Settings; Settings.QuietStart = Value; _ = Store.UpdateLearningSettings(Settings); UpdateReminders()
-                        }), in: 0...23)
-                        Stepper("Until \(Store.Learning.Settings.QuietEnd):00", value: Binding(get: { Store.Learning.Settings.QuietEnd }, set: { Value in
-                            var Settings = Store.Learning.Settings; Settings.QuietEnd = Value; _ = Store.UpdateLearningSettings(Settings); UpdateReminders()
-                        }), in: 0...23)
-                        Text("A final reminder at 22:00 is sent only if you have not started. Equal quiet-hour values turn this restriction off.").font(.caption).foregroundStyle(Palette.Muted)
                     }.padding(22).FrostedCard()
+                    Text("Your words and practice stay on this device. Export CSV from My words to keep a copy of your vocabulary.")
+                        .font(.subheadline).foregroundStyle(Palette.Muted)
                     Text("WordRevisit · Version \(Bundle.main.infoDictionary?["CFBundleShortVersionString"] as? String ?? "—")")
-                        .font(.system(size: 12))
-                        .foregroundStyle(Palette.Muted.opacity(0.7))
-                        .frame(maxWidth: .infinity)
-                        .padding(.top, 14)
-                }
-                .padding(.horizontal, 24)
-                .padding(.top, 20)
-                .padding(.bottom, 35)
+                        .font(.caption).foregroundStyle(Palette.Muted).frame(maxWidth: .infinity)
+                }.padding(24)
             }
-        }
-        .sheet(isPresented: $ShowingPlan) { StudySettingsView() }
-        .sheet(isPresented: $ShowingBackup) { BackupView() }
-        .alert("Notifications unavailable", isPresented: Binding(
-            get: { Notice != nil }, set: { if !$0 { Notice = nil } }
-        )) { Button("OK") { Notice = nil } } message: { Text(Notice ?? "") }
+        }.sheet(isPresented: $ShowingHistory) { HistoryView() }
+            .alert("Notifications unavailable", isPresented: $Notice) { Button("OK") {} } message: {
+                Text("Allow notifications in iPhone Settings, then enable Xcode renewal again.")
+            }
     }
-
-    private func UpdateReminders() {
-        Store.SaveSettings()
-        IsUpdating = true
+    private func UpdateRenewal() {
+        Updating = true
         Task {
-            let Scheduled = await Store.RefreshNotifications(RequestPermission: Store.RemindersEnabled)
-            if !Scheduled {
-                Store.RemindersEnabled = false
-                Store.SaveSettings()
-                Notice = "Allow notifications in iPhone Settings, then turn reminders on again."
+            if !(await ReminderScheduler.SetRenewal(Enabled: Store.Data.RenewalReminderEnabled, InstalledAt: Store.Data.XcodeInstalledAt)) {
+                Store.SetRenewal(Enabled: false); Notice = true
             }
-            IsUpdating = false
-        }
-    }
-
-    private func UpdateRenewalReminder() {
-        Store.SaveSettings()
-        IsUpdating = true
-        Task {
-            let Scheduled = await ReminderScheduler.SetRenewal(Enabled: Store.RenewalReminderEnabled,
-                                                               InstalledAt: Store.XcodeInstalledAt)
-            if !Scheduled {
-                Store.RenewalReminderEnabled = false
-                Store.SaveSettings()
-                Notice = "Allow notifications in iPhone Settings, then turn Xcode renewal on again."
-            }
-            IsUpdating = false
-        }
-    }
-}
-
-private struct TimeRow: View {
-    let Title: String
-    let Symbol: String
-    let Tint: Color
-    @Binding var Time: Date
-
-    var body: some View {
-        HStack(spacing: 11) {
-            Image(systemName: Symbol)
-                .foregroundStyle(Tint)
-                .frame(width: 26)
-            Text(Title).font(.system(size: 15, weight: .medium))
-            Spacer()
-            DatePicker(Title, selection: $Time, displayedComponents: .hourAndMinute)
-                .labelsHidden()
-                .tint(Tint)
+            Updating = false
         }
     }
 }

@@ -30,19 +30,13 @@ struct LibraryView: View {
     @State private var ConfirmDelete = false
     @State private var ShowingPaste = false
     @State private var ImportText: String?
-    @State private var Filter = "All"
     @FocusState private var SearchFocused: Bool
 
     private var FilteredEntries: [WordEntry] {
         Store.Entries.filter {
             (Search.isEmpty || $0.Group.localizedCaseInsensitiveContains(Search) || $0.Term.localizedCaseInsensitiveContains(Search) ||
             $0.Translation.localizedCaseInsensitiveContains(Search))
-            && (Filter == "All" || Filter == "New" && $0.Learning.IntroducedAt == nil
-                || Filter == "Learning" && $0.Learning.Stage < 3 && $0.Learning.IntroducedAt != nil
-                || Filter == "Review" && $0.Learning.Stage >= 3
-                || Filter == "Difficult" && $0.Learning.Lapses >= Store.Learning.Settings.LeechThreshold
-                || Filter == "Paused" && !$0.Learning.IsAvailable(at: .now)
-                || Filter == "Synonyms" && !$0.Group.isEmpty)
+
         }
         .sorted { $0.Term.localizedStandardCompare($1.Term) == .orderedAscending }
     }
@@ -54,16 +48,6 @@ struct LibraryView: View {
                 VStack(alignment: .leading, spacing: 24) {
                     Header
                     SearchField
-                    Picker("Filter words", selection: $Filter) {
-                        ForEach(["All", "New", "Learning", "Review", "Difficult", "Paused", "Synonyms"], id: \.self) { Text($0).tag($0) }
-                    }.pickerStyle(.menu)
-                    if Selecting {
-                        HStack {
-                            Button("Select visible") { Selected.formUnion(FilteredEntries.map(\.Id)) }
-                            Spacer()
-                            Button("Delete (\(Selected.count))", role: .destructive) { DeleteIds = Selected; ConfirmDelete = true }.disabled(Selected.isEmpty)
-                        }.frame(minHeight: 44)
-                    }
                     HStack {
                         SectionEyebrow(Title: "Your collection")
                         Spacer()
@@ -98,6 +82,17 @@ struct LibraryView: View {
             }
             .scrollDismissesKeyboard(.interactively)
         }
+        .safeAreaInset(edge: .bottom) {
+            if Selecting {
+                HStack {
+                    Button("Select visible") { Selected.formUnion(FilteredEntries.map(\.Id)) }
+                    Spacer()
+                    Button("Delete (\(Selected.count))", role: .destructive) { DeleteIds = Selected; ConfirmDelete = true }
+                        .disabled(Selected.isEmpty)
+                }.frame(minHeight: 44).padding(.horizontal, 24).padding(.vertical, 10)
+                    .background(.regularMaterial)
+            }
+        }
         .sheet(isPresented: $ShowingPaste) { ImportWordsView() }
         .sheet(isPresented: Binding(get: { ImportText != nil }, set: { if !$0 { ImportText = nil } })) { ImportWordsView(CSV: ImportText) }
         .confirmationDialog("Delete \(DeleteIds.count) words?", isPresented: $ConfirmDelete, titleVisibility: .visible) {
@@ -105,7 +100,7 @@ struct LibraryView: View {
                 Store.Delete(Ids: DeleteIds); Selected.subtract(DeleteIds); Selecting = false
             }
             Button("Cancel", role: .cancel) {}
-        } message: { Text("The selected words and their schedules will be removed. Past answer history stays. Export a backup first if you may want them back.") }
+        } message: { Text("These words will be removed from your vocabulary and the current practice cycle. Past history stays. Export CSV first if you may want the words back.") }
         .sheet(isPresented: $ShowingAdd) { WordEditorView() }
         .sheet(item: $EditingEntry) { Entry in WordEditorView(Entry: Entry) }
         .fileImporter(isPresented: $ShowingImport, allowedContentTypes: [.commaSeparatedText, .plainText]) { Result in
@@ -142,9 +137,9 @@ struct LibraryView: View {
                 Button { ShowingAdd = true } label: {
                     Image(systemName: "plus")
                         .font(.system(size: 18, weight: .bold))
-                        .foregroundStyle(Palette.Background)
+                        .foregroundStyle(.white)
                         .frame(width: 46, height: 46)
-                        .background(Palette.Primary, in: RoundedRectangle(cornerRadius: 15))
+                        .background(Palette.Accent, in: RoundedRectangle(cornerRadius: 15))
                 }
                 .accessibilityLabel("Add word")
             }
@@ -200,14 +195,13 @@ private struct WordRow: View {
     var body: some View {
         HStack(spacing: 14) {
             RoundedRectangle(cornerRadius: 2)
-                .fill(Entry.IncorrectCount > Entry.CorrectCount ? Palette.Accent : Palette.Primary)
+                .fill(Palette.Accent)
                 .frame(width: 3, height: 47)
             VStack(alignment: .leading, spacing: 5) {
                 Text(Entry.Term).font(.system(size: 18, weight: .semibold, design: .rounded))
                 Text(Entry.Translation).font(.system(size: 14)).foregroundStyle(Palette.Muted)
                     .lineLimit(2)
                 if !Entry.Group.isEmpty { Text(Entry.Group).font(.caption).foregroundStyle(Palette.Accent) }
-                if Entry.Learning.Suspended { Text("Paused").font(.caption) }
             }
             Spacer()
             Image(systemName: "chevron.right").font(.system(size: 12, weight: .bold))

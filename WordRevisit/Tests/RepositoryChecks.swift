@@ -1,106 +1,86 @@
 import Foundation
 
-@main
-enum RepositoryChecks {
-    @MainActor
-    static func main() throws {
+@main enum RepositoryChecks {
+    @MainActor static func main() throws {
         let Directory = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
         try FileManager.default.createDirectory(at: Directory, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: Directory) }
         let URL = Directory.appendingPathComponent("Words.json")
-        let Legacy = """
-        {"Entries":[{"Id":"\(UUID())","Term":"fell","Translation":"ağacı kəsmək","Definition":"","CorrectCount":3,"IncorrectCount":1}],
-        "History":[{"Id":"\(UUID())","Date":0,"Mode":"Easy","Correct":12,"Total":20}],
-        "Morning":{"Hour":9,"Minute":0},"Evening":{"Hour":19,"Minute":0},"RemindersEnabled":false}
-        """
-        try Data(Legacy.utf8).write(to: URL)
+        let Entries = (0..<45).map { WordEntry(Term: "word\($0)", Translation: "məna\($0)") }
+        let Initial = PracticeData(Entries: Entries, Bag: PracticeBag(Entries: Entries))
+        try JSONEncoder().encode(Initial).write(to: URL)
         let Store = WordRepository(FileURL: URL)
-        assert(Store.ErrorMessage == nil && Store.Entries.count == 1)
-        assert(Store.History.count == 1 && Store.History[0].Correct == 12)
-        var Word = Store.Entries[0]
-        assert(Word.CorrectCount == 3 && Word.Translation.contains("ağac kəsmək"))
-        Word.ExampleSentences = "They fell trees."
-        Store.Update(Word)
-        let Session = QuizSession(Mode: .Easy, Questions: QuizPlanner.MakeQuestions(From: Store.Entries, Mode: .Easy))
-        var Run = QuizRun(Session: Session)
-        let Answer = Run.Submit("agac kesmek", For: Word.id)!
-        Store.RecordAnswer(For: Word.id, IsCorrect: Answer.IsCorrect)
-        assert(Run.CurrentQuestion?.id == Word.id)
-        assert(QuizPlanner.MakeQuestions(From: Store.Entries, Mode: .Easy).isEmpty)
-        assert(Run.Advance(From: Word.id))
-        Store.FinishQuiz(Mode: .Easy, Answers: Run.OriginalAnswers, IsPractice: false)
-        let Reloaded = WordRepository(FileURL: URL)
-        assert(Reloaded.Entries[0].ExampleSentences == "They fell trees.")
-        assert(Reloaded.Entries[0].CorrectCount == 4 && Reloaded.Entries[0].NextReviewAt != nil)
-        assert(Reloaded.History.count == 2 && Reloaded.History[0].Answers?.first?.Input == "agac kesmek")
-        assert(Reloaded.History[1].Answers == nil)
-        let BrokenURL = Directory.appendingPathComponent("Broken.json")
-        let BrokenData = Data("{broken".utf8)
-        try BrokenData.write(to: BrokenURL)
-        let Broken = WordRepository(FileURL: BrokenURL)
-        assert(Broken.ErrorMessage != nil)
-        assert(!Broken.Add(Term: "word", Translation: "söz", Definition: ""))
-        let PreservedData = try Data(contentsOf: BrokenURL)
-        assert(PreservedData == BrokenData)
-        try CheckVersion2Upgrade(Directory: Directory)
-        print("Repository migration and persistence checks passed")
-    }
-    @MainActor
-    private static func CheckVersion2Upgrade(Directory: URL) throws {
-        // This fixture was encoded by the unchanged 2.0 app with seven study days and a saved session.
-        let FixtureURL = URL(fileURLWithPath: #filePath).deletingLastPathComponent()
-            .appendingPathComponent("Fixtures/Version2Backup.json")
-        let Original = try Data(contentsOf: FixtureURL)
-        let URL = Directory.appendingPathComponent("Version2.json")
-        try Original.write(to: URL)
-        let Store = WordRepository(FileURL: URL)
-        assert(Store.ErrorMessage == nil && Store.Appearance == .System)
-        assert(Store.Learning.Days.count == 7 && Store.Learning.Session?.Current?.Input == "wat")
-        assert(Store.History[0].Answers?[0].Question.Options == nil)
-        let Recovery = URL.appendingPathExtension("before-schema-3")
-        let RecoveryData = try Data(contentsOf: Recovery)
-        assert(RecoveryData == Original)
-        func Content(_ Data: Data) throws -> NSDictionary {
-            var Object = try JSONSerialization.jsonObject(with: Data) as! [String: Any]
-            Object.removeValue(forKey: "SchemaVersion"); Object.removeValue(forKey: "Appearance")
-            return Object as NSDictionary
-        }
-        func AssertContent(_ Data: Data, Expected: NSDictionary) throws {
-            let Actual = try Content(Data)
-            assert(Actual == Expected)
-        }
-        let Expected = try Content(Original)
-        let Upgraded = try Store.ExportBackup()
-        let UpgradedContent = try Content(Upgraded)
-        assert(UpgradedContent == Expected)
-        Store.SetAppearance(.Light)
+        Store.SetMode(.Hard); assert(Store.StartPractice())
+        let Question = Store.Session!.Current!
+        let Remaining = Store.Data.Bag.Remaining
+        Store.SaveDraft("a saved draft", For: Question.id)
         let Reopened = WordRepository(FileURL: URL)
-        assert(Reopened.Appearance == .Light)
-        try AssertContent(Reopened.ExportBackup(), Expected: Expected)
-        let CleanURL = Directory.appendingPathComponent("CleanInstall.json")
-        let Clean = WordRepository(FileURL: CleanURL)
-        try Clean.RestoreBackup(Original)
-        assert(Clean.Appearance == .System)
-        try AssertContent(Clean.ExportBackup(), Expected: Expected)
-        Clean.SetAppearance(.Dark)
-        let NewBackup = try Clean.ExportBackup()
-        try Reopened.RestoreBackup(NewBackup)
-        assert(Reopened.Appearance == .Dark)
-        try AssertContent(Reopened.ExportBackup(), Expected: Expected)
-        let BeforeInvalid = try Data(contentsOf: URL)
-        var Future = try JSONSerialization.jsonObject(with: Original) as! [String: Any]
-        Future["SchemaVersion"] = 99
-        do {
-            try Reopened.RestoreBackup(JSONSerialization.data(withJSONObject: Future))
-            assertionFailure("Future schema accepted")
-        } catch {}
-        let AfterInvalid = try Data(contentsOf: URL)
-        assert(AfterInvalid == BeforeInvalid)
-        try Reopened.RestoreBackup(Original)
-        try AssertContent(Reopened.ExportBackup(), Expected: Expected)
-        let StillPreserved = try Data(contentsOf: Recovery)
-        assert(StillPreserved == Original)
-        print("2.0 upgrade, seven-day history, saved session, appearance and backup restore checks passed")
+        assert(Reopened.Session!.Draft == "a saved draft" && Reopened.Session!.Current!.id == Question.id)
+        assert(Reopened.Data.Bag.Remaining == Remaining)
+        Reopened.Submit(Question.Answer, For: Question.id)
+        let Answered = WordRepository(FileURL: URL)
+        assert(Answered.Session!.Submitted?.IsCorrect == true && Answered.Session!.Current!.id == Question.id)
+        Answered.Advance(From: Question.id)
+        Answered.Submit("stale", For: Question.id)
+        assert(Answered.Session!.Answers.count == 1)
+        while let Current = Answered.Session?.Current {
+            Answered.Submit("wrong", For: Current.id); Answered.Advance(From: Current.id)
+        }
+        assert(Answered.History.count == 1 && Answered.History[0].Correct == 1)
+        assert(Answered.History[0].RetryAnswers?.count == 19)
+        let Finished = WordRepository(FileURL: URL)
+        assert(Finished.Session!.IsFinished && Finished.History.count == 1)
+        Finished.SetMode(.Easy); assert(Finished.StartPractice())
+        assert(Finished.Session!.Mode == .Easy && Finished.Data.Bag.Cycle == 1)
+        assert(Set(Finished.Session!.Questions.map(\.id)).isDisjoint(with: Store.Session!.Questions.map(\.id)))
+        let New = WordEntry(Term: "new", Translation: "yeni")
+        assert(Finished.SaveEntry(New)); assert(Finished.Data.Bag.Remaining.contains(New.Id))
+        let Delete = Finished.Session!.Current!.id
+        Finished.Delete(Ids: [Delete]); assert(Finished.Session!.Current?.id != Delete)
+        Finished.SetAppearance(.Dark); Finished.SetRenewal(Enabled: true)
+        let Again = WordRepository(FileURL: URL)
+        assert(Again.Appearance == .Dark && Again.Data.RenewalReminderEnabled && Again.Data.XcodeInstalledAt != nil)
+        assert(!Again.StorageBlocked && Again.History.count == 1)
+        try CheckLegacy(Directory)
+        try CheckUnsupported(Directory)
+        print("Session persistence, shared cycles, history, 1.2 migration and 2.x rejection checks passed")
     }
-
+    @MainActor static func CheckLegacy(_ Directory: URL) throws {
+        let URL = Directory.appendingPathComponent("Legacy.json")
+        let WordId = UUID()
+        let Text = """
+        {"Entries":[{"Id":"\(WordId)","Term":"forest","Translation":"meşə","Definition":"old definition","CorrectCount":4,"IncorrectCount":1,"ExampleSentences":"An old sentence."}],"History":[{"Id":"\(UUID())","Date":0,"Mode":"Easy","Correct":12,"Total":20}],"Morning":{"Hour":9,"Minute":0},"Evening":{"Hour":20,"Minute":30},"RemindersEnabled":true,"RenewalReminderEnabled":true,"XcodeInstalledAt":0}
+        """
+        let Bytes = Data(Text.utf8); try Bytes.write(to: URL)
+        let Store = WordRepository(FileURL: URL)
+        assert(!Store.StorageBlocked && Store.Entries.count == 1 && Store.Entries[0].Id == WordId)
+        assert(Store.History[0].Correct == 12 && Store.Data.RenewalReminderEnabled)
+        let Old = try Data(contentsOf: URL.appendingPathExtension("before-1-3")); assert(Old == Bytes)
+        assert(WordRepository(FileURL: URL).Entries == Store.Entries)
+    }
+    @MainActor static func CheckUnsupported(_ Directory: URL) throws {
+        let Fixture = URL(fileURLWithPath: #filePath).deletingLastPathComponent().appendingPathComponent("Fixtures/Version2Backup.json")
+        let Original = try Data(contentsOf: Fixture)
+        for Version in [2, 3] {
+            var Object = try JSONSerialization.jsonObject(with: Original) as! [String: Any]
+            Object["SchemaVersion"] = Version
+            let Bytes = try JSONSerialization.data(withJSONObject: Object)
+            let URL = Directory.appendingPathComponent("Blocked\(Version).json")
+            try Bytes.write(to: URL)
+            let Store = WordRepository(FileURL: URL)
+            assert(Store.StorageBlocked && Store.Entries.isEmpty)
+            assert(!Store.SaveEntry(WordEntry(Term: "new", Translation: "yeni")))
+            let Unchanged = try Data(contentsOf: URL); assert(Unchanged == Bytes)
+            Store.StartFresh()
+            assert(!Store.StorageBlocked && Store.Entries.count == 287)
+            let Files = try FileManager.default.contentsOfDirectory(at: Directory, includingPropertiesForKeys: nil)
+            let Archive = Files.first { $0.lastPathComponent.hasPrefix("Blocked\(Version).json.archived-") }!
+            let Archived = try Data(contentsOf: Archive); assert(Archived == Bytes)
+        }
+        let BadURL = Directory.appendingPathComponent("Broken.json")
+        let Broken = Data("{bad".utf8); try Broken.write(to: BadURL)
+        let Bad = WordRepository(FileURL: BadURL)
+        assert(Bad.StorageBlocked)
+        let Untouched = try Data(contentsOf: BadURL); assert(Untouched == Broken)
+    }
 }

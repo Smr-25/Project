@@ -7,12 +7,14 @@ enum Palette {
     static let Primary = Color(uiColor: .label)
     static let Muted = Color(uiColor: .secondaryLabel)
     static let Accent = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark
-        ? UIColor(red: 0.49, green: 0.69, blue: 0.94, alpha: 1)
-        : UIColor(red: 0.18, green: 0.38, blue: 0.66, alpha: 1) })
+        ? UIColor(red: 0.96, green: 0.16, blue: 0.21, alpha: 1)
+        : UIColor(red: 0.82, green: 0.08, blue: 0.13, alpha: 1) })
     static let Success = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark
-        ? UIColor(red: 0.47, green: 0.79, blue: 0.65, alpha: 1)
-        : UIColor(red: 0.12, green: 0.43, blue: 0.30, alpha: 1) })
-    static let Danger = Color(uiColor: .systemRed)
+        ? UIColor(red: 0.20, green: 0.78, blue: 0.55, alpha: 1)
+        : UIColor(red: 0.02, green: 0.43, blue: 0.28, alpha: 1) })
+    static let Danger = Color(uiColor: UIColor { $0.userInterfaceStyle == .dark
+        ? UIColor(red: 0.96, green: 0.35, blue: 0.46, alpha: 1)
+        : UIColor(red: 0.66, green: 0.06, blue: 0.19, alpha: 1) })
 }
 
 extension AppAppearance {
@@ -57,21 +59,21 @@ struct SectionEyebrow: View {
         Text(Title.uppercased())
             .font(.system(size: 11, weight: .bold, design: .rounded))
             .tracking(2.6)
-            .foregroundStyle(Palette.Muted)
+            .foregroundStyle(Palette.Accent)
     }
 }
 
 struct PrimaryActionStyle: ButtonStyle {
-    let Tint: Color
+    @Environment(\.isEnabled) private var IsEnabled
 
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
             .font(.system(size: 16, weight: .bold, design: .rounded))
-            .foregroundStyle(Palette.Background)
+            .foregroundStyle(.white)
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
             .frame(maxWidth: .infinity, minHeight: 56)
-            .background(Tint, in: RoundedRectangle(cornerRadius: 20))
+            .background(Palette.Accent.opacity(IsEnabled ? 1 : 0.4), in: RoundedRectangle(cornerRadius: 20))
             .scaleEffect(configuration.isPressed ? 0.98 : 1)
     }
 }

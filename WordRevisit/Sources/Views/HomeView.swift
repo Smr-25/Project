@@ -2,150 +2,79 @@ import SwiftUI
 
 struct HomeView: View {
     @EnvironmentObject private var Store: WordRepository
-    @Environment(\.scenePhase) private var ScenePhase
-    @State private var ActiveQuiz: QuizSession?
-    @State private var ChoosingDirection = false
-    @State private var ShowingPlan = false
-    @State private var Notice: String?
-    @State private var Now = Date.now
-
-    private var DueCount: Int { Store.Entries.filter { $0.Learning.IsAvailable(at: Now) && $0.Learning.IntroducedAt != nil && ReviewSchedule.IsDue($0, Now: Now) }.count }
+    @State private var ShowingPractice = false
+    private var Resuming: Bool { Store.Session != nil && Store.Session?.IsFinished == false }
 
     var body: some View {
         ZStack {
             AppBackground()
-            ScrollView(showsIndicators: false) {
-                VStack(alignment: .leading, spacing: 28) {
-                    Header
-                    DailyPlan
-                    SectionEyebrow(Title: "Free practice · no schedule changes")
-                    ModeCard(Mode: .Easy, Tint: Palette.Accent) { ChoosingDirection = true }
-                    ModeCard(Mode: .Hard, Tint: Palette.Accent) { StartQuiz(.Hard) }
-                    if Store.Entries.contains(where: { !$0.Group.isEmpty }) {
-                        Button("Practise synonyms") {
-                            if Store.Learning.Session != nil { Notice = "Finish your saved session first, then start synonym practice." }
-                            else if Store.StartStudy(Synonyms: true) { Store.PresentStudy = true }
-                            else { Notice = "Add words to the same synonym group and bring at least two to stage 3. Four distinct answer options are needed." }
-                        }.buttonStyle(PrimaryActionStyle(Tint: Palette.Accent))
+            ScrollView {
+                VStack(alignment: .leading, spacing: 26) {
+                    HStack {
+                        VStack(alignment: .leading, spacing: 5) {
+                            SectionEyebrow(Title: "A little practice, anytime")
+                            Text("WordRevisit").font(.title.bold())
+                        }
+                        Spacer()
+                        Image("BrandLogo").resizable().scaledToFit().frame(width: 44, height: 44)
+                            .clipShape(Circle()).accessibilityHidden(true)
                     }
-                }
-                .padding(.horizontal, 24)
-                .padding(.top, 20)
-                .padding(.bottom, 40)
+                    VStack(alignment: .leading, spacing: 20) {
+                        SectionEyebrow(Title: "Cycle \(Store.Data.Bag.Cycle)")
+                        Text(Store.Entries.isEmpty ? "Your words come first." : Store.Data.Bag.CycleComplete ? "Cycle complete." : "Every word.\nIts turn.")
+                            .font(.largeTitle.bold())
+                        HStack(alignment: .top) {
+                            Metric("\(Store.Entries.count)", "Words")
+                            Metric("\(Store.Data.Bag.Remaining.count)", "Waiting in this cycle")
+                        }
+                        if let Session = Store.Session, !Session.IsFinished {
+                            Label(Session.IsRetry ? "One more look at missed words" : "Group in progress", systemImage: "bookmark.fill")
+                                .foregroundStyle(Palette.Accent)
+                            Text("\(Session.Mode.rawValue) · \(Session.Index + 1) of \(Session.CurrentQuestions.count)")
+                                .foregroundStyle(Palette.Muted)
+                        } else {
+                            Text(Store.Data.Bag.CycleComplete ? "You have practised every word. Start a fresh shuffled cycle whenever you like." : "Up to 20 words per group. Keep going for as long as you like.")
+                                .foregroundStyle(Palette.Muted)
+                        }
+                    }.padding(24).FrostedCard(CornerRadius: 30)
+                    if !Resuming {
+                        ModePicker()
+                    } else {
+                        Text("Your saved group keeps its mode. Choose a different mode for the next group.")
+                            .font(.subheadline).foregroundStyle(Palette.Muted)
+                    }
+                }.padding(24)
             }
         }
-        .fullScreenCover(item: $ActiveQuiz) { Quiz in
-            QuizView(Session: Quiz)
-                .environmentObject(Store)
-        }
-        .confirmationDialog("Easy recall · choose a direction", isPresented: $ChoosingDirection, titleVisibility: .visible) {
-            Button("English → Azerbaijani") { StartQuiz(.Easy) }
-            Button("Azerbaijani → English") { StartQuiz(.EasyReverse) }
-            Button("Cancel", role: .cancel) {}
-        }
-        .sheet(isPresented: $ShowingPlan) { StudySettingsView() }
-        .alert("Your learning", isPresented: Binding(get: { Notice != nil }, set: { if !$0 { Notice = nil } })) {
-            Button("OK") { Notice = nil }
-        } message: { Text(Notice ?? "") }
-        .onAppear {
-            Store.RefreshDay()
-            Now = .now
-            #if DEBUG
-            if ProcessInfo.processInfo.arguments.contains("-PreviewQuiz") { StartQuiz(.Easy) }
-            #endif
-        }
-        .onChange(of: ScenePhase) { _, Phase in
-            if Phase == .active { Now = .now; Store.RefreshDay() }
-        }
-    }
-
-    private func StartQuiz(_ Mode: QuizMode) {
-        Now = .now
-        let Questions = QuizPlanner.MakeQuestions(From: Store.Entries, Mode: Mode,
-            Now: Now, IncludeUpcoming: true, Choices: Mode != .Hard)
-        if Questions.isEmpty && Mode != .Hard {
-            Notice = "Easy recall needs four distinct answer options. Add more words with different meanings; if you use parts of speech, add words of the same type. You can use Hard recall for written practice."
-            return
-        }
-        ActiveQuiz = QuizSession(Mode: Mode, Questions: Questions, IsPractice: true)
-    }
-
-    private var DailyPlan: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            SectionEyebrow(Title: Store.Today?.Comeback == true ? "Welcome back · a gentle start" : "Your daily plan")
-            Text(Store.Today?.FullMet == true ? "Today, well spent." : "A few words.\nA little progress.")
-                .font(.largeTitle.bold())
-            let Completed = Store.Today?.Completed.count ?? 0
-            let Target = Store.Today?.Target ?? 0
-            ProgressView(value: Double(min(Completed, Target)), total: Double(max(1, Target))).tint(Palette.Accent)
-                .accessibilityLabel("Today's progress").accessibilityValue("\(Completed) of \(Target)")
-            HStack {
-                Text("\(Completed) / \(Target) words")
-                Spacer()
-                Label("\(Store.Streak.Current) day streak", systemImage: "flame")
-            }.font(.subheadline).foregroundStyle(Palette.Muted)
-            if let Day = Store.Today {
-                Text("New: \(LearningEngine.NewEntries(Store.Entries, Excluding: Day.Introduced, Limit: max(0, Day.NewLimit - Day.Introduced.count), Now: Now).count) left · Reviews: \(min(DueCount, max(0, Day.ReviewLimit - Day.Reviewed.count))) due")
-                    .font(.subheadline)
-                Text(Day.MinimumMet ? "Daily minimum complete. Reminders are quiet for today." : "Daily minimum: \(Store.Today?.Attempted.count ?? 0) / \(min(Store.Learning.Settings.MinimumCards, Target)) words practised")
-                    .font(.caption).foregroundStyle(Palette.Muted)
+        .safeAreaInset(edge: .bottom) {
+            Button(Resuming ? "Continue group" : Store.Data.Bag.CycleComplete ? "Start next cycle" : "Start practice") {
+                if Store.StartPractice() { ShowingPractice = true }
             }
-            Button(Store.Learning.Session == nil ? "Start today's plan" : "Continue saved session") {
-                if Store.StartStudy() { Store.PresentStudy = true }
-                else { Notice = "You're caught up for now. Your next words will appear when due. You can still use free practice below." }
-            }.buttonStyle(PrimaryActionStyle(Tint: Palette.Primary))
-            Button("Adjust my plan") { ShowingPlan = true }.frame(minHeight: 44)
-        }.padding(24).FrostedCard(CornerRadius: 30)
-    }
-
-    private var Header: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 4) {
-                Text("Welcome back")
-                    .font(.system(size: 15, weight: .medium))
-                    .foregroundStyle(Palette.Muted)
-                Text("WordRevisit")
-                    .font(.system(size: 24, weight: .bold, design: .rounded))
-            }
-            Spacer()
-            Image("BrandLogo")
-                .resizable()
-                .scaledToFit()
-                .frame(width: 44, height: 44)
-                .clipShape(Circle())
-                .accessibilityHidden(true)
+            .buttonStyle(PrimaryActionStyle())
+            .disabled(Store.Entries.isEmpty)
+            .padding(20).background(.regularMaterial)
         }
+        .fullScreenCover(isPresented: $ShowingPractice) { QuizView() }
     }
 
-
+    private func Metric(_ Value: String, _ Label: String) -> some View {
+        VStack(alignment: .leading, spacing: 5) {
+            Text(Value).font(.title.bold())
+            Text(Label).font(.caption).foregroundStyle(Palette.Muted)
+        }.frame(maxWidth: .infinity, alignment: .leading)
+    }
 }
 
-private struct ModeCard: View {
-    let Mode: QuizMode
-    let Tint: Color
-    let Action: () -> Void
-
+struct ModePicker: View {
+    var Identifier = "PracticeMode"
+    @EnvironmentObject private var Store: WordRepository
     var body: some View {
-        Button(action: Action) {
-            HStack(spacing: 16) {
-                Image(systemName: Mode.Symbol)
-                    .font(.system(size: 21, weight: .semibold))
-                    .foregroundStyle(Tint)
-                    .frame(width: 54, height: 54)
-                    .background(Tint.opacity(0.13), in: RoundedRectangle(cornerRadius: 17))
-                VStack(alignment: .leading, spacing: 5) {
-                    Text(Mode.Title).font(.system(size: 18, weight: .bold, design: .rounded))
-                    Text(Mode == .Hard ? "Azerbaijani → English · write" : "Both directions · choose from 4").font(.system(size: 13)).foregroundStyle(Palette.Muted)
-                }
-                Spacer(minLength: 2)
-                Image(systemName: "arrow.up.right")
-                    .font(.system(size: 14, weight: .bold))
-                    .foregroundStyle(Tint)
-            }
-            .padding(18)
-            .FrostedCard(CornerRadius: 25)
-            .contentShape(Rectangle())
+        VStack(alignment: .leading, spacing: 12) {
+            SectionEyebrow(Title: "Practice mode")
+            Picker("Practice mode", selection: Binding(get: { Store.Data.PreferredMode }, set: { Store.SetMode($0) })) {
+                ForEach(QuizMode.allCases) { Text($0.rawValue).tag($0) }
+            }.pickerStyle(.segmented).accessibilityIdentifier(Identifier)
+            Text(Store.Data.PreferredMode.Subtitle).font(.subheadline).foregroundStyle(Palette.Muted)
         }
-        .buttonStyle(.plain)
     }
 }

@@ -1,61 +1,50 @@
 import SwiftUI
 
-struct QuizReviewView: View {
+struct HistoryView: View {
+    @EnvironmentObject private var Store: WordRepository
     @Environment(\.dismiss) private var Dismiss
-    let Answers: [QuizAnswer]
-    var Title = "Answer review"
-
     var body: some View {
         NavigationStack {
-            ZStack {
-                AppBackground()
-                ScrollView {
-                    VStack(alignment: .leading, spacing: 20) {
-                        SectionEyebrow(Title: "A little reflection")
-                        Text(Title)
-                            .font(.system(size: 32, weight: .bold, design: .rounded))
-                        Text("\(Answers.filter(\.IsCorrect).count) correct · \(Answers.count) answers")
-                            .foregroundStyle(Palette.Muted)
-                        ForEach(Answers) { Answer in
-                            VStack(alignment: .leading, spacing: 15) {
-                                HStack(alignment: .top) {
-                                    Text(Answer.Question.Prompt)
-                                        .font(.system(size: 23, weight: .bold, design: .rounded))
-                                    Spacer()
-                                    Image(systemName: Answer.IsCorrect ? "checkmark.circle.fill" : "arrow.uturn.backward.circle.fill")
-                                        .foregroundStyle(Answer.IsCorrect ? Palette.Success : Palette.Danger)
-                                        .accessibilityLabel(Answer.IsCorrect ? "Correct" : "Incorrect")
-                                }
-                                VStack(alignment: .leading, spacing: 5) {
-                                    SectionEyebrow(Title: Answer.Question.Options == nil ? "You wrote" : "You selected")
-                                    Text(Answer.Input).foregroundStyle(Answer.IsCorrect ? Palette.Success : Palette.Danger)
-                                }
-                                VStack(alignment: .leading, spacing: 5) {
-                                    SectionEyebrow(Title: "Accepted answer")
-                                    Text(Answer.Question.Answer)
-                                }
-                                if !Answer.Question.Entry.ExampleSentences.isEmpty {
-                                    Divider()
-                                    Text(Answer.Question.Entry.ExampleSentences)
-                                        .font(.system(size: 14))
-                                        .foregroundStyle(Palette.Muted)
-                                }
-                            }
-                            .frame(maxWidth: .infinity, alignment: .leading)
-                            .padding(22)
-                            .FrostedCard(CornerRadius: 25)
-                        }
+            List {
+                if Store.History.isEmpty {
+                    ContentUnavailableView("Your practice history", systemImage: "clock", description: Text("Finished groups appear here, including your first answers and the one-time retry."))
+                }
+                ForEach(Store.History) { Record in
+                    NavigationLink {
+                        QuizReviewView(Record: Record)
+                    } label: {
+                        VStack(alignment: .leading, spacing: 6) {
+                            HStack { Text(Record.Mode).font(.headline); Spacer(); Text("\(Record.Correct)/\(Record.Total)").monospacedDigit() }
+                            Text(Record.Date.formatted(date: .abbreviated, time: .shortened)).font(.subheadline).foregroundStyle(Palette.Muted)
+                        }.padding(.vertical, 5)
                     }
-                    .padding(24)
                 }
-            }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button("Done") { Dismiss() }.tint(Palette.Accent)
-                }
-            }
-            .toolbarBackground(.hidden)
-        }
+            }.navigationTitle("Practice history")
+                .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { Dismiss() } } }
+        }.tint(Palette.Accent)
+    }
+}
 
+struct QuizReviewView: View {
+    let Record: QuizRecord
+    var body: some View {
+        List {
+            Section("First answers · \(Record.Correct) / \(Record.Total)") {
+                if let Answers = Record.Answers { ForEach(Answers) { Row($0) } }
+                else { Text("Individual answers were not recorded in this older session.").foregroundStyle(Palette.Muted) }
+            }
+            if let Retry = Record.RetryAnswers, !Retry.isEmpty {
+                Section("Missed words · one retry") { ForEach(Retry) { Row($0) } }
+            }
+        }.navigationTitle("Answer review")
+    }
+    private func Row(_ Answer: QuizAnswer) -> some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text(Answer.Question.Prompt).font(.headline)
+            Label(Answer.Input, systemImage: Answer.IsCorrect ? "checkmark.circle.fill" : "xmark.circle.fill")
+                .foregroundStyle(Answer.IsCorrect ? Palette.Success : Palette.Danger)
+            Text("Vocabulary answer: \(Answer.Question.Answer)").font(.subheadline)
+            if Answer.Alternative == true { Text("Another word with the same meaning was accepted.").font(.caption).foregroundStyle(Palette.Muted) }
+        }.padding(.vertical, 8)
     }
 }
