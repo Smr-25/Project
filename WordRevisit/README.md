@@ -1,141 +1,137 @@
 # WordRevisit
 
-A native, offline iPhone app for learning English with Azerbaijani translations. **Version 2.1.0**, iOS **18+**, SwiftUI. Vocabulary and learning history stay on your iPhone. The first installation includes a 59-word starter collection.
+An offline English–Azerbaijani vocabulary app for iPhone and iPad. **Version 1.3.0 · iOS 18+ · SwiftUI.** Add words, practise in shuffled groups, and give every word a turn.
 
 ## Screenshots
 
-Screenshots from an iOS 27 simulator using sample data. The interface follows your iPhone’s appearance, or you can choose Light or Dark in Settings. It uses Liquid Glass on iOS 26+ and native materials on iOS 18–25.
+Screenshots use sample vocabulary in the simulator. The black, white and red interface supports System, Light and Dark appearance, with emerald feedback for correct answers and cherry red for incorrect answers.
 
-| Today's plan | Recall and feedback | Progress |
+| Practice | Answers | Synonyms |
 |:---:|:---:|:---:|
-| ![Daily learning plan](docs/screenshots/today.png) | ![Multiple-choice practice feedback](docs/screenshots/study.png) | ![Learning statistics](docs/screenshots/progress.png) |
+| ![Current practice cycle](docs/screenshots/today.png) | ![Practice answer feedback](docs/screenshots/study.png) | ![Vocabulary grouped by synonym family](docs/screenshots/synonyms.png) |
 
 ## Start here
 
-1. Open **My words** to add or edit words. Each word can have a definition, examples, part of speech, synonym group, memory hook, and your own sentence.
-2. Use **Import CSV** or **Manage words → Paste words**, review the counts, and confirm the import.
-3. Tap **Start today's plan**. Meet new words, recall them after short gaps, then complete their mini-test. Close at any point and use **Continue saved session** later.
-4. Use **Progress** to review saved answers and difficult words.
-5. Export a full JSON backup from **Settings → Backup & restore** before removing the app or changing its bundle identifier.
+1. Open **My words** to add, edit, delete or import vocabulary.
+2. Choose **Easy** or **Hard** on **Practice**, then tap **Start practice**.
+3. Answer and tap **Next** in the fixed bottom panel. In Hard mode, **Check answer** stays above the keyboard.
+4. Finish a group, then continue with **Next group** or return home. There is no daily limit.
+5. Find completed groups and their answers in **Settings → Practice history**.
 
-## Daily learning
+## Every word gets a turn
 
-- The default target is **20 new words**, in **two batches of 10**, alongside due reviews. Choose one, two, or four batches.
-- New words follow collection/import order. Words sharing a synonym group or an Azerbaijani meaning are introduced on different study days.
-- Due reviews prioritise the oldest due date and then the lowest stage. Equal-priority cards are shuffled. Free quizzes also shuffle equal-priority words.
-- At the start of a study day, over 100 due reviews halves the new-word allowance; over 150 pauses it. Paused intake resumes below 100. The daily review limit is 200 distinct words; extra reviews remain due.
-- After at least two missed days, the comeback day has no new words and at most 40 reviews.
-- A study day starts at **04:00 local time**.
-- The daily minimum is **15 distinct words practised**, or the entire available queue when smaller. Mistakes count as practice; repeating one word does not inflate the minimum. Completing all scheduled words finishes the full plan.
-- Each seven consecutive completed study days earns a streak freeze, with up to two saved. A freeze covers a missed day automatically; the best streak remains recorded.
-- The plan's daily limits are fixed for that study day. Changes to those limits apply to the next day; adding or deleting vocabulary updates the remaining available work.
+A cycle starts with all vocabulary in a shared pool. Each group draws up to **20 random words**, without replacement. A remainder of fewer than 20 words forms its own shorter group; it is not padded with repeats.
 
-### New words and review stages
+Missed words return once at the end of their group. The retry finishes each word for that cycle, whether the second answer is right or wrong. Once the last group and its retries are finished, **Cycle complete** appears. Starting again creates a newly shuffled cycle.
 
-An introduction shows the word, translations, definition and examples. Add an optional memory hook, learn the word, mark it already known, or leave it for tomorrow. Already-known words enter stage 5. Learning steps default to **1 minute**, then **10 minutes**, followed by a mini-test. A waiting session is saved and can be closed; reminders can announce its next ready card.
+Easy and Hard share the same pool. Change mode between groups; an unfinished group keeps its original mode. Newly added words join the current pool. Deleted words leave both the pool and any unfinished group. Previously completed history remains available.
 
-| Stage | Review interval |
-|---|---|
-| 1–3 | 1, 2, 4 days |
-| 4–6 | 8, 16, 30 days |
-| 7–9 | 60, 120, 180 days |
+The pool, current question, draft answer, submitted feedback and retry state are saved locally. Close and reopen the app to continue where you left off. Questions in an active group retain the wording they had when the group started; vocabulary edits apply to future groups.
 
-Correct, unassisted, timely recall advances a stage. A correct answer with a hint, a single spelling error in a word of at least five letters, or a longer response is **Hard** and keeps the stage. Default response thresholds are 5 seconds for choices and 12 seconds for typing; these are adjustable.
+### Easy
 
-A wrong answer or **I don't know** drops two stages, with a minimum of stage 1. It returns after 3–5 other cards where enough cards are available, needs two correct recovery answers, and is then due tomorrow. Longer intervals receive a configurable ±10% spread. Very overdue words receive an easier question tier.
+Answer with up to four choices. Each group mixes English → Azerbaijani and Azerbaijani → English questions equally, in random order. For odd-sized groups, one direction has one extra question.
 
-After four mistakes a word is labelled difficult and the feedback offers a memory hook. At most 15 difficult words stay active; excess words pause for seven days. You can also pause or resume any word manually.
+Distractors come from the vocabulary and exclude words sharing any accepted Azerbaijani meaning with the target. If only two or three distinct choices are available, the question uses those choices. If there is only one distinct answer, that word uses written Azerbaijani → English recall so it is still covered by the cycle.
 
-### Questions and synonyms
+### Hard
 
-Early stages use English/Azerbaijani choices; later stages add definitions, cloze sentences, and written recall. Definitions and cloze questions are only used when the necessary content exists. Cloze blanks whole-word occurrences in your example sentence. If four unambiguous options cannot be built, the question uses written recall instead. Distractors exclude words with shared meanings or the same synonym group, and respect part of speech when supplied.
+See the Azerbaijani meaning and write the English word. Matching ignores letter case and extra whitespace; spelling and diacritics must otherwise match exactly.
 
-Assign matching **Synonym group** names to related words. **Practise synonyms** becomes useful when at least two words in a group reach stage 3 and three distinct distractors are available. Select the matching synonym from the answer choices. Synonym practice leaves review dates and daily minimums unchanged.
+Another English word in the vocabulary with a shared Azerbaijani meaning is also accepted. Feedback shows both your valid alternative and the target word. Every answer shows its result and the vocabulary answer before you continue.
 
-Daily questions show examples through **Show sentence hint**, then show examples, definitions and memory hooks after answering. Your own sentence can be saved and shared from the editor.
+## Vocabulary and CSV
 
-**Easy recall** offers four answer choices in either direction: English → Azerbaijani or Azerbaijani → English. **Hard recall** asks you to write the English word from its Azerbaijani translation. Easy practice includes words with four distinct, unambiguous options; add more vocabulary if none are available. Example hints stay visible, results can be reviewed, and missed words can be retried. Free practice does not change daily review stages or dates. Its quiz history is kept separately; resumable sessions apply to the daily plan and synonym practice.
+Each word has three editable fields:
 
-## Manage words and import
+| Field | Required | Example |
+|---|---|---|
+| English | Yes | `large` |
+| Azerbaijani | Yes | `böyük; iri` |
+| Group | No | `size` |
 
-Use **Manage words → Select words**, tap individual rows, or choose **Select visible**, then confirm deletion. **Delete all words** is a separate confirmed action. Deleting words removes their schedules and pending cards, while retaining past answer history. Search includes English, Azerbaijani and group names; filters cover new, learning, review, difficult, paused and synonym entries.
+Use semicolons to separate accepted meanings. Select individual words, **Select visible**, or **Delete all words** from **Manage words** to delete entries after confirmation. Export CSV before deleting vocabulary you might want to keep.
 
-CSV is a UTF-8 plain-text table:
+### Import
+
+CSV files must be UTF-8 with a header containing **English** and **Azerbaijani**. **Group** is optional. Columns are located by header name, so their order may vary; all other columns are ignored.
 
 ```csv
-English,Azerbaijani,Definition,Examples,PartOfSpeech,Group,Mnemonic,MySentence
-large,böyük,Of considerable size.,A large forest.,adjective,size,,
-huge,iri; böyük,Extremely large.,A huge tree.,adjective,size,,
+English,Azerbaijani,Group
+large,böyük; iri,size
+huge,nəhəng; böyük,size
+forest,meşə,nature
 ```
 
-English and Azerbaijani are required. The remaining columns are optional, in the order shown. Old two-, three-, and four-column files still work; empty definitions, quoted commas, escaped quotes and multiline examples are supported. A semicolon separates accepted meanings.
+Import preview shows new words, skipped duplicates and invalid rows before confirmation. An existing English word is always skipped, even if its translation or group differs. The first occurrence within a file is kept; later duplicates are skipped. Duplicate checks ignore case and extra whitespace. An unfinished quoted field stops the import.
 
-The preview reports new entries, merged entries, skipped duplicates and invalid rows. Identical word/meaning pairs are skipped. For the same word with a different translation, choose **merge**, **keep separate**, or **skip**. Merging retains existing review progress. Invalid rows are reported and skipped after confirmation; an unfinished quoted field stops the preview.
+For quick entry, **Manage words → Paste words** accepts one `word - translation` pair per line.
 
-For quick paste, use one pair per line:
+### Export and starter words
 
-```text
-forest - meşə
-water - su
-```
+**Export CSV** writes exactly `English,Azerbaijani,Group`. CSV contains vocabulary only, not practice history or the unfinished group.
 
-CSV carries vocabulary and notes only. **JSON backup** also carries stages, dates, history, settings and the saved session. Restore validates the file before replacing data, asks for confirmation and keeps a local copy of the previous file. Files larger than 64 MB, unsupported schemas and malformed learning data are rejected. An optional backup reminder defaults to every seven days.
+A fresh installation includes **287 unique words** from [Data/Vocabulary.csv](Data/Vocabulary.csv). The supplied file contains 298 rows; its 11 duplicate English entries are skipped, keeping each first occurrence.
 
-## Notifications
+## Synonyms
 
-Daily reminders default to **09:00 and 20:30**. A 22:00 reminder is scheduled only when no study has started; the daily minimum cancels the remaining daily reminders. Quiet hours default to **23:00–07:00**. Tapping a study notification opens or resumes the session. The app refreshes a seven-day notification schedule on use. Notification delivery still follows the iPhone's permission and Focus settings.
+The **Synonyms** tab builds word-family blocks automatically from **Group**. The first word added to each group is its heading; the other words appear underneath with their translations. Words without a group are omitted. Search matches English, Azerbaijani or the group name and shows the whole matching block.
 
-Enable **Xcode renewal** in Settings for a reminder to reinstall through Xcode. Backup and renewal reminders remain active after you complete the daily minimum.
+The layout uses one column on narrow screens and two or three on wider screens. These are your own vocabulary families; the app does not generate or verify synonym relationships.
 
-## Updating
+## Settings and Xcode renewal
 
-Export a JSON backup, then install the update over your existing app using the same bundle identifier. Keep the installed app; deleting it removes its local data.
+Choose **System**, **Light** or **Dark**. The header logo follows that appearance. **Practice history** records first-attempt scores and the separate one-time retries; older 1.2 sessions retain the history detail originally saved.
 
-Version 2.1 reads existing 2.0 data and JSON backups, including words, review dates, history, settings and saved study sessions. It also supports the earlier 1.2 data format. The first upgrade keeps a local recovery copy of the previous data file. Older backups use System appearance by default; new backups include your chosen appearance. Backups created by 2.1 require 2.1 or a later compatible version to restore.
+Enable **Xcode renewal** for a local reminder six days after enabling it or tapping **I reinstalled from Xcode**. Tap that button after each successful reinstall. The reminder estimates when a free install may expire; it does not inspect the provisioning profile or renew the app. Delivery follows notification permission and the iPhone's Focus settings.
 
-### Appearance
+## Release and data compatibility
 
-Choose **System**, **Light** or **Dark** in **Settings → Appearance**. The home logo follows the selected theme. Blue marks actions and selections, green marks correct answers, and red marks mistakes and destructive actions. Feedback also uses text and icons.
+**1.3 replaces the 2.x workflow following issues with practice navigation and the expanded learning flow.** The 2.x daily plan, review stages, streaks, statistics, advanced word fields, dedicated synonym quiz, quiet hours and JSON backup interface are retired. System/Light/Dark, the adaptive logo, Xcode renewal and practice history remain.
+
+This version reads the original **1.2 local data format** and preserves its vocabulary and practice history. It keeps a local copy of the old file before converting it. Word definitions, examples and other removed fields are not part of the new vocabulary model.
+
+**2.0 and 2.1 data are not migrated.** Before switching from either version, use that version to export the vocabulary you need as CSV. You may also keep its full backup for use with that older version. Version 1.3 does not import JSON backups.
+
+If 1.3 finds a 2.x or unreadable file, it leaves the file untouched and displays a recovery screen. **Start with the new vocabulary** requires confirmation, preserves that old file separately on the device, and starts with the bundled vocabulary and empty practice history. You can then import CSV; existing English entries are skipped. To replace the bundled vocabulary entirely, delete it first through **My words**, then import your CSV.
+
+Keep the same bundle identifier when installing an update over an existing app. Deleting the app removes its local files, including any local recovery copies. Keep exported CSV outside the app before removing it. CSV does not preserve history or practice state.
 
 ## Run on an iPhone without the App Store
 
-Requirements: a Mac with Xcode 26 or later, an iPhone running iOS 18 or later, a cable, and a free Apple Account.
+Requirements: a Mac with Xcode 26 or later, an iPhone running iOS 18 or later, and an Apple Account.
 
 1. Open `WordRevisit.xcodeproj` in Xcode.
-2. In **Xcode → Settings → Accounts**, sign in with your Apple Account.
-3. Select the **WordRevisit** target. Under **Signing & Capabilities**, enable **Automatically manage signing**, choose your **Personal Team**, and change the bundle identifier if Xcode asks for a unique one.
-4. Connect and unlock your iPhone, select **Trust This Computer** if prompted, and enable **Settings → Privacy & Security → Developer Mode** on the phone if needed.
-5. Choose your named iPhone as the Xcode run destination (not **Any iOS Device**) and press **Run** (`⌘R`). Xcode registers the phone and creates its development provisioning profile.
-6. If iOS blocks the installed app, open **Settings → General → VPN & Device Management**, select your developer account, and trust its certificate. Follow any restart prompt, then open WordRevisit again.
+2. Sign in under **Xcode → Settings → Accounts**.
+3. Select the **WordRevisit** target. Under **Signing & Capabilities**, enable **Automatically manage signing** and choose your **Personal Team**. Use a unique bundle identifier for your first installation, then keep that identifier for updates.
+4. Connect and unlock the iPhone, trust the computer, and enable **Settings → Privacy & Security → Developer Mode** when prompted.
+5. Select your named iPhone as the run destination and press **Run** (`⌘R`).
+6. If iOS blocks the developer certificate, trust your account under **Settings → General → VPN & Device Management**, following any restart prompt.
 
-If Xcode says **“Your team has no devices from which to generate a provisioning profile”**, check that the iPhone appears under **Window → Devices and Simulators**, is unlocked and trusted, and is selected as the run destination. Keep **Automatically manage signing** enabled and select your own Personal Team. If Xcode reports a bundle ID conflict, choose a unique bundle identifier for your copy.
+For **“Your team has no devices from which to generate a provisioning profile”**, check that your unlocked, trusted phone appears in **Window → Devices and Simulators** and is selected as the run destination. Check your Personal Team and automatic signing settings.
 
-The free Personal Team profile expires after **7 days**. Run the project from Xcode again to renew it. Export your words before removing the app or changing its bundle identifier. See [Apple's device-run guide](https://developer.apple.com/documentation/xcode/running-your-app-on-simulated-or-physical-devices) and [free-account limits](https://developer.apple.com/help/account/basics/about-your-developer-account).
+A free Personal Team install normally expires after seven days. Run from Xcode again to renew it. See [Apple's device-run guide](https://developer.apple.com/documentation/xcode/running-your-app-on-simulated-or-physical-devices) and [free-account limits](https://developer.apple.com/help/account/basics/about-your-developer-account).
 
-For a heads-up, turn on **Xcode renewal** in Settings. The app sends one local notification six days after the date you enable it or tap **I reinstalled from Xcode**. Tap that button after each successful reinstall. The reminder is an estimate because the app does not inspect your provisioning profile; it cannot renew the install for you.
-
-## Code map and checks
+## Code and checks
 
 ```text
 Sources/
-├── Models/      Codable words, learning settings, days, sessions and review logs
-├── Services/    Learning engine, calendar rules, import preview, CSV and reminders
-├── Data/        Atomic persistence, migration, backup and session transactions
-└── Views/       SwiftUI screens and shared visual components
+├── Models/      Vocabulary, practice pool, sessions and answer history
+├── Services/    Question generation, CSV preview and Xcode renewal reminders
+├── Data/        Atomic persistence and version compatibility
+└── Views/       Practice, vocabulary, synonym families and settings
 ```
 
-There are no third-party dependencies. Run these commands from `WordRevisit/` on a Mac with Xcode selected:
+There are no third-party dependencies. From `WordRevisit/`, with Xcode selected:
 
 ```bash
 swiftc Sources/Models/*.swift Sources/Services/*.swift Tests/LogicChecks.swift -o /tmp/WordRevisitLogicChecks
 /tmp/WordRevisitLogicChecks
 swiftc Sources/Models/*.swift Sources/Services/*.swift Sources/Data/WordRepository.swift Tests/RepositoryChecks.swift -o /tmp/WordRevisitRepositoryChecks
 /tmp/WordRevisitRepositoryChecks
-swiftc Sources/Models/*.swift Sources/Services/*.swift Sources/Data/WordRepository.swift Tests/LearningChecks.swift -o /tmp/WordRevisitLearningChecks
-/tmp/WordRevisitLearningChecks
 ```
 
-Choose an iPhone simulator and **Product → Test** (`⌘U`) to run UI checks for word management, saved sessions, quizzes and synonym practice. Tests use an isolated temporary store. The command-line checks cover imports, migration, learning schedules, answer grading, streaks, notifications and backup restoration. A fixture generated by version 2.0 checks that seven study days, a saved session and existing settings survive both an update and a JSON restore.
+These check full-cycle coverage, short final groups, one-time retries, adding/deleting words, exact and alternative answers, CSV duplicate handling, saved sessions, 1.2 conversion and rejection of 2.x files without changing them. Select a simulator and use **Product → Test** (`⌘U`) for the interface checks, including reaching **Next** without scrolling. UI tests use an isolated temporary vocabulary.
 
 ## License
 

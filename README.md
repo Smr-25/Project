@@ -17,12 +17,12 @@ Three independent applications in one repository: two ASP.NET Core web apps and 
 
 ### WordRevisit
 
-WordRevisit **2.1.0** includes a daily learning plan, resumable sessions, staged reviews, synonym practice, bulk word management, and full backups. Vocabulary and learning history stay on the iPhone.
+WordRevisit **1.3.0** offers unlimited practice in shuffled groups, automatic synonym-family blocks, CSV vocabulary import/export and saved practice history. Each word gets a turn before a new cycle starts. Vocabulary stays on the device.
 
 <p align="center">
-  <img src="WordRevisit/docs/screenshots/today.png" alt="WordRevisit daily plan" width="205">
+  <img src="WordRevisit/docs/screenshots/today.png" alt="WordRevisit practice cycle" width="205">
   <img src="WordRevisit/docs/screenshots/study.png" alt="WordRevisit recall and feedback" width="205">
-  <img src="WordRevisit/docs/screenshots/progress.png" alt="WordRevisit learning progress" width="205">
+  <img src="WordRevisit/docs/screenshots/synonyms.png" alt="WordRevisit synonym families" width="205">
 </p>
 
 <p align="center"><a href="WordRevisit/README.md">Features and iPhone setup →</a></p>
