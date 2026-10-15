@@ -3,6 +3,7 @@ import SwiftUI
 struct HomeView: View {
     @EnvironmentObject private var Store: WordRepository
     @State private var ShowingPractice = false
+    @State private var ShowingSynonyms = false
     private var Resuming: Bool { Store.Session != nil && Store.Session?.IsFinished == false }
 
     var body: some View {
@@ -37,6 +38,19 @@ struct HomeView: View {
                                 .foregroundStyle(Palette.Muted)
                         }
                     }.padding(24).FrostedCard(CornerRadius: 30)
+                    Button { ShowingSynonyms = true } label: {
+                        HStack(spacing: 16) {
+                            Image(systemName: "rectangle.3.group.fill").font(.title).foregroundStyle(Palette.Accent)
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text(Store.Synonyms.Round?.IsFinished == false ? "Continue synonyms" : "Synonym practice").font(.headline)
+                                Text("\(VocabularyGroup.Make(Store.Entries).count) families · a separate cycle")
+                                    .font(.subheadline).foregroundStyle(Palette.Muted)
+                            }
+                            Spacer(minLength: 0)
+                            Image(systemName: "arrow.up.right").foregroundStyle(Palette.Accent)
+                        }.padding(22).FrostedCard(CornerRadius: 24)
+                    }.buttonStyle(.plain).accessibilityIdentifier("OpenSynonyms")
+                    if let Notice = Store.Synonyms.Notice { Text(Notice).font(.subheadline).foregroundStyle(Palette.Muted) }
                     if !Resuming {
                         ModePicker()
                     } else {
@@ -55,6 +69,7 @@ struct HomeView: View {
             .padding(20).background(.regularMaterial)
         }
         .fullScreenCover(isPresented: $ShowingPractice) { QuizView() }
+        .fullScreenCover(isPresented: $ShowingSynonyms) { SynonymPracticeView() }
     }
 
     private func Metric(_ Value: String, _ Label: String) -> some View {

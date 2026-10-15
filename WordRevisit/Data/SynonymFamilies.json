@@ -1,0 +1,936 @@
+[
+  {
+    "Code": "end01001wr",
+    "Head": "endure",
+    "Sense": "bear something difficult",
+    "Terms": [
+      "endure",
+      "tolerate"
+    ]
+  },
+  {
+    "Code": "obs01002wr",
+    "Head": "obscure",
+    "Sense": "not clear",
+    "Terms": [
+      "obscure",
+      "indistinct"
+    ]
+  },
+  {
+    "Code": "ass01003wr",
+    "Head": "assess",
+    "Sense": "estimate quality or value",
+    "Terms": [
+      "assess",
+      "judge"
+    ]
+  },
+  {
+    "Code": "req01004wr",
+    "Head": "require",
+    "Sense": "need something",
+    "Terms": [
+      "require",
+      "demand"
+    ]
+  },
+  {
+    "Code": "com02005wr",
+    "Head": "command",
+    "Sense": "give an instruction",
+    "Terms": [
+      "command",
+      "order",
+      "direct"
+    ]
+  },
+  {
+    "Code": "inv02006wr",
+    "Head": "involve",
+    "Sense": "include as a necessary part",
+    "Terms": [
+      "involve",
+      "entail",
+      "mean"
+    ]
+  },
+  {
+    "Code": "ide02007wr",
+    "Head": "identify",
+    "Sense": "determine who or what someone is",
+    "Terms": [
+      "identify",
+      "recognize",
+      "place"
+    ]
+  },
+  {
+    "Code": "und02008wr",
+    "Head": "understand",
+    "Sense": "grasp the meaning",
+    "Terms": [
+      "understand",
+      "comprehend",
+      "apprehend"
+    ]
+  },
+  {
+    "Code": "rea02009wr",
+    "Head": "realize",
+    "Sense": "become aware of a fact",
+    "Terms": [
+      "realize",
+      "discover",
+      "learn"
+    ]
+  },
+  {
+    "Code": "loc04010wr",
+    "Head": "locate",
+    "Sense": "choose a position for something",
+    "Terms": [
+      "locate",
+      "site",
+      "situate",
+      "put",
+      "set"
+    ]
+  },
+  {
+    "Code": "iss02011wr",
+    "Head": "issue",
+    "Sense": "a subject for discussion",
+    "Terms": [
+      "issue",
+      "topic",
+      "matter"
+    ]
+  },
+  {
+    "Code": "fac01012wr",
+    "Head": "factor",
+    "Sense": "a contributing part",
+    "Terms": [
+      "factor",
+      "element"
+    ]
+  },
+  {
+    "Code": "pri01013wr",
+    "Head": "principle",
+    "Sense": "a guiding conviction",
+    "Terms": [
+      "principle",
+      "belief"
+    ]
+  },
+  {
+    "Code": "reg01014wr",
+    "Head": "regulation",
+    "Sense": "an official requirement",
+    "Terms": [
+      "regulation",
+      "rule"
+    ]
+  },
+  {
+    "Code": "nor04015wr",
+    "Head": "normal",
+    "Sense": "expected in everyday circumstances",
+    "Terms": [
+      "normal",
+      "usual",
+      "typical",
+      "common",
+      "ordinary"
+    ]
+  },
+  {
+    "Code": "sec03016wr",
+    "Head": "section",
+    "Sense": "a subdivision of a whole",
+    "Terms": [
+      "section",
+      "part",
+      "portion",
+      "division"
+    ]
+  },
+  {
+    "Code": "reg02017wr",
+    "Head": "region",
+    "Sense": "a geographical space",
+    "Terms": [
+      "region",
+      "area",
+      "territory"
+    ]
+  },
+  {
+    "Code": "inc02018wr",
+    "Head": "income",
+    "Sense": "money received",
+    "Terms": [
+      "income",
+      "revenue",
+      "earnings"
+    ]
+  },
+  {
+    "Code": "lab02019wr",
+    "Head": "labour",
+    "Sense": "make a sustained physical effort",
+    "Terms": [
+      "labour",
+      "toil",
+      "work hard"
+    ]
+  },
+  {
+    "Code": "pro03020wr",
+    "Head": "proceed",
+    "Sense": "keep an activity going",
+    "Terms": [
+      "proceed",
+      "continue",
+      "go on",
+      "carry on"
+    ]
+  },
+  {
+    "Code": "sig02021wr",
+    "Head": "significant",
+    "Sense": "having a strong effect or influence",
+    "Terms": [
+      "significant",
+      "important",
+      "major"
+    ]
+  },
+  {
+    "Code": "gre03022wr",
+    "Head": "greatly",
+    "Sense": "to a large degree",
+    "Terms": [
+      "greatly",
+      "hugely",
+      "vastly",
+      "very much"
+    ]
+  },
+  {
+    "Code": "ind02023wr",
+    "Head": "indicate",
+    "Sense": "make something evident",
+    "Terms": [
+      "indicate",
+      "show",
+      "reveal"
+    ]
+  },
+  {
+    "Code": "est03024wr",
+    "Head": "establish",
+    "Sense": "provide evidence that something is true",
+    "Terms": [
+      "establish",
+      "prove",
+      "confirm",
+      "demonstrate"
+    ]
+  },
+  {
+    "Code": "leg01025wr",
+    "Head": "legal",
+    "Sense": "relating to law",
+    "Terms": [
+      "legal",
+      "juridical"
+    ]
+  },
+  {
+    "Code": "ind02026wr",
+    "Head": "individual",
+    "Sense": "considered on its own",
+    "Terms": [
+      "individual",
+      "separate",
+      "single"
+    ]
+  },
+  {
+    "Code": "pri05027wr",
+    "Head": "primary",
+    "Sense": "most important",
+    "Terms": [
+      "primary",
+      "main",
+      "chief",
+      "key",
+      "principal",
+      "foremost"
+    ]
+  },
+  {
+    "Code": "res03028wr",
+    "Head": "research",
+    "Sense": "a systematic search for knowledge",
+    "Terms": [
+      "research",
+      "investigation",
+      "inquiry",
+      "study"
+    ]
+  },
+  {
+    "Code": "sur01029wr",
+    "Head": "survey",
+    "Sense": "a general account",
+    "Terms": [
+      "survey",
+      "overview"
+    ]
+  },
+  {
+    "Code": "spe01030wr",
+    "Head": "specific",
+    "Sense": "precisely identified",
+    "Terms": [
+      "specific",
+      "particular"
+    ]
+  },
+  {
+    "Code": "fea03031wr",
+    "Head": "feature",
+    "Sense": "a distinguishing quality",
+    "Terms": [
+      "feature",
+      "characteristic",
+      "attribute",
+      "trait"
+    ]
+  },
+  {
+    "Code": "int03032wr",
+    "Head": "interpret",
+    "Sense": "make the meaning easier to understand",
+    "Terms": [
+      "interpret",
+      "explain",
+      "clarify",
+      "spell out"
+    ]
+  },
+  {
+    "Code": "met03033wr",
+    "Head": "method",
+    "Sense": "a procedure for doing something",
+    "Terms": [
+      "method",
+      "way",
+      "approach",
+      "technique"
+    ]
+  },
+  {
+    "Code": "res02034wr",
+    "Head": "respond",
+    "Sense": "react with words",
+    "Terms": [
+      "respond",
+      "answer",
+      "reply"
+    ]
+  },
+  {
+    "Code": "str02035wr",
+    "Head": "structure",
+    "Sense": "the arrangement of parts",
+    "Terms": [
+      "structure",
+      "arrangement",
+      "make-up"
+    ]
+  },
+  {
+    "Code": "con01036wr",
+    "Head": "construction",
+    "Sense": "creating a physical structure",
+    "Terms": [
+      "construction",
+      "building"
+    ]
+  },
+  {
+    "Code": "occ02037wr",
+    "Head": "occur",
+    "Sense": "come about",
+    "Terms": [
+      "occur",
+      "happen",
+      "take place"
+    ]
+  },
+  {
+    "Code": "rol01038wr",
+    "Head": "role",
+    "Sense": "a character in a performance",
+    "Terms": [
+      "role",
+      "part"
+    ]
+  },
+  {
+    "Code": "pos01039wr",
+    "Head": "position",
+    "Sense": "an appointed job",
+    "Terms": [
+      "position",
+      "post"
+    ]
+  },
+  {
+    "Code": "var03040wr",
+    "Head": "vary",
+    "Sense": "not be the same",
+    "Terms": [
+      "vary",
+      "differ",
+      "be different",
+      "be dissimilar"
+    ]
+  },
+  {
+    "Code": "ana02041wr",
+    "Head": "analyse",
+    "Sense": "look at something in detail",
+    "Terms": [
+      "analyse",
+      "examine",
+      "study"
+    ]
+  },
+  {
+    "Code": "ben01042wr",
+    "Head": "benefit",
+    "Sense": "a favourable effect",
+    "Terms": [
+      "benefit",
+      "advantage"
+    ]
+  },
+  {
+    "Code": "dat02043wr",
+    "Head": "data",
+    "Sense": "factual information",
+    "Terms": [
+      "data",
+      "facts",
+      "figures"
+    ]
+  },
+  {
+    "Code": "con01044wr",
+    "Head": "concept",
+    "Sense": "a mental representation",
+    "Terms": [
+      "concept",
+      "idea"
+    ]
+  },
+  {
+    "Code": "def02045wr",
+    "Head": "define",
+    "Sense": "set the limits",
+    "Terms": [
+      "define",
+      "outline",
+      "mark out"
+    ]
+  },
+  {
+    "Code": "des02046wr",
+    "Head": "design",
+    "Sense": "a visual proposal",
+    "Terms": [
+      "design",
+      "plan",
+      "sketch"
+    ]
+  },
+  {
+    "Code": "obv03047wr",
+    "Head": "obvious",
+    "Sense": "easy to see or understand",
+    "Terms": [
+      "obvious",
+      "evident",
+      "plain",
+      "clear"
+    ]
+  },
+  {
+    "Code": "obt04048wr",
+    "Head": "obtain",
+    "Sense": "come into possession of",
+    "Terms": [
+      "obtain",
+      "get",
+      "gain",
+      "acquire",
+      "pick up"
+    ]
+  },
+  {
+    "Code": "ach03049wr",
+    "Head": "achieve",
+    "Sense": "successfully complete a goal",
+    "Terms": [
+      "achieve",
+      "accomplish",
+      "attain",
+      "reach"
+    ]
+  },
+  {
+    "Code": "fou02050wr",
+    "Head": "found",
+    "Sense": "start an organization",
+    "Terms": [
+      "found",
+      "establish",
+      "set up"
+    ]
+  },
+  {
+    "Code": "cre03051wr",
+    "Head": "create",
+    "Sense": "bring into existence",
+    "Terms": [
+      "create",
+      "produce",
+      "make",
+      "form"
+    ]
+  },
+  {
+    "Code": "dis03052wr",
+    "Head": "distribute",
+    "Sense": "provide something to several people",
+    "Terms": [
+      "distribute",
+      "hand out",
+      "dispense",
+      "give out"
+    ]
+  },
+  {
+    "Code": "com01053wr",
+    "Head": "component",
+    "Sense": "one constituent of a whole",
+    "Terms": [
+      "component",
+      "element"
+    ]
+  },
+  {
+    "Code": "ass03054wr",
+    "Head": "assume",
+    "Sense": "suppose without proof",
+    "Terms": [
+      "assume",
+      "presume",
+      "think",
+      "believe"
+    ]
+  },
+  {
+    "Code": "exp01055wr",
+    "Head": "expect",
+    "Sense": "regard a future event as likely",
+    "Terms": [
+      "expect",
+      "anticipate"
+    ]
+  },
+  {
+    "Code": "con02056wr",
+    "Head": "context",
+    "Sense": "the background to an event",
+    "Terms": [
+      "context",
+      "circumstances",
+      "background"
+    ]
+  },
+  {
+    "Code": "sur02057wr",
+    "Head": "surroundings",
+    "Sense": "what is around a place",
+    "Terms": [
+      "surroundings",
+      "environment",
+      "setting"
+    ]
+  },
+  {
+    "Code": "thr01058wr",
+    "Head": "thrift",
+    "Sense": "careful use of money",
+    "Terms": [
+      "thrift",
+      "economy"
+    ]
+  },
+  {
+    "Code": "adm02059wr",
+    "Head": "administration",
+    "Sense": "running an organization",
+    "Terms": [
+      "administration",
+      "management",
+      "managing"
+    ]
+  },
+  {
+    "Code": "con01060wr",
+    "Head": "contract",
+    "Sense": "a binding arrangement",
+    "Terms": [
+      "contract",
+      "agreement"
+    ]
+  },
+  {
+    "Code": "com01061wr",
+    "Head": "complex",
+    "Sense": "not simple",
+    "Terms": [
+      "complex",
+      "complicated"
+    ]
+  },
+  {
+    "Code": "ava01062wr",
+    "Head": "available",
+    "Sense": "able to be obtained or used",
+    "Terms": [
+      "available",
+      "accessible"
+    ]
+  },
+  {
+    "Code": "fun01063wr",
+    "Head": "function",
+    "Sense": "what something is for",
+    "Terms": [
+      "function",
+      "purpose"
+    ]
+  },
+  {
+    "Code": "inf02064wr",
+    "Head": "influence",
+    "Sense": "have an effect on",
+    "Terms": [
+      "influence",
+      "affect",
+      "impact"
+    ]
+  },
+  {
+    "Code": "var02065wr",
+    "Head": "variety",
+    "Sense": "a mix of different things",
+    "Terms": [
+      "variety",
+      "diversity",
+      "range"
+    ]
+  },
+  {
+    "Code": "kin02066wr",
+    "Head": "kind",
+    "Sense": "a classification of things",
+    "Terms": [
+      "kind",
+      "sort",
+      "type"
+    ]
+  },
+  {
+    "Code": "acq03067wr",
+    "Head": "acquisition",
+    "Sense": "the act of getting something",
+    "Terms": [
+      "acquisition",
+      "obtaining",
+      "acquiring",
+      "gaining"
+    ]
+  },
+  {
+    "Code": "app03068wr",
+    "Head": "appropriate",
+    "Sense": "right for a particular purpose",
+    "Terms": [
+      "appropriate",
+      "suitable",
+      "fitting",
+      "apt"
+    ]
+  },
+  {
+    "Code": "rel02069wr",
+    "Head": "relevant",
+    "Sense": "bearing on the matter",
+    "Terms": [
+      "relevant",
+      "pertinent",
+      "applicable"
+    ]
+  },
+  {
+    "Code": "ass03070wr",
+    "Head": "assistance",
+    "Sense": "making a task easier for someone",
+    "Terms": [
+      "assistance",
+      "help",
+      "aid",
+      "support"
+    ]
+  },
+  {
+    "Code": "cat02071wr",
+    "Head": "category",
+    "Sense": "things classified together",
+    "Terms": [
+      "category",
+      "class",
+      "group"
+    ]
+  },
+  {
+    "Code": "com01072wr",
+    "Head": "computer",
+    "Sense": "a machine that processes data",
+    "Terms": [
+      "computer",
+      "data processor"
+    ]
+  },
+  {
+    "Code": "con02073wr",
+    "Head": "conclusion",
+    "Sense": "the last part",
+    "Terms": [
+      "conclusion",
+      "ending",
+      "end"
+    ]
+  },
+  {
+    "Code": "con01074wr",
+    "Head": "conduct",
+    "Sense": "perform an activity",
+    "Terms": [
+      "conduct",
+      "carry out"
+    ]
+  },
+  {
+    "Code": "man03075wr",
+    "Head": "manage",
+    "Sense": "be in charge of",
+    "Terms": [
+      "manage",
+      "run",
+      "oversee",
+      "supervise"
+    ]
+  },
+  {
+    "Code": "con02076wr",
+    "Head": "consequence",
+    "Sense": "what follows from an action",
+    "Terms": [
+      "consequence",
+      "result",
+      "outcome"
+    ]
+  },
+  {
+    "Code": "buy01077wr",
+    "Head": "buyer",
+    "Sense": "someone who pays for goods",
+    "Terms": [
+      "buyer",
+      "purchaser"
+    ]
+  },
+  {
+    "Code": "dis02078wr",
+    "Head": "distinction",
+    "Sense": "a contrast between things",
+    "Terms": [
+      "distinction",
+      "difference",
+      "dissimilarity"
+    ]
+  },
+  {
+    "Code": "eva03079wr",
+    "Head": "evaluation",
+    "Sense": "determining quality or value",
+    "Terms": [
+      "evaluation",
+      "assessment",
+      "appraisal",
+      "judgement"
+    ]
+  },
+  {
+    "Code": "rat01080wr",
+    "Head": "rating",
+    "Sense": "an assessment of quality",
+    "Terms": [
+      "rating",
+      "ranking"
+    ]
+  },
+  {
+    "Code": "fin02081wr",
+    "Head": "final",
+    "Sense": "last",
+    "Terms": [
+      "final",
+      "ultimate",
+      "endmost"
+    ]
+  },
+  {
+    "Code": "inv01082wr",
+    "Head": "investment",
+    "Sense": "money committed to a purpose",
+    "Terms": [
+      "investment",
+      "outlay"
+    ]
+  },
+  {
+    "Code": "fun01083wr",
+    "Head": "funding",
+    "Sense": "providing money",
+    "Terms": [
+      "funding",
+      "financing"
+    ]
+  },
+  {
+    "Code": "pre01084wr",
+    "Head": "preservation",
+    "Sense": "keeping from harm or loss",
+    "Terms": [
+      "preservation",
+      "conservation"
+    ]
+  },
+  {
+    "Code": "par01085wr",
+    "Head": "participation",
+    "Sense": "taking part",
+    "Terms": [
+      "participation",
+      "involvement"
+    ]
+  },
+  {
+    "Code": "pra01086wr",
+    "Head": "practical",
+    "Sense": "concerned with what works",
+    "Terms": [
+      "practical",
+      "pragmatic"
+    ]
+  },
+  {
+    "Code": "ben01087wr",
+    "Head": "beneficial",
+    "Sense": "helpful",
+    "Terms": [
+      "beneficial",
+      "useful"
+    ]
+  },
+  {
+    "Code": "pot01088wr",
+    "Head": "potential",
+    "Sense": "possible",
+    "Terms": [
+      "potential",
+      "possible"
+    ]
+  },
+  {
+    "Code": "pre03089wr",
+    "Head": "previous",
+    "Sense": "before a given time or point",
+    "Terms": [
+      "previous",
+      "preceding",
+      "prior",
+      "earlier"
+    ]
+  },
+  {
+    "Code": "res01090wr",
+    "Head": "restricted",
+    "Sense": "subject to constraints",
+    "Terms": [
+      "restricted",
+      "limited"
+    ]
+  },
+  {
+    "Code": "sec01091wr",
+    "Head": "security",
+    "Sense": "freedom from danger",
+    "Terms": [
+      "security",
+      "safety"
+    ]
+  },
+  {
+    "Code": "sel02092wr",
+    "Head": "select",
+    "Sense": "make a choice",
+    "Terms": [
+      "select",
+      "choose",
+      "pick"
+    ]
+  },
+  {
+    "Code": "tra02093wr",
+    "Head": "traditional",
+    "Sense": "following established custom",
+    "Terms": [
+      "traditional",
+      "conventional",
+      "customary"
+    ]
+  },
+  {
+    "Code": "tra02094wr",
+    "Head": "transfer",
+    "Sense": "change location",
+    "Terms": [
+      "transfer",
+      "move",
+      "convey"
+    ]
+  }
+]

@@ -8,7 +8,10 @@ struct WordRevisitApp: App {
         if let Value = ProcessInfo.processInfo.environment["WORDREVISIT_TEST_STORE"], let Id = UUID(uuidString: Value) {
             let URL = FileManager.default.temporaryDirectory.appendingPathComponent("UITest-\(Id).json")
             if !FileManager.default.fileExists(atPath: URL.path) {
-                let Words = [("forest", "meşə", "nature"), ("water", "su", ""), ("bird", "quş", "nature"), ("large", "böyük", "size"), ("huge", "böyük", "size"), ("tree", "ağac", "nature")].map { WordEntry(Term: $0.0, Translation: $0.1, Group: $0.2) }
+                let Pairs = [("select", "seçmək"), ("choose", "seçmək"), ("previous", "əvvəlki"), ("prior", "əvvəlki"), ("obtain", "əldə etmək"), ("acquire", "əldə etmək")]
+                let Words = Pairs.map { Pair in
+                    WordEntry(Term: Pair.0, Translation: Pair.1, Group: SynonymCatalog.Families.filter { $0.Terms.contains(Pair.0) }.map(\.Code).joined(separator: "; "))
+                }
                 let Data = PracticeData(Entries: Words, Bag: PracticeBag(Entries: Words))
                 try? JSONEncoder().encode(Data).write(to: URL, options: .atomic)
             }
@@ -53,15 +56,15 @@ private struct StorageRecoveryView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
                     Text("Existing file preserved").font(.largeTitle.bold())
-                    Text(Store.ErrorMessage ?? "This file cannot be opened by version 1.3.")
-                    Text("To bring words from 2.x, export CSV in that version first. You can then start 1.3 and import that CSV. Practice history and schedules from 2.x are not migrated.")
+                    Text(Store.ErrorMessage ?? "This file cannot be opened by version 1.4.")
+                    Text("To bring words from 2.x, export CSV in that version first. You can then start 1.4 and import that CSV. Practice history and schedules from 2.x are not migrated.")
                     Button("Start with the new vocabulary") { Confirm = true }
                         .buttonStyle(PrimaryActionStyle())
                 }.padding(24)
-            }.confirmationDialog("Start a fresh 1.3 vocabulary?", isPresented: $Confirm, titleVisibility: .visible) {
+            }.confirmationDialog("Start a fresh 1.4 vocabulary?", isPresented: $Confirm, titleVisibility: .visible) {
                 Button("Keep old file and start fresh", role: .destructive) { Store.StartFresh() }
                 Button("Cancel", role: .cancel) {}
-            } message: { Text("The old file will be retained separately on this device. Version 1.3 starts with 287 words and an empty practice history. Export CSV from your previous version first if you need its vocabulary.") }
+            } message: { Text("The old file will be retained separately on this device. Version 1.4 starts with 513 words and an empty practice history. Export CSV from your previous version first if you need its vocabulary.") }
         }
     }
 }

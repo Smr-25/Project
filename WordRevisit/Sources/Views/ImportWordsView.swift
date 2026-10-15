@@ -18,12 +18,14 @@ struct ImportWordsView: View {
                 }
                 Section {
                     Text("English and Azerbaijani are required. Group is optional. Other CSV columns are ignored.")
-                    Text("Existing English words are skipped. Their translations and groups stay unchanged.")
+                    Text("Existing English words are updated without resetting your cycle. Repeated rows in this file combine their meanings and groups. A missing Group column keeps current groups; an empty Group clears them.")
                 }.font(.subheadline)
                 if let Preview {
                     Section("Import preview") {
                         LabeledContent("New words", value: "\(Preview.Added)")
-                        LabeledContent("Duplicate English skipped", value: "\(Preview.Duplicates)")
+                        LabeledContent("Words to update", value: "\(Preview.Updated)")
+                        LabeledContent("Unchanged words", value: "\(Preview.Unchanged)")
+                        LabeledContent("Repeated rows combined", value: "\(Preview.Duplicates)")
                         LabeledContent("Invalid rows skipped", value: "\(Preview.Errors.count)")
                         ForEach(Preview.Errors.prefix(20), id: \.self) { Text($0).font(.caption).foregroundStyle(Palette.Danger) }
                     }
@@ -34,9 +36,9 @@ struct ImportWordsView: View {
                 .safeAreaInset(edge: .bottom) {
                     Group {
                         if let Preview {
-                            Button("Import \(Preview.Added) words") {
+                            Button("Import \(Preview.Added + Preview.Updated) words") {
                                 if Store.ApplyImport(Text: SourceText, Paste: CSV == nil) { Dismiss() }
-                            }.disabled(Preview.Added == 0)
+                            }.disabled(Preview.Added + Preview.Updated == 0)
                         } else {
                             Button("Preview import") { BuildPreview() }.disabled(SourceText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
                         }

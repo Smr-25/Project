@@ -25,8 +25,8 @@ struct WordEditorView: View {
                     TextField("Translation; another meaning", text: $Azerbaijani, axis: .vertical).accessibilityIdentifier("EditTranslation")
                 }
                 Section("Group · optional") {
-                    TextField("For example: size", text: $Group)
-                    Text("Words with the same group appear together in Synonyms.").font(.caption).foregroundStyle(Palette.Muted)
+                    TextField("Family codes, separated by ;", text: $Group)
+                    Text("Use codes from the supplied CSV. Only reviewed word memberships appear in Synonyms; other labels are retained for export.").font(.caption).foregroundStyle(Palette.Muted)
                 }
             }.textInputAutocapitalization(.never).autocorrectionDisabled()
                 .navigationTitle(IsNew ? "Add word" : "Edit word")
