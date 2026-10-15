@@ -1,1 +1,26 @@
 .DS_Store
+
+# >>> harden-all-repos
+# IDE
+.vs/
+*.user
+*.suo
+# Asılılıqlar
+node_modules/
+# Secret-lər və açarlar
+.env
+.env.local
+.env.development
+.env.production
+.env.staging
+*.pfx
+*.p12
+*.pem
+*.key
+*.secrets.json
+secrets.json
+appsettings.*.local.json
+# .NET build nəticələri
+[Bb]in/
+[Oo]bj/
+# <<< harden-all-repos
