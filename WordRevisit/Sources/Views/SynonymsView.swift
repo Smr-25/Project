@@ -11,7 +11,7 @@ struct SynonymsView: View {
                 AppBackground()
                 VStack(alignment: .leading, spacing: 0) {
                     VStack(alignment: .leading, spacing: 16) {
-                        SectionEyebrow(Title: "Words that belong together")
+                        SectionEyebrow(Title: "Shared meanings")
                         Text("Synonyms").font(.largeTitle.bold())
                         HStack(spacing: 10) {
                             Image(systemName: "magnifyingglass").foregroundStyle(Palette.Accent)
@@ -29,7 +29,7 @@ struct SynonymsView: View {
                         let Groups = VocabularyGroup.Make(Store.Entries, Search: Search)
                         if Groups.isEmpty {
                             ContentUnavailableView(Search.isEmpty ? "Your word families" : "No matching groups",
-                                systemImage: "rectangle.3.group", description: Text(Search.isEmpty ? "Add a Group to words in My words or CSV to see them together here." : "Search an English word, translation or group name."))
+                                systemImage: "rectangle.3.group", description: Text(Search.isEmpty ? "Import the supplied CSV to add reviewed families. Each family needs at least two of its words." : "Search an English word, translation or family code or meaning."))
                         } else {
                             LazyVGrid(columns: Array(repeating: GridItem(.flexible(), alignment: .top), count: Geometry.size.width >= 1000 ? 3 : Geometry.size.width >= 700 ? 2 : 1), alignment: .leading, spacing: 18) {
                                 ForEach(Groups) { Group in

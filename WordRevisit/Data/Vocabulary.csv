@@ -1,53 +1,53 @@
 English,Azerbaijani,Group
-logging,ağac kəsimi,tree-cutting
-array,sıra; düzüm,variety
-environment,ətraf mühit,
+logging,ağac kəsimi,
+array,sıra; düzüm,
+environment,ətraf mühit,sur02057wr
 habitat,yaşayış mühiti,
 pollution,çirklənmə,
 extend,uzatmaq; genişləndirmək,
-fell,ağacı kəsmək,tree-cutting
+fell,ağacı kəsmək,
 nutrients,qida maddələri,
-terrestrial,quruda yaşayan; yerüstü,land-water
-aquatic,suda yaşayan; suya aid,land-water
+terrestrial,quruda yaşayan; yerüstü,
+aquatic,suda yaşayan; suya aid,
 vanish,yoxa çıxmaq,
-myriad,saysız-hesabsız,variety
+myriad,saysız-hesabsız,
 intact,zədəsiz; toxunulmamış,
 intercept,qarşısını kəsmək,
 stabilize,sabitləşdirmək,
 erosion,eroziya; aşınma,
 vegetation,bitki örtüyü,
-inhibit,mane olmaq; ləngitmək,inhibit-inhabit
+inhibit,mane olmaq; ləngitmək,
 defense,müdafiə,
-deforestation,meşəsizləşmə,tree-cutting
+deforestation,meşəsizləşmə,
 migration,köç; miqrasiya,
-inhabit,məskunlaşmaq,inhibit-inhabit; inhabit-occupy
+inhabit,məskunlaşmaq,
 fascinate,heyran etmək; valeh etmək,
 imperative,vacib; zəruri,
-evolve,təkamül etmək; inkişaf etmək,evolve-adapt-thrive
+evolve,təkamül etmək; inkişaf etmək,
 breed,çoxalmaq; nəsil artırmaq,
 optimal,ən əlverişli,
 hemisphere,yarımkürə,
 species,növ,
 windswept,küləyin təsirinə məruz qalmış,
-endure,dözmək,tolerate-endure
+endure,dözmək,end01001wr
 fuel,yanacaq; gücləndirmək,
 aspect,cəhət,
 feat,nailiyyət; uğur,
-nocturnal,gecə fəal olan,night-day
-obscure,naməlum; qaranlıq,unclear
+nocturnal,gecə fəal olan,
+obscure,naməlum; qaranlıq,obs01002wr
 starry,ulduzlu,
-diurnal,gündüz fəal olan,night-day
+diurnal,gündüz fəal olan,
 navigation,istiqamət tapma; naviqasiya,
-occupy,tutmaq; məskunlaşmaq,inhabit-occupy
+occupy,tutmaq; məskunlaşmaq,
 sparse,seyrək,
 swing,yellənmək; dəyişmək,
 violent,şiddətli,
 extreme,həddindən artıq; ifrat,
 transitional,keçid dövrünə aid,
-fringe,kənar; haşiyə,edge
-diverse,müxtəlif,variety
-adapt,uyğunlaşmaq,evolve-adapt-thrive
-thrive,inkişaf etmək,evolve-adapt-thrive
+fringe,kənar; haşiyə,
+diverse,müxtəlif,
+adapt,uyğunlaşmaq,
+thrive,inkişaf etmək,
 resilient,dözümlü; dayanıqlı,
 stressor,stress yaradan amil,
 minimize,minimuma endirmək,
@@ -56,244 +56,459 @@ prolific,məhsuldar; çox nəsil verən,
 mechanisms,mexanizmlər,
 evaporation,buxarlanma,
 dilute,seyrəltmək,
-determine,müəyyən etmək,assess
+determine,müəyyən etmək,
 accumulate,yığılmaq; toplamaq,
-require,tələb etmək,require; involve
-identify,müəyyən etmək,identify
-recognize,tanımaq,identify
-place,yerini müəyyən etmək,identify
-name,adlandırmaq,identify
-remember,xatırlamaq,identify
-issue,məsələ,issue
-topic,mövzu,issue
-point,məqam,issue; factor
-matter,məsələ; iş,issue
-problem,problem,issue
-principle,prinsip,principle
-belief,inam,principle
-rule,qayda,principle
-standard,standart; norma,principle
-attitude,münasibət,principle
-section,bölmə,section
-part,hissə,section; factor
-piece,parça,section
-portion,pay; hissə,section
-division,bölgü; şöbə,section
-income,gəlir,income
-revenue,gəlir (dövlət və ya şirkət gəliri),income
-gains,qazanc,income
-earnings,qazanc; maaş,income
-means,vəsait; imkan,income
-labour,əmək,labour
-work,iş,labour
-toil,ağır zəhmət,labour
-strive,can atmaq,labour
-work hard,çox çalışmaq,labour
-proceed,davam etmək,proceed
-continue,davam etmək,proceed
-go on,davam etmək,proceed
-progress,irəliləmək,proceed
-carry on,davam etdirmək,proceed
-significant,əhəmiyyətli; xeyli,significant
-very much,çox,significant
-greatly,xeyli,significant
-hugely,nəhəng dərəcədə,significant
-vastly,qat-qat,significant
-indicate,göstərmək,indicate
-show,göstərmək,indicate; establish
-suggest,ehtimal etdirmək; təklif etmək,indicate
-reveal,üzə çıxarmaq,indicate
-display,nümayiş etdirmək,indicate
-legal,hüquqi,legal
-judicial,məhkəmə ilə bağlı,legal
-judiciary,məhkəmə hakimiyyəti,legal
-forensic,məhkəmə-ekspertiza,legal
-juridical,hüquqi,legal
-order,əmr etmək,require
-demand,tələb etmək,require; involve
-direct,göstəriş vermək,require
-command,əmr vermək,require
-source,mənbə,source
-informant,məlumat verən şəxs,source
-authority,səlahiyyətli orqan,source
-documentation,sənədlər,source
-individual,fərdi,individual
-separate,ayrı,individual
-single,tək,individual
-independent,müstəqil,individual
-isolated,təcrid olunmuş,individual
-major,əsas; böyük,major
-important,vacib,major
-vital,həyati,major
-critical,kritik,major
-significant,əhəmiyyətli,major
-research,tədqiqat,research
-investigation,araşdırma,research
-study,tədqiqat; öyrənmə,research
-inquiry,sorğu; araşdırma,research
-analysis,təhlil,research
-specific,konkret,specific
-particular,xüsusi,specific
-special,xüsusi,specific
-characteristic,səciyyəvi,specific
-distinguishing,fərqləndirici,specific
-interpret,izah etmək,interpret
-explain,izah etmək,interpret
-define,tərif vermək,interpret
-clarify,aydınlaşdırmaq,interpret
-spell out,ətraflı izah etmək,interpret
-method,metod; üsul,method
-manner,tərz,method
-process,proses,method
-approach,yanaşma,method; approach
-technique,texnika; üsul,method
-respond,cavab vermək,respond
-answer,cavab vermək,respond
-return,geri qaytarmaq,respond
-reply,cavablandırmaq,respond
-come back,geri qayıtmaq,respond
-structure,struktur,structure
-arrangement,düzülüş,structure
-form,forma,structure
-make-up,tərkib,structure
-make,quruluş,structure
-involve,əhatə etmək,involve
-entail,nəzərdə tutmaq,involve
-mean,mənasını vermək,involve
-occur,baş vermək,occur
-happen,baş vermək,occur
-take place,baş tutmaq,occur
-role,rol,role
-post,vəzifə,role
-position,mövqe; vəzifə,role
-part,rol; hissə,role
-vary,fərqlənmək,vary
-differ,fərqlənmək,vary
-be different,fərqli olmaq,vary
-be dissimilar,bənzəməmək,vary
-disagree,razılaşmamaq,vary
-analyse,təhlil etmək,analyse
-examine,yoxlamaq; araşdırmaq,analyse
-test,sınaqdan keçirmək,analyse
-study,öyrənmək,analyse
-benefit,fayda,benefit
-good,xeyir,benefit
-profit,mənfəət,benefit
-advantage,üstünlük,benefit
-data,məlumat,data
-details,təfərrüatlar,data
-facts,faktlar,data
-figures,rəqəmlər,data
-materials,materiallar,data
-estimate,qiymətləndirmək,estimate
-value,dəyər vermək,estimate
-guess,təxmin etmək,estimate
-judge,mühakimə etmək,estimate; assess
-way,yol,approach
-method,metod,approach
-concept,anlayış,concept
-idea,ideya,concept
-view,baxış,concept
-image,obraz,concept
-theory,nəzəriyyə,concept
-define,müəyyənləşdirmək,define
-outline,qısaca təsvir etmək,define
-mark out,sərhədlərini çəkmək,define
-evident,aşkar,evident
-obvious,göz qabağında,evident
-plain,sadə; aydın,evident
-clear,aydın,evident
-area,sahə; ərazi,area
-region,bölgə,area
-land,torpaq,area
-territory,ərazi,area
-consist,ibarət olmaq,consist
-be composed (of),ibarət olmaq,consist
-formed (of),təşkil olunmuş,consist
-derive,əldə etmək,derive
-obtain,əldə etmək,derive
-get,almaq,derive
-receive,qəbul etmək,derive
-draw,götürmək; çıxarmaq,derive
-export,ixrac etmək,export
-ship,göndərmək,export
-trade in,ticarət etmək,export
-assess,qiymətləndirmək,assess
-estimate,təxmin etmək,assess
-constitute,təşkil etmək,constitute
-set up,qurmaq,constitute
-found,əsasını qoymaq,constitute
-name,təyin etmək,constitute
-create,yaratmaq,constitute; create
-distribute,paylamaq,distribute
-hand out,paylamaq,distribute
-dispense,bölüşdürmək,distribute
-give out,paylamaq,distribute
-factor,amil,factor
-element,element,factor
-thing,şey,factor
-assume,fərz etmək,assume
-presume,güman etmək,assume
-think,düşünmək,assume
-believe,inanmaq,assume
-expect,gözləmək,assume
-context,kontekst,context
-circumstances,hallar,context
-conditions,şərait,context; environment
-situation,vəziyyət,context; environment
-background,fon; arxa plan,context
-economy,iqtisadiyyat; qənaət,economy
-thrift,qənaətcillik,economy
-saving,qənaət,economy
-finance,maliyyə,finance
-economics,iqtisadiyyat,finance
-business,biznes,finance
-money,pul,finance
-banking,bankçılıq,finance
-authority,hakimiyyət,authority
-government,hökumət,authority
-state officials,dövlət məmurları,authority
-contract,müqavilə,contract
-agreement,razılaşma,contract
-commission,tapşırıq; komissiya,contract
-commitment,öhdəlik,contract
-surroundings,ətraf,environment
-setting,məkan; şərait,environment
-formula,formula,formula
-mixture,qarışıq,formula
-preparation,hazırlanmış məhsul,formula
-compound,birləşmə,formula
-composition,tərkib,formula
-available,əlçatan,available
-accessible,əlçatan,available
-attainable,əldə oluna bilən,available
-form,formalaşdırmaq,create
-produce,istehsal etmək,create
-make,düzəltmək,create
-establish,sübut etmək,establish
-prove,sübut etmək,establish
-confirm,təsdiqləmək,establish
-demonstrate,nümayiş etdirmək,establish
-function,funksiya,function
-purpose,məqsəd,function
-business,iş; vəzifə,function
-concern,məsələ; vəzifə,function
+require,tələb etmək,req01004wr
+identify,müəyyən etmək,ide02007wr
+recognize,tanımaq,ide02007wr
+place,yerini müəyyən etmək; yerləşdirmək,ide02007wr
+name,adlandırmaq; təyin etmək,
+remember,xatırlamaq,
+issue,məsələ,iss02011wr
+topic,mövzu,iss02011wr
+point,məqam,
+matter,məsələ; iş,iss02011wr
+problem,problem,
+principle,prinsip,pri01013wr
+belief,inam,pri01013wr
+rule,qayda,reg01014wr
+standard,standart; norma,
+attitude,münasibət,
+section,bölmə,sec03016wr
+part,hissə; rol,sec03016wr; rol01038wr
+piece,parça,
+portion,pay; hissə,sec03016wr
+division,bölgü; şöbə,sec03016wr
+income,gəlir,inc02018wr
+revenue,gəlir (dövlət və ya şirkət gəliri),inc02018wr
+gains,qazanc,
+earnings,qazanc; maaş,inc02018wr
+means,vəsait; imkan,
+labour,əmək,lab02019wr
+work,iş,
+toil,ağır zəhmət,lab02019wr
+strive,can atmaq,
+work hard,çox çalışmaq,lab02019wr
+proceed,davam etmək,pro03020wr
+continue,davam etmək,pro03020wr
+go on,davam etmək,pro03020wr
+progress,irəliləmək,
+carry on,davam etdirmək,pro03020wr
+significant,əhəmiyyətli; xeyli,sig02021wr
+very much,çox,gre03022wr
+greatly,xeyli,gre03022wr
+hugely,nəhəng dərəcədə,gre03022wr
+vastly,qat-qat,gre03022wr
+indicate,göstərmək,ind02023wr
+show,göstərmək,ind02023wr
+suggest,ehtimal etdirmək; təklif etmək,
+reveal,üzə çıxarmaq,ind02023wr
+display,nümayiş etdirmək,
+legal,hüquqi,leg01025wr
+judicial,məhkəmə ilə bağlı,
+judiciary,məhkəmə hakimiyyəti,
+forensic,məhkəmə-ekspertiza,
+juridical,hüquqi,leg01025wr
+order,əmr etmək,com02005wr
+demand,tələb etmək,req01004wr
+direct,göstəriş vermək,com02005wr
+command,əmr vermək,com02005wr
+source,mənbə,
+informant,məlumat verən şəxs,
+authority,səlahiyyətli orqan; hakimiyyət,
+documentation,sənədlər,
+individual,fərdi,ind02026wr
+separate,ayrı,ind02026wr
+single,tək,ind02026wr
+independent,müstəqil,
+isolated,təcrid olunmuş,
+major,əsas; böyük,sig02021wr
+important,vacib,sig02021wr
+vital,həyati,
+critical,kritik,
+research,tədqiqat,res03028wr
+investigation,araşdırma,res03028wr
+study,tədqiqat; öyrənmə; öyrənmək,res03028wr; ana02041wr
+inquiry,sorğu; araşdırma,res03028wr
+analysis,təhlil,
+specific,konkret,spe01030wr
+particular,xüsusi,spe01030wr
+special,xüsusi,
+characteristic,səciyyəvi,fea03031wr
+distinguishing,fərqləndirici,
+interpret,izah etmək,int03032wr
+explain,izah etmək,int03032wr
+define,tərif vermək; müəyyənləşdirmək,def02045wr
+clarify,aydınlaşdırmaq,int03032wr
+spell out,ətraflı izah etmək,int03032wr
+method,metod; üsul,met03033wr
+manner,tərz,
+process,proses,
+approach,yanaşma,met03033wr
+technique,texnika; üsul,met03033wr
+respond,cavab vermək,res02034wr
+answer,cavab vermək,res02034wr
+return,geri qaytarmaq,
+reply,cavablandırmaq,res02034wr
+come back,geri qayıtmaq,
+structure,struktur,str02035wr
+arrangement,düzülüş,str02035wr
+form,forma; formalaşdırmaq,cre03051wr
+make-up,tərkib,str02035wr
+make,quruluş; düzəltmək,cre03051wr
+involve,əhatə etmək,inv02006wr
+entail,nəzərdə tutmaq,inv02006wr
+mean,mənasını vermək,inv02006wr
+occur,baş vermək,occ02037wr
+happen,baş vermək,occ02037wr
+take place,baş tutmaq,occ02037wr
+role,rol,rol01038wr
+post,vəzifə,pos01039wr
+position,mövqe; vəzifə,pos01039wr
+vary,fərqlənmək,var03040wr
+differ,fərqlənmək,var03040wr
+be different,fərqli olmaq,var03040wr
+be dissimilar,bənzəməmək,var03040wr
+disagree,razılaşmamaq,
+analyse,təhlil etmək,ana02041wr
+examine,yoxlamaq; araşdırmaq,ana02041wr
+test,sınaqdan keçirmək,
+benefit,fayda,ben01042wr
+good,xeyir,
+profit,mənfəət,
+advantage,üstünlük,ben01042wr
+data,məlumat,dat02043wr
+details,təfərrüatlar,
+facts,faktlar,dat02043wr
+figures,rəqəmlər,dat02043wr
+materials,materiallar,
+estimate,qiymətləndirmək; təxmin etmək,est01080wr
+value,dəyər vermək,
+guess,təxmin etmək,est01080wr
+judge,mühakimə etmək,ass01003wr
+way,yol,met03033wr
+concept,anlayış,con01044wr
+idea,ideya,con01044wr
+view,baxış; nəzərdən keçirmək,
+image,obraz,
+theory,nəzəriyyə,
+outline,qısaca təsvir etmək; ümumi cizgi,def02045wr
+mark out,sərhədlərini çəkmək,def02045wr
+evident,aşkar,obv03047wr
+obvious,göz qabağında,obv03047wr
+plain,sadə; aydın,obv03047wr
+clear,aydın,obv03047wr
+area,sahə; ərazi,reg02017wr
+region,bölgə,reg02017wr
+land,torpaq,
+territory,ərazi,reg02017wr
+consist,ibarət olmaq,
+be composed (of),ibarət olmaq,
+formed (of),təşkil olunmuş,
+derive,əldə etmək,
+obtain,əldə etmək,obt04048wr
+get,almaq,obt04048wr
+receive,qəbul etmək,
+draw,götürmək; çıxarmaq,
+export,ixrac etmək,
+ship,göndərmək,
+trade in,ticarət etmək,
+assess,qiymətləndirmək,ass01003wr
+constitute,təşkil etmək,
+set up,qurmaq,fou02050wr
+found,əsasını qoymaq,fou02050wr
+create,yaratmaq,cre03051wr
+distribute,paylamaq,dis03052wr
+hand out,paylamaq,dis03052wr
+dispense,bölüşdürmək,dis03052wr
+give out,paylamaq,dis03052wr
+factor,amil,fac01012wr
+element,element,fac01012wr; com01053wr
+thing,şey,
+assume,fərz etmək,ass03054wr
+presume,güman etmək,ass03054wr
+think,düşünmək,ass03054wr
+believe,inanmaq,ass03054wr
+expect,gözləmək,exp01055wr
+context,kontekst,con02056wr
+circumstances,hallar,con02056wr
+conditions,şərait,
+situation,vəziyyət,
+background,fon; arxa plan,con02056wr
+economy,iqtisadiyyat; qənaət,thr01058wr
+thrift,qənaətcillik,thr01058wr
+saving,qənaət,
+finance,maliyyə,
+economics,iqtisadiyyat,
+business,biznes; iş; vəzifə,
+money,pul,
+banking,bankçılıq,
+government,hökumət,
+state officials,dövlət məmurları,
+contract,müqavilə,con01060wr
+agreement,razılaşma,con01060wr
+commission,tapşırıq; komissiya haqqı,
+commitment,öhdəlik,
+surroundings,ətraf,sur02057wr
+setting,məkan; şərait,sur02057wr
+formula,formula,
+mixture,qarışıq,
+preparation,hazırlanmış məhsul,
+compound,birləşmə; mürəkkəb,
+composition,tərkib,
+available,əlçatan,ava01062wr
+accessible,əlçatan,ava01062wr
+attainable,əldə oluna bilən,
+produce,istehsal etmək,cre03051wr
+establish,sübut etmək,est03024wr; fou02050wr
+prove,sübut etmək,est03024wr
+confirm,təsdiqləmək,est03024wr
+demonstrate,nümayiş etdirmək,est03024wr
+function,funksiya,fun01063wr
+purpose,məqsəd,fun01063wr
+concern,məsələ; vəzifə; aid olmaq,
 focus,diqqəti cəmləmək; fokuslanmaq,
-indistinct,qeyri-aydın; dumanlı,unclear
-blur,bulanıqlıq; bulanıqlaşdırmaq,unclear
+indistinct,qeyri-aydın; dumanlı,obs01002wr
+blur,bulanıqlıq; bulanıqlaşdırmaq,
 unconsciously,şüursuzcasına; fərqinə varmadan,
-peripheral,periferik; kənar,edge
-tolerate,dözmək; qatlaşmaq,tolerate-endure
+peripheral,periferik; kənar,
+tolerate,dözmək; qatlaşmaq,end01001wr
 vision,görmə; görmə qabiliyyəti,
 athlete,idmançı,
-range,diapazon; aralıq,variety
+range,diapazon; aralıq,var02065wr
 performance,çıxış; performans,
 detect,aşkar etmək; hiss etmək,
 maneuver,manevr etmək; manevr,
 distracting,diqqəti yayındıran,
-anticipate,qabaqcadan görmək; gözləmək,assume
+anticipate,qabaqcadan görmək; gözləmək,exp01055wr
 scan,gözdən keçirmək; skan etmək,
 complicate,mürəkkəbləşdirmək,
 coordinate,əlaqələndirmək; koordinasiya etmək,
-boundary,sərhəd; hüdud,edge
-indiscernibly,hiss olunmaz dərəcədə; seçilməz şəkildə,unclear
+boundary,sərhəd; hüdud,
+indiscernibly,hiss olunmaz dərəcədə; seçilməz şəkildə,
+achieve,nail olmaq; əldə etmək,ach03049wr
+reach,çatmaq,ach03049wr
+accomplish,yerinə yetirmək; başa çatdırmaq,ach03049wr
+fulfill,yerinə yetirmək; reallaşdırmaq,
+gain,qazanmaq; əldə etmək,obt04048wr
+acquisition,əldə etmə; əldə olunan şey,acq03067wr
+possession,sahiblik; mülkiyyət,
+asset,aktiv; sərvət,
+obtaining,əldə etmə,acq03067wr
+acquiring,əldə etmə (prosesi),acq03067wr
+gaining,qazanma,acq03067wr
+administration,idarəetmə; administrasiya,adm02059wr
+management,idarəetmə; rəhbərlik,adm02059wr
+managing,idarə etmə,adm02059wr
+directing,rəhbərlik etmə; yönəltmə,
+executive,icraçı; rəhbər,
+affect,təsir etmək,inf02064wr
+influence,təsir; nüfuz,inf02064wr
+impact,təsir; zərbə,inf02064wr
+appropriate,uyğun; müvafiq,app03068wr
+suitable,yararlı; münasib,app03068wr
+relevant,aidiyyəti olan; əhəmiyyətli,rel02069wr
+connected,əlaqəli; bağlı,
+pertinent,məsələyə aid olan,rel02069wr
+fitting,uyğun; yaraşan,app03068wr
+apt,yerinə düşən; meylli,app03068wr
+side,tərəf; yan,
+feature,xüsusiyyət; cəhət,fea03031wr
+assistance,kömək; yardım,ass03070wr
+help,kömək; kömək etmək,ass03070wr
+aid,yardım; dəstək,ass03070wr
+support,dəstək; dəstəkləmək,ass03070wr
+category,kateqoriya; növ,cat02071wr
+group,qrup,cat02071wr
+class,sinif; kateqoriya,cat02071wr
+chapter,fəsil; bölmə,
+compensation,kompensasiya; əvəz,
+percentage,faiz; faiz hissəsi,
+community,icma; birlik,
+society,cəmiyyət,
+public,ictimaiyyət; ictimai,
+association,birlik; assosiasiya,
+complex,mürəkkəb; kompleks,com01061wr
+complicated,çətin; mürəkkəb,com01061wr
+multiple,çoxsaylı; çoxlu,
+computer,kompüter,com01072wr
+data processor,məlumat emal edən qurğu,com01072wr
+conclusion,nəticə; yekun,con02073wr
+ending,son; sonluq,con02073wr
+end,son; bitmək,con02073wr
+conduct,aparmaq; həyata keçirmək,con01074wr
+manage,idarə etmək; bacarmaq,man03075wr
+run,idarə etmək; işlətmək,man03075wr
+carry out,yerinə yetirmək; həyata keçirmək,con01074wr
+oversee,nəzarət etmək,man03075wr
+supervise,rəhbərlik edib nəzarət etmək,man03075wr
+consequence,nəticə; fəsad,con02076wr
+result,nəticə; yekun,con02076wr
+outcome,son nəticə,con02076wr
+out-turn,yekun nəticə,
+construction,tikinti; quruluş,con01036wr
+building,bina; tikinti,con01036wr
+consumer,istehlakçı,
+purchaser,alıcı; satınalan,buy01077wr
+buyer,alıcı,buy01077wr
+cultural,mədəni,
+ethnic,etnik,
+folk,xalq; xalqa məxsus,
+design,dizayn; layihə,des02046wr
+plan,plan; planlaşdırmaq,des02046wr
+drawing,rəsm; çertyoj,
+sketch,eskiz; cızma,des02046wr
+distinction,fərq; seçkinlik,dis02078wr
+difference,fərq,dis02078wr
+variation,dəyişiklik; variasiya,
+dissimilarity,oxşamazlıq; fərqlilik,dis02078wr
+component,komponent; tərkib hissəsi,com01053wr
+equation,tənlik; bərabərlik,
+coincidence,təsadüf; üst-üstə düşmə,
+fitness,uyğunluq; fiziki hazırlıq,
+evaluation,qiymətləndirmə,eva03079wr
+assessment,qiymətləndirmə; yoxlama,eva03079wr
+appraisal,qiymətləndirmə; ekspertiza,eva03079wr
+judgement,mühakimə; rəy,eva03079wr
+estimation,təxmin; qiymətləndirmə,
+ranking,reytinq; sıralama,
+rating,reytinq; qiymət,
+attribute,xüsusiyyət; atribut,fea03031wr
+trait,xarakter cizgisi,fea03031wr
+mark,nişan; qeyd,
+hallmark,səciyyəvi əlamət; nişan,
+final,son; yekun,fin02081wr
+terminal,son; terminal,
+culminating,zirvəyə çatan; yekun,
+ultimate,sonuncu; ən yüksək,fin02081wr
+eventual,son nəticədə baş verən,
+endmost,ən sondakı,fin02081wr
+collision,toqquşma,
+injury,zədə; yaralanma,
+wound,yara,
+bruise,göyərmə; əzik,
+gash,dərin kəsik,
+institute,institut; təsis etmək,
+foundation,təməl; fond,
+organization,təşkilat,
+academy,akademiya,
+school,məktəb,
+establishment,müəssisə; yaradılma,
+investment,investisiya; sərmayə,inv01082wr
+outlay,xərc,inv01082wr
+funding,maliyyələşdirmə; fond,fun01083wr
+financing,maliyyələşdirmə,fun01083wr
+maintenance,saxlanma; baxım,
+preservation,qoruyub saxlama,pre01084wr
+conservation,mühafizə; qoruma,pre01084wr
+normal,normal; adi,nor04015wr
+usual,adi; müntəzəm,nor04015wr
+typical,tipik; xarakterik,nor04015wr
+common,ümumi; geniş yayılmış,nor04015wr
+ordinary,adi; sıravi,nor04015wr
+acquire,əldə etmək; qazanmaq,obt04048wr
+pick up,götürmək; öyrənmək,obt04048wr
+attain,nail olmaq; çatmaq,ach03049wr
+participation,iştirak,par01085wr
+involvement,iştirak; cəlb olunma,par01085wr
+implication,nəzərdə tutulan məna; cəlb olunma,
+joining,qoşulma; birləşmə,
+perceive,hiss etmək; qavramaq,
+comprehend,dərindən başa düşmək,und02008wr
+apprehend,anlamaq; həbs etmək,und02008wr
+understand,başa düşmək; anlamaq,und02008wr
+discover,kəşf etmək; tapmaq,rea02009wr
+learn,öyrənmək,rea02009wr
+realize,dərk etmək; reallaşdırmaq,rea02009wr
+positive,müsbət; pozitiv,
+pragmatic,praqmatik; real,pra01086wr
+practical,praktik; əməli,pra01086wr
+productive,məhsuldar,
+beneficial,xeyirli; sərfəli,ben01087wr
+useful,faydalı; yararlı,ben01087wr
+cheerful,şən; xoşagələn,
+potential,potensial; mümkün,pot01088wr
+prospective,gələcəkdə ola biləcək,
+probable,ehtimal olunan,
+possible,mümkün; ola bilən,pot01088wr
+previous,əvvəlki; keçmiş,pre03089wr
+foregoing,yuxarıda göstərilən,
+preceding,əvvəl gələn; qabaqkı,pre03089wr
+prior,əvvəlki; ilkin,pre03089wr
+earlier,daha əvvəlki; daha tez,pre03089wr
+primary,əsas; ilkin,pri05027wr
+main,əsas; ana,pri05027wr
+chief,baş; rəis,pri05027wr
+key,açar; əsas,pri05027wr
+principal,başlıca; direktor,pri05027wr
+foremost,ən qabaqcıl; ilk,pri05027wr
+supreme,ali; ən yüksək,
+master,usta; mənimsəmək,
+dominant,hakim; üstün,
+paramount,ən vacib; ən mühüm,
+variety,müxtəliflik; çeşid,var02065wr
+diversity,müxtəliflik; rəngarənglik,var02065wr
+collection,kolleksiya; toplu,
+kind,növ; cür,kin02066wr
+sort,növ; çeşid,kin02066wr
+type,tip; növ,kin02066wr
+district,rayon; məhəllə,
+province,vilayət; əyalət,
+regulation,qayda; tənzimləmə,reg01014wr
+law,qanun; hüquq,
+requirement,tələb; şərt,
+prescription,göstəriş; resept,
+applicable,tətbiq olunan; yararlı,rel02069wr
+resident,sakin,
+local,yerli,
+citizen,vətəndaş,
+resources,ehtiyatlar; resurslar,
+funds,vəsait; fond,
+supplies,təchizat; ehtiyat,
+restricted,məhdud; məhdudlaşdırılmış,res01090wr
+limited,məhdud; az,res01090wr
+cramped,dar; sıxıcı,
+security,təhlükəsizlik; mühafizə,sec01091wr
+safety,təhlükəsizlik; salamatlıq,sec01091wr
+reliability,etibarlılıq,
+select,seçmək,sel02092wr
+choose,seçmək; üstünlük vermək,sel02092wr
+pick,seçmək; götürmək,sel02092wr
+site,məkan; sayt,loc04010wr
+put,qoymaq; yerləşdirmək,loc04010wr
+locate,yerini tapmaq; yerləşdirmək,loc04010wr
+situate,yerləşdirmək; yerləşmək,loc04010wr
+set,qoymaq; təyin etmək,loc04010wr
+survey,sorğu; araşdırma,sur01029wr
+overview,icmal; ümumi baxış,sur01029wr
+look over,nəzərdən keçirmək,
+observe,müşahidə etmək; izləmək,
+traditional,ənənəvi,tra02093wr
+conventional,şərti; ənənəvi,tra02093wr
+customary,adət halına düşmüş,tra02093wr
+long-established,çoxdankı; köklü,
+transfer,köçürmək; ötürmək,tra02094wr
+move,hərəkət etmək; köçürmək,tra02094wr
+convey,çatdırmaq; ötürmək,tra02094wr
+carry,daşımaq; aparmaq,
+fetch,gedib gətirmək,
+bear,daşımaq; çəkmək,
+entertainment,əyləncə,
+century,əsr,
+ancient,qədim,
+venue,tədbir məkanı,
+popular,populyar; məşhur,
+spectator,tamaşaçı,
+exhibit,nümayiş etdirmək; eksponat,
+exotic,ekzotik; qəribə,
+renovation,təmir; bərpa,
+massive,nəhəng; iri həcmli,
+remnant,qalıq,
+permanently,daimi olaraq,
+reduce,azaltmaq,
+band,musiqi qrupu; zolaq,
+trainer,məşqçi,
+develop,inkişaf etmək; inkişaf etdirmək,
+talent,istedad,
+survive,sağ qalmaq; yaşamaq,
+grandeur,əzəmət; təntənə,

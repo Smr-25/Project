@@ -67,26 +67,26 @@ enum AppAppearance: String, Codable, CaseIterable, Identifiable {
     var id: String { rawValue }
 }
 
-struct VocabularyGroup: Identifiable {
+struct VocabularyGroup: Identifiable, Codable {
+    let Code: String
     let Name: String
     let Words: [WordEntry]
-    var id: String { QuizPlanner.Normalize(Name) }
+    var id: String { Code }
 
     static func Make(_ Entries: [WordEntry], Search: String = "") -> [VocabularyGroup] {
-        var Names: [String] = []
-        var Groups: [String: [WordEntry]] = [:]
-        for Word in Entries where !Word.Group.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
-            let Key = QuizPlanner.Normalize(Word.Group)
-            if Groups[Key] == nil { Names.append(Key) }
-            Groups[Key, default: []].append(Word)
-        }
-        return Names.compactMap { Key in
-            guard let Words = Groups[Key], let First = Words.first else { return nil }
-            let Query = QuizPlanner.Normalize(Search)
-            guard Query.isEmpty || QuizPlanner.Normalize(First.Group).contains(Query) || Words.contains(where: {
+        let ByTerm = Dictionary(Entries.map { (QuizPlanner.Normalize($0.Term), $0) }, uniquingKeysWith: { First, _ in First })
+        let Query = QuizPlanner.Normalize(Search)
+        return SynonymCatalog.Families.compactMap { Family in
+            let Words = Family.Terms.compactMap { Term -> WordEntry? in
+                guard let Word = ByTerm[Term], SynonymCatalog.Parts(SynonymCatalog.CanonicalGroups(Word.Group, Term: Word.Term))
+                    .map(QuizPlanner.Normalize).contains(Family.Code) else { return nil }
+                return Word
+            }
+            guard Words.count >= 2 else { return nil }
+            guard Query.isEmpty || Family.Code.contains(Query) || QuizPlanner.Normalize(Family.Sense).contains(Query) || Words.contains(where: {
                 QuizPlanner.Normalize($0.Term).contains(Query) || QuizPlanner.Normalize($0.Translation).contains(Query)
             }) else { return nil }
-            return VocabularyGroup(Name: First.Group, Words: Words)
+            return VocabularyGroup(Code: Family.Code, Name: Family.Sense, Words: Words)
         }
     }
 }

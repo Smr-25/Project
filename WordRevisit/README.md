@@ -1,14 +1,14 @@
 # WordRevisit
 
-An offline English–Azerbaijani vocabulary app for iPhone and iPad. **Version 1.3.0 · iOS 18+ · SwiftUI.** Add words, practise in shuffled groups, and give every word a turn.
+An offline English–Azerbaijani vocabulary app for iPhone and iPad. **Version 1.4.0 · iOS 18+ · SwiftUI.** Add words, practise in shuffled groups, and give every word a turn.
 
 ## Screenshots
 
-Screenshots show WordRevisit 1.3.0 with sample vocabulary in the simulator. The black, white and red interface supports System, Light and Dark appearance, with emerald feedback for correct answers and cherry red for incorrect answers.
+Screenshots show WordRevisit 1.4.0 with sample vocabulary in the simulator. The black, white and red interface supports System, Light and Dark appearance, with emerald feedback for correct answers and cherry red for incorrect answers.
 
-| Practice | Answers | Synonyms |
+| Practice | Answers | Synonym practice |
 |:---:|:---:|:---:|
-| ![WordRevisit 1.3.0 practice cycle](docs/screenshots/practice-1.3.0.png) | ![WordRevisit 1.3.0 answer feedback](docs/screenshots/answers-1.3.0.png) | ![Vocabulary grouped by synonym family](docs/screenshots/synonyms.png) |
+| ![WordRevisit 1.4.0 practice cycle](docs/screenshots/practice-1.4.0.png) | ![WordRevisit 1.4.0 answer feedback](docs/screenshots/answers-1.4.0.png) | ![WordRevisit 1.4.0 synonym grouping](docs/screenshots/synonyms-1.4.0.png) |
 
 ## Start here
 
@@ -16,7 +16,8 @@ Screenshots show WordRevisit 1.3.0 with sample vocabulary in the simulator. The 
 2. Choose **Easy** or **Hard** on **Practice**, then tap **Start practice**.
 3. Answer and tap **Next** in the fixed bottom panel. In Hard mode, **Check answer** stays above the keyboard.
 4. Finish a group, then continue with **Next group** or return home. There is no daily limit.
-5. Find completed groups and their answers in **Settings → Practice history**.
+5. Open **Synonym practice** on the home screen for separate Grouping or Easy rounds.
+6. Find completed word groups and synonym rounds in **Settings → Practice history**.
 
 ## Every word gets a turn
 
@@ -48,7 +49,7 @@ Each word has three editable fields:
 |---|---|---|
 | English | Yes | `large` |
 | Azerbaijani | Yes | `böyük; iri` |
-| Group | No | `size` |
+| Group | No | `sel02092wr` (multiple codes separated by `;`) |
 
 Use semicolons to separate accepted meanings. Select individual words, **Select visible**, or **Delete all words** from **Manage words** to delete entries after confirmation. Export CSV before deleting vocabulary you might want to keep.
 
@@ -58,12 +59,20 @@ CSV files must be UTF-8 with a header containing **English** and **Azerbaijani**
 
 ```csv
 English,Azerbaijani,Group
-large,böyük; iri,size
-huge,nəhəng; böyük,size
-forest,meşə,nature
+select,seçmək,sel02092wr
+choose,seçmək,sel02092wr
+pick,seçmək; yığmaq,sel02092wr
 ```
 
-Import preview shows new words, skipped duplicates and invalid rows before confirmation. An existing English word is always skipped, even if its translation or group differs. The first occurrence within a file is kept; later duplicates are skipped. Duplicate checks ignore case and extra whitespace. An unfinished quoted field stops the import.
+Preview shows **new**, **updated**, **unchanged**, **combined duplicate rows**, and **invalid rows** before confirmation. Matching ignores case and extra whitespace in English:
+
+- A new English word is added to the current ordinary practice pool.
+- An existing word keeps its ID, position and cycle progress; its translation and Group are updated from the file. Words absent from the file remain in the app.
+- Repeated English rows within the same file combine distinct meanings and group memberships, retaining their original order.
+- A missing Group column preserves existing groups. A present but empty Group clears them.
+- Extra columns are ignored. Invalid rows are reported and skipped; an unfinished quoted field stops the import.
+
+Questions already in an ordinary practice group keep their original wording until that group ends. Import does not reset its pool or unfinished answers.
 
 For quick entry, **Manage words → Paste words** accepts one `word - translation` pair per line.
 
@@ -71,13 +80,37 @@ For quick entry, **Manage words → Paste words** accepts one `word - translatio
 
 **Export CSV** writes exactly `English,Azerbaijani,Group`. CSV contains vocabulary only, not practice history or the unfinished group.
 
-A fresh installation includes **287 unique words** from [Data/Vocabulary.csv](Data/Vocabulary.csv). The supplied file contains 298 rows; its 11 duplicate English entries are skipped, keeping each first occurrence.
+A fresh installation includes **513 unique words** in [Data/Vocabulary.csv](Data/Vocabulary.csv). All words and Azerbaijani meanings from the supplied 524-row file are retained; its 11 repeated English rows are combined. The original file is preserved in [Data/SourceVocabulary-v2.csv](Data/SourceVocabulary-v2.csv).
 
-## Synonyms
+## Synonym families
 
-The **Synonyms** tab builds word-family blocks automatically from **Group**. The first word added to each group is its heading; the other words appear underneath with their translations. Words without a group are omitted. Search matches English, Azerbaijani or the group name and shows the whole matching block.
+The **Synonyms** tab shows **94 reviewed, sense-specific families** when all starter words are present. Each block states the shared meaning, then shows its head word and remaining members with their Azerbaijani translations. Related topics, opposites and similar spellings alone do not make a synonym family. Words such as `terrestrial`, `aquatic`, `nocturnal`, `diurnal`, `inhibit` and `inhabit` remain in the vocabulary without being grouped together as synonyms.
 
-The layout uses one column on narrow screens and two or three on wider screens. These are your own vocabulary families; the app does not generate or verify synonym relationships.
+Group codes identify families. For example, `sel02092wr` means the first three letters of `select`, two synonyms besides the head, family 092, and `wr`. Multiple memberships use `;`. Codes remain stable after creation; deleting a member does not rename its family. The app displays English headings and meanings, rather than codes. Head selection comes from the reviewed catalogue, independent of CSV row order. If the head is absent, the first remaining catalogue member becomes the heading. Families with fewer than two available members are hidden.
+
+Only reviewed term–family memberships appear in Synonyms and synonym practice. Recognized labels from the supplied older CSV are converted to the corresponding codes; topical memberships are removed. Unknown custom labels are retained for CSV export but do not automatically create a synonym relationship. To extend the reviewed catalogue, edit [Data/SynonymFamilies.json](Data/SynonymFamilies.json) and regenerate the data as described below.
+
+Search finds complete blocks by English, Azerbaijani, shared meaning or code. The layout uses one column on phones and two or three on wider screens. Synonyms share the stated sense; they are not interchangeable in every sentence. The supplied translations are preserved, including other meanings of polysemous words.
+
+## Separate synonym practice
+
+Launch **Synonym practice** from **Practice**. The bottom navigation remains **Practice · My words · Synonyms · Settings**.
+
+### Grouping
+
+A round draws up to three random families from its own shuffled pool. Families sharing any word, including their heads, cannot appear together. Tap a synonym chip, then select its family in the fixed bottom panel. You can move chips until you press **Check families**. Feedback marks each placement and shows the correct family for mistakes.
+
+All synonyms in each selected family appear; round size follows family size instead of dropping words to force a fixed chip count. If only one compatible family remains for a round, it uses Easy. Other families stay in the pool for later rounds.
+
+### Easy
+
+See a head word and its shared meaning, then choose a synonym. Each non-head member gets a question. Alternatives exclude members and known synonyms of that family, as well as words sharing a supplied Azerbaijani meaning. Use two or three choices when four distinct choices are unavailable. If no distractor exists, the app offers an unscored review of the synonym.
+
+### Progress and saving
+
+Both synonym modes share their own family pool, separate from ordinary Easy/Hard word practice. Every family is drawn once per cycle. Incorrect placements or choices return once; after that, the family is complete regardless of the retry result. **Next** stays in the fixed bottom panel. Finish a round, then choose the next mode or return home.
+
+The selected families, chip placements, current question, feedback and retry state survive closing the app. Completed scored rounds appear in **Settings → Practice history**. New eligible families join the current synonym pool. If edits or deletion change a family in an unfinished synonym round, that round is rebuilt: surviving families return to the pool and a message appears on Home. Other cycle progress and ordinary practice remain intact.
 
 ## Settings and Xcode renewal
 
@@ -85,17 +118,27 @@ Choose **System**, **Light** or **Dark**. The header logo follows that appearanc
 
 Enable **Xcode renewal** for a local reminder six days after enabling it or tapping **I reinstalled from Xcode**. Tap that button after each successful reinstall. The reminder estimates when a free install may expire; it does not inspect the provisioning profile or renew the app. Delivery follows notification permission and the iPhone's Focus settings.
 
-## Release and data compatibility
+## Updates and data compatibility
 
-**1.3 replaces the 2.x workflow following issues with practice navigation and the expanded learning flow.** The 2.x daily plan, review stages, streaks, statistics, advanced word fields, dedicated synonym quiz, quiet hours and JSON backup interface are retired. System/Light/Dark, the adaptive logo, Xcode renewal and practice history remain.
+**1.4.0** adds separate synonym practice, reviewed family codes, CSV updates without deleting vocabulary, and the expanded 513-word vocabulary. Ordinary Easy/Hard practice, System/Light/Dark, the adaptive logo and Xcode renewal remain available.
 
-This version reads the original **1.2 local data format** and preserves its vocabulary and practice history. It keeps a local copy of the old file before converting it. Word definitions, examples and other removed fields are not part of the new vocabulary model.
+### From 1.3
 
-**2.0 and 2.1 data are not migrated.** Before switching from either version, use that version to export the vocabulary you need as CSV. You may also keep its full backup for use with that older version. Version 1.3 does not import JSON backups.
+Install over the existing app with the same bundle identifier. On the first 1.4 launch, the app preserves a local recovery copy of the old file and upgrades it once. Existing word IDs, custom words, history, appearance, renewal settings, pool and unfinished ordinary group are retained. New supplied words join the current pool. Existing words keep their meanings, with new supplied meanings added; known starter groups become reviewed codes. Unknown custom labels are retained. Words you delete after upgrading are not re-added on subsequent launches.
 
-If 1.3 finds a 2.x or unreadable file, it leaves the file untouched and displays a recovery screen. **Start with the new vocabulary** requires confirmation, preserves that old file separately on the device, and starts with the bundled vocabulary and empty practice history. You can then import CSV; existing English entries are skipped. To replace the bundled vocabulary entirely, delete it first through **My words**, then import your CSV.
+### From 1.2
 
-Keep the same bundle identifier when installing an update over an existing app. Deleting the app removes its local files, including any local recovery copies. Keep exported CSV outside the app before removing it. CSV does not preserve history or practice state.
+The original 1.2 local format remains readable. Vocabulary and history are preserved, the supplied vocabulary is added, and a new shuffled practice pool is created. A local copy of the old file is retained before conversion. Definitions, examples and other retired fields are not editable in the current model.
+
+### From unreleased 2.x development builds
+
+The 2.0/2.1 development workflow was replaced by 1.3 following practice navigation and learning-flow issues; **2.x was not a public release**. Its daily plan, stages, streaks, expanded statistics, advanced word fields, quiet hours and JSON backup interface remain retired. The synonym practice in 1.4 uses the separate family cycle described above.
+
+**2.x local files and JSON backups are not migrated.** Before switching, open that development build and export the vocabulary as CSV. Keep its full backup if you need its old history. This app imports CSV vocabulary, not JSON backups.
+
+If the app finds an unsupported or unreadable file, it leaves it untouched and displays a recovery screen. **Start with the new vocabulary** requires confirmation, archives the old file separately on the device, and starts with 513 words and empty practice history. You can then import your CSV to add or update words. To use only your own vocabulary, delete the starter words in **My words** first, then import.
+
+Deleting the app removes its local files and local recovery copies. Export CSV outside the app before removing it or changing its bundle identifier. CSV preserves vocabulary, not practice history or the current cycle.
 
 ## Run on an iPhone without the App Store
 
@@ -116,7 +159,7 @@ A free Personal Team install normally expires after seven days. Run from Xcode a
 
 ```text
 Sources/
-├── Models/      Vocabulary, practice pool, sessions and answer history
+├── Models/      Vocabulary, reviewed families, independent practice pools and sessions
 ├── Services/    Question generation, CSV preview and Xcode renewal reminders
 ├── Data/        Atomic persistence and version compatibility
 └── Views/       Practice, vocabulary, synonym families and settings
@@ -131,7 +174,15 @@ swiftc Sources/Models/*.swift Sources/Services/*.swift Sources/Data/WordReposito
 /tmp/WordRevisitRepositoryChecks
 ```
 
-These check full-cycle coverage, short final groups, one-time retries, adding/deleting words, exact and alternative answers, CSV duplicate handling, saved sessions, 1.2 conversion and rejection of 2.x files without changing them. Select a simulator and use **Product → Test** (`⌘U`) for the interface checks, including reaching **Next** without scrolling. UI tests use an isolated temporary vocabulary.
+These check ordinary and synonym cycle coverage, overlapping-family exclusion, every member receiving a turn, one-time retries, saved placements and answers, CSV upserts, preservation of every supplied meaning, 1.2/1.3 migration, and rejection of unsupported files without changing them. Select a simulator and use **Product → Test** (`⌘U`) for the interface checks, including reaching **Next** without scrolling. UI tests use an isolated temporary vocabulary.
+
+To regenerate the canonical CSV and Swift vocabulary/catalogue after editing the source data:
+
+```bash
+python3 Scripts/GenerateVocabulary.py
+```
+
+The original source file preserves the supplied meanings. `SynonymFamilies.json` defines reviewed members, their shared sense, head and stable code. The generator checks unique codes, valid members and the expected vocabulary size. When adding a new family, allocate a new sequence number; do not reuse or renumber existing codes.
 
 ## License
 
