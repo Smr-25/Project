@@ -82,7 +82,7 @@ enum SynonymCatalog {
         SynonymFamily(Code: "buy01077wr", Head: "buyer", Sense: "someone who pays for goods", Terms: ["buyer", "purchaser"]),
         SynonymFamily(Code: "dis02078wr", Head: "distinction", Sense: "a contrast between things", Terms: ["distinction", "difference", "dissimilarity"]),
         SynonymFamily(Code: "eva03079wr", Head: "evaluation", Sense: "determining quality or value", Terms: ["evaluation", "assessment", "appraisal", "judgement"]),
-        SynonymFamily(Code: "rat01080wr", Head: "rating", Sense: "an assessment of quality", Terms: ["rating", "ranking"]),
+        SynonymFamily(Code: "est01080wr", Head: "estimate", Sense: "make an approximate judgement", Terms: ["estimate", "guess"]),
         SynonymFamily(Code: "fin02081wr", Head: "final", Sense: "last", Terms: ["final", "ultimate", "endmost"]),
         SynonymFamily(Code: "inv01082wr", Head: "investment", Sense: "money committed to a purpose", Terms: ["investment", "outlay"]),
         SynonymFamily(Code: "fun01083wr", Head: "funding", Sense: "providing money", Terms: ["funding", "financing"]),

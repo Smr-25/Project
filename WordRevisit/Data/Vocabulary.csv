@@ -182,9 +182,9 @@ details,təfərrüatlar,
 facts,faktlar,dat02043wr
 figures,rəqəmlər,dat02043wr
 materials,materiallar,
-estimate,qiymətləndirmək; təxmin etmək,
+estimate,qiymətləndirmək; təxmin etmək,est01080wr
 value,dəyər vermək,
-guess,təxmin etmək,
+guess,təxmin etmək,est01080wr
 judge,mühakimə etmək,ass01003wr
 way,yol,met03033wr
 concept,anlayış,con01044wr
@@ -371,8 +371,8 @@ assessment,qiymətləndirmə; yoxlama,eva03079wr
 appraisal,qiymətləndirmə; ekspertiza,eva03079wr
 judgement,mühakimə; rəy,eva03079wr
 estimation,təxmin; qiymətləndirmə,
-ranking,reytinq; sıralama,rat01080wr
-rating,reytinq; qiymət,rat01080wr
+ranking,reytinq; sıralama,
+rating,reytinq; qiymət,
 attribute,xüsusiyyət; atribut,fea03031wr
 trait,xarakter cizgisi,fea03031wr
 mark,nişan; qeyd,

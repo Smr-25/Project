@@ -793,12 +793,12 @@
     ]
   },
   {
-    "Code": "rat01080wr",
-    "Head": "rating",
-    "Sense": "an assessment of quality",
+    "Code": "est01080wr",
+    "Head": "estimate",
+    "Sense": "make an approximate judgement",
     "Terms": [
-      "rating",
-      "ranking"
+      "estimate",
+      "guess"
     ]
   },
   {

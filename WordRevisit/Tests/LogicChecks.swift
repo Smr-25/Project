@@ -126,7 +126,7 @@ import Foundation
             let Family = SynonymCatalog.Families.first { $0.Code == Group.Code }!
             assert(Group.Words.map(\.Term) == Family.Terms && Group.Words[0].Term == Family.Head)
         }
-        for Excluded in ["terrestrial", "aquatic", "nocturnal", "diurnal", "inhibit", "inhabit"] {
+        for Excluded in ["terrestrial", "aquatic", "nocturnal", "diurnal", "inhibit", "inhabit", "rating", "ranking"] {
             assert(Entries.contains { $0.Term == Excluded })
             assert(VocabularyGroup.Make(Entries, Search: Excluded).isEmpty)
         }
