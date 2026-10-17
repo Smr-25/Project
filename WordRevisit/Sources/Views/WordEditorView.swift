@@ -25,8 +25,8 @@ struct WordEditorView: View {
                     TextField("Translation; another meaning", text: $Azerbaijani, axis: .vertical).accessibilityIdentifier("EditTranslation")
                 }
                 Section("Group · optional") {
-                    TextField("Family codes, separated by ;", text: $Group)
-                    Text("Use codes from the supplied CSV. Only reviewed word memberships appear in Synonyms; other labels are retained for export.").font(.caption).foregroundStyle(Palette.Muted)
+                    TextField("Family codes, separated by ;", text: $Group).accessibilityIdentifier("EditGroup")
+                    Text("Words sharing a code form a synonym family when at least two members are present. Use ; for multiple families. Group only words with a shared meaning.").font(.caption).foregroundStyle(Palette.Muted)
                 }
             }.textInputAutocapitalization(.never).autocorrectionDisabled()
                 .navigationTitle(IsNew ? "Add word" : "Edit word")
