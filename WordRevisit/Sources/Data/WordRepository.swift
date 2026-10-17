@@ -3,11 +3,12 @@ import SwiftUI
 
 struct PracticeData: Codable {
     var Format = "WordRevisitPractice"
-    var SchemaVersion = 2
+    var SchemaVersion = 3
     var Entries: [WordEntry]
     var Bag: PracticeBag
     var History: [QuizRecord] = []
     var Synonyms: SynonymBag?
+    var FamilyMeanings: [String: String]?
     var Appearance = AppAppearance.System
     var PreferredMode = QuizMode.Easy
     var RenewalReminderEnabled = false
@@ -25,7 +26,7 @@ enum StorageIssue: LocalizedError {
     case Unsupported, Invalid
     var errorDescription: String? {
         switch self {
-        case .Unsupported: "This installation contains 2.x or newer data. Version 1.4 does not migrate that format. Export your vocabulary as CSV from that version before switching. The existing file has not been changed."
+        case .Unsupported: "This installation contains 2.x or newer data. Version 1.5 does not migrate that format. Export your vocabulary as CSV from that version before switching. The existing file has not been changed."
         case .Invalid: "The saved file could not be read safely. It has not been changed."
         }
     }
@@ -38,6 +39,7 @@ final class WordRepository: ObservableObject {
     @Published var ErrorMessage: String?
     private let FileURL: URL
     var Entries: [WordEntry] { Data.Entries }
+    var Groups: [VocabularyGroup] { VocabularyGroup.Make(Entries, Meanings: Data.FamilyMeanings ?? [:]) }
     var History: [QuizRecord] { Data.History }
     var Appearance: AppAppearance { Data.Appearance }
     var Session: PracticeSession? { Data.Bag.Session }
@@ -59,8 +61,9 @@ final class WordRepository: ObservableObject {
             if Header?["Format"] as? String == "WordRevisitPractice" {
                 var Saved = try JSONDecoder().decode(PracticeData.self, from: Bytes)
                 try Validate(Saved)
-                if Saved.SchemaVersion == 1 {
-                    UpgradeVocabulary(&Saved)
+                if Saved.SchemaVersion < 3 {
+                    if Saved.SchemaVersion == 1 { UpgradeVocabulary(&Saved) }
+                    Saved.SchemaVersion = 3
                     try PreserveBeforeUpgrade(Bytes)
                     if !Commit(Saved) { StorageBlocked = true }
                 } else { Data = Saved }
@@ -84,7 +87,7 @@ final class WordRepository: ObservableObject {
     }
 
     private func PreserveBeforeUpgrade(_ Bytes: Foundation.Data) throws {
-        let Recovery = FileURL.appendingPathExtension("before-1-4")
+        let Recovery = FileURL.appendingPathExtension("before-1-5")
         if !FileManager.default.fileExists(atPath: Recovery.path) { try Bytes.write(to: Recovery, options: .atomic) }
     }
 
@@ -98,7 +101,7 @@ final class WordRepository: ObservableObject {
             } else { Saved.Entries.append(Word) }
         }
         Saved.Bag.Reconcile(Saved.Entries)
-        Saved.SchemaVersion = 2
+        Saved.SchemaVersion = 3
         Saved.Synonyms = SynonymBag()
         Saved.Synonyms?.Reconcile(VocabularyGroup.Make(Saved.Entries))
     }
@@ -108,7 +111,7 @@ final class WordRepository: ObservableObject {
         guard !StorageBlocked else { return false }
         var Next = Next
         if Next.Synonyms == nil { Next.Synonyms = SynonymBag() }
-        Next.Synonyms?.Reconcile(VocabularyGroup.Make(Next.Entries))
+        Next.Synonyms?.Reconcile(VocabularyGroup.Make(Next.Entries, Meanings: Next.FamilyMeanings ?? [:]))
         do {
             try JSONEncoder().encode(Next).write(to: FileURL, options: .atomic)
             Data = Next
@@ -197,15 +200,23 @@ final class WordRepository: ObservableObject {
         do {
             let Preview = try ImportPreview(Text: Text, Existing: Entries, Paste: Paste)
             var Next = Data
-            let Updates = Dictionary(uniqueKeysWithValues: Preview.UpdatedEntries.map { ($0.Id, $0) })
-            Next.Entries = Next.Entries.map { Updates[$0.Id] ?? $0 }
-            Next.Entries.append(contentsOf: Preview.AddedEntries)
+            Next.Entries = Preview.Applying(to: Next.Entries)
             Next.Bag.Reconcile(Next.Entries)
             return Commit(Next)
         } catch { ErrorMessage = error.localizedDescription; return false }
     }
 
     var Synonyms: SynonymBag { Data.Synonyms ?? SynonymBag() }
+
+    @discardableResult
+    func SetFamilyMeaning(Code: String, Meaning: String) -> Bool {
+        guard Groups.contains(where: { $0.Code == Code && !$0.IsCatalogued }) else { return false }
+        var Next = Data
+        if Next.FamilyMeanings == nil { Next.FamilyMeanings = [:] }
+        let Value = Meaning.trimmingCharacters(in: .whitespacesAndNewlines)
+        Next.FamilyMeanings?[Code] = Value.isEmpty ? nil : Value
+        return Commit(Next)
+    }
 
     func SetSynonymMode(_ Mode: SynonymMode) {
         var Next = Data; var Bag = Synonyms; Bag.PreferredMode = Mode; Next.Synonyms = Bag; _ = Commit(Next)
@@ -214,7 +225,7 @@ final class WordRepository: ObservableObject {
     @discardableResult
     func StartSynonyms() -> Bool {
         var Next = Data; var Bag = Synonyms
-        Bag.Start(VocabularyGroup.Make(Entries)); Next.Synonyms = Bag
+        Bag.Start(Groups); Next.Synonyms = Bag
         guard Bag.Round != nil else { return false }
         return Commit(Next)
     }
@@ -258,14 +269,14 @@ final class WordRepository: ObservableObject {
 
     private func Validate(_ Saved: PracticeData) throws {
         let Ids = Set(Saved.Entries.map(\.Id))
-        guard [1, 2].contains(Saved.SchemaVersion) else { throw StorageIssue.Unsupported }
+        guard [1, 2, 3].contains(Saved.SchemaVersion) else { throw StorageIssue.Unsupported }
         guard Saved.Bag.Cycle > 0,
               Ids.count == Saved.Entries.count,
               Set(Saved.Entries.map { QuizPlanner.Normalize($0.Term) }).count == Saved.Entries.count,
               Saved.Entries.allSatisfy({ !QuizPlanner.Normalize($0.Term).isEmpty && !QuizPlanner.Meanings($0.Translation).isEmpty }),
               Set(Saved.Bag.Known) == Ids, Saved.Bag.Known.count == Ids.count, Set(Saved.Bag.Remaining).isSubset(of: Ids),
               Set(Saved.Bag.Remaining).count == Saved.Bag.Remaining.count else { throw StorageIssue.Invalid }
-        if let Synonyms = Saved.Synonyms, !Synonyms.IsValid(VocabularyGroup.Make(Saved.Entries)) { throw StorageIssue.Invalid }
+        if let Synonyms = Saved.Synonyms, !Synonyms.IsValid(VocabularyGroup.Make(Saved.Entries, Meanings: Saved.FamilyMeanings ?? [:], CatalogOnly: Saved.SchemaVersion < 3)) { throw StorageIssue.Invalid }
         if let Session = Saved.Bag.Session {
             let Questions = Set(Session.Questions.map(\.id))
             guard Questions.count == Session.Questions.count, Questions.isSubset(of: Ids),

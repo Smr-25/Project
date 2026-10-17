@@ -73,20 +73,41 @@ struct VocabularyGroup: Identifiable, Codable {
     let Words: [WordEntry]
     var id: String { Code }
 
-    static func Make(_ Entries: [WordEntry], Search: String = "") -> [VocabularyGroup] {
-        let ByTerm = Dictionary(Entries.map { (QuizPlanner.Normalize($0.Term), $0) }, uniquingKeysWith: { First, _ in First })
+    var IsCatalogued: Bool { SynonymCatalog.Families.contains { $0.Code == Code } }
+
+    static func Make(_ Entries: [WordEntry], Search: String = "", Meanings: [String: String] = [:], CatalogOnly: Bool = false) -> [VocabularyGroup] {
+        var Members: [String: [WordEntry]] = [:]
+        var Codes: [String] = []
+        for Word in Entries {
+            for Code in Set(SynonymCatalog.Parts(SynonymCatalog.CanonicalGroups(Word.Group, Term: Word.Term)).map(QuizPlanner.Normalize)).sorted() {
+                if Members[Code] == nil { Codes.append(Code) }
+                Members[Code, default: []].append(Word)
+            }
+        }
+        let Catalogue = Dictionary(uniqueKeysWithValues: SynonymCatalog.Families.map { ($0.Code, $0) })
+        let OrderedCodes = SynonymCatalog.Families.map(\.Code) + Codes.filter { Catalogue[$0] == nil }
         let Query = QuizPlanner.Normalize(Search)
-        return SynonymCatalog.Families.compactMap { Family in
-            let Words = Family.Terms.compactMap { Term -> WordEntry? in
-                guard let Word = ByTerm[Term], SynonymCatalog.Parts(SynonymCatalog.CanonicalGroups(Word.Group, Term: Word.Term))
-                    .map(QuizPlanner.Normalize).contains(Family.Code) else { return nil }
-                return Word
+        return OrderedCodes.compactMap { Code in
+            var Words = Members[Code] ?? []
+            let Name: String
+            if let Family = Catalogue[Code] {
+                let ByTerm = Dictionary(Words.map { (QuizPlanner.Normalize($0.Term), $0) }, uniquingKeysWith: { First, _ in First })
+                let Reviewed = Family.Terms.compactMap { ByTerm[$0] }
+                // Old saved synonym pools must be validated against their original catalogue rules.
+                Words = Reviewed + (CatalogOnly ? [] : Words.filter { !Family.Terms.contains(QuizPlanner.Normalize($0.Term)) })
+                Name = Family.Sense
+            } else {
+                guard !CatalogOnly else { return nil }
+                if let Head = Words.firstIndex(where: { QuizPlanner.Normalize($0.Term).hasPrefix(String(Code.prefix(3))) }) {
+                    Words.insert(Words.remove(at: Head), at: 0)
+                }
+                Name = Meanings[Code] ?? ""
             }
             guard Words.count >= 2 else { return nil }
-            guard Query.isEmpty || Family.Code.contains(Query) || QuizPlanner.Normalize(Family.Sense).contains(Query) || Words.contains(where: {
+            guard Query.isEmpty || Code.contains(Query) || QuizPlanner.Normalize(Name).contains(Query) || Words.contains(where: {
                 QuizPlanner.Normalize($0.Term).contains(Query) || QuizPlanner.Normalize($0.Translation).contains(Query)
             }) else { return nil }
-            return VocabularyGroup(Code: Family.Code, Name: Family.Sense, Words: Words)
+            return VocabularyGroup(Code: Code, Name: Name, Words: Words)
         }
     }
 }

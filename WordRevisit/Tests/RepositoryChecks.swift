@@ -42,6 +42,7 @@ import Foundation
         assert(Again.Appearance == .Dark && Again.Data.RenewalReminderEnabled && Again.Data.XcodeInstalledAt != nil)
         assert(!Again.StorageBlocked && Again.History.count == 1)
         try Check14MigrationAndSynonyms(Directory)
+        try Check15MigrationAndImport(Directory)
         try CheckLegacy(Directory)
         try CheckUnsupported(Directory)
         print("Session persistence, shared cycles, history, 1.2 migration and 2.x rejection checks passed")
@@ -63,13 +64,13 @@ import Foundation
         Old.Bag.Start(.Hard, Entries: Words); Old.Bag.Session?.Draft = "keep this draft"
         let Bytes = try JSONEncoder().encode(Old); try Bytes.write(to: URL)
         let Store = WordRepository(FileURL: URL)
-        assert(!Store.StorageBlocked && Store.Entries.count == 513 && Store.Data.SchemaVersion == 2)
+        assert(!Store.StorageBlocked && Store.Entries.count == 513 && Store.Data.SchemaVersion == 3)
         assert(Store.Entries.prefix(287).map(\.Id) == Words.map(\.Id))
         assert(Store.Entries[0].Translation.contains("my personal meaning"))
         assert(Store.Session?.Current?.id == Old.Bag.Session?.Current?.id && Store.Session?.Draft == "keep this draft")
         assert(Store.Data.Bag.Remaining.count == Old.Bag.Remaining.count + 226)
         assert(Store.Appearance == .Dark && Store.Data.RenewalReminderEnabled)
-        let Recovery = try Data(contentsOf: URL.appendingPathExtension("before-1-4")); assert(Recovery == Bytes)
+        let Recovery = try Data(contentsOf: URL.appendingPathExtension("before-1-5")); assert(Recovery == Bytes)
         let Ordinary = try JSONEncoder().encode(Store.Data.Bag)
         assert(Store.StartSynonyms())
         let Round = Store.Synonyms.Round!
@@ -102,6 +103,74 @@ import Foundation
         assert(Store.History.filter { $0.Mode.hasPrefix("Synonyms") }.count == 1)
         assert(!WordRepository(FileURL: URL).StorageBlocked)
     }
+    @MainActor static func Check15MigrationAndImport(_ Directory: URL) throws {
+        let URL = Directory.appendingPathComponent("Version14.json")
+        let Catalogue = SynonymCatalog.Families.first { $0.Terms.count == 2 }!
+        var Words = StarterVocabulary.Entries.filter { Catalogue.Terms.contains($0.Term) }
+        Words += [WordEntry(Term: "swift", Translation: "cəld", Group: "rap01999wr"),
+                  WordEntry(Term: "rapid", Translation: "sürətli", Group: "rap01999wr")]
+        Words += (0..<25).map { WordEntry(Term: "word\($0)", Translation: "məna\($0)") }
+        var Old = PracticeData(Entries: Words, Bag: PracticeBag(Entries: Words))
+        Old.SchemaVersion = 2; Old.Appearance = .Light; Old.RenewalReminderEnabled = true; Old.XcodeInstalledAt = .now
+        Old.History = [QuizRecord(Mode: "Hard", Correct: 5, Total: 5)]
+        Old.Bag.Start(.Hard, Entries: Words); Old.Bag.Session?.Draft = "saved draft"
+        var Synonyms = SynonymBag(); Synonyms.Start(VocabularyGroup.Make(Words, CatalogOnly: true)); Old.Synonyms = Synonyms
+        let Encoder = JSONEncoder(); Encoder.outputFormatting = .sortedKeys
+        let OriginalBag = try Encoder.encode(Old.Bag)
+        let Bytes = try Encoder.encode(Old); try Bytes.write(to: URL)
+        let Store = WordRepository(FileURL: URL)
+        assert(!Store.StorageBlocked && Store.Data.SchemaVersion == 3)
+        assert(Store.Entries == Words && Store.Groups.count == 2)
+        assert(Store.Synonyms.Round?.id == Synonyms.Round?.id)
+        assert(Store.Synonyms.Remaining.contains("rap01999wr"))
+        assert(Store.Appearance == .Light && Store.Data.XcodeInstalledAt == Old.XcodeInstalledAt)
+        assert(Store.Data.RenewalReminderEnabled && Store.History[0].Id == Old.History[0].Id)
+        assert(tryEqual(try Encoder.encode(Store.Data.Bag), OriginalBag))
+        let Backup = try Data(contentsOf: URL.appendingPathExtension("before-1-5")); assert(Backup == Bytes)
+        assert(Store.SetFamilyMeaning(Code: "rap01999wr", Meaning: "  moving quickly  "))
+        assert(!Store.SetFamilyMeaning(Code: Catalogue.Code, Meaning: "changed"))
+        let Reopened = WordRepository(FileURL: URL)
+        assert(!Reopened.StorageBlocked && Reopened.Groups.first { $0.Code == "rap01999wr" }!.Name == "moving quickly")
+        assert(tryEqual(try Encoder.encode(Reopened.Data.Bag), OriginalBag))
+        // Updating a known word's group keeps its ID and the complete ordinary cycle byte-for-byte.
+        assert(Store.ApplyImport(Text: "English,Azerbaijani,Group\nword0,new meaning,\(Catalogue.Code)\n", Paste: false))
+        assert(Store.Entries.map(\.Id) == Words.map(\.Id))
+        assert(Store.Groups.first { $0.Code == Catalogue.Code }!.Words.count == 3)
+        assert(Store.Synonyms.Round == nil && Store.Synonyms.Notice != nil)
+        assert(tryEqual(try Encoder.encode(Store.Data.Bag), OriginalBag))
+        let CSV = "English,Azerbaijani,Group\ncalm,sakit,cal04998wr\nquiet,səssiz,cal04998wr\npeaceful,dinc,cal04998wr\nserene,hüzurlu,cal04998wr\ntranquil,rahat,cal04998wr\n"
+        assert(Store.ApplyImport(Text: CSV, Paste: false))
+        assert(Store.Groups.first { $0.Code == "cal04998wr" }!.Words.count == 5)
+        assert(Store.Entries.prefix(Words.count).map(\.Id) == Words.map(\.Id))
+        let Session = try Encoder.encode(Store.Session)
+        assert(tryEqual(try Encoder.encode(Old.Bag.Session), Session))
+        assert(Store.Data.Bag.Remaining == Old.Bag.Remaining + Store.Entries.suffix(5).map(\.Id))
+        assert(Store.ApplyImport(Text: "English,Azerbaijani\nrapid,tez\n", Paste: false))
+        assert(Store.Entries.first { $0.Term == "rapid" }!.Group == "rap01999wr")
+        assert(Store.ApplyImport(Text: "English,Azerbaijani,Group\nrapid,tez,\n", Paste: false))
+        assert(!Store.Groups.contains { $0.Code == "rap01999wr" })
+        assert(!WordRepository(FileURL: URL).StorageBlocked)
+        // Migration also repairs an old round whose membership grows under the new rules.
+        var ExtendedOld = Old
+        ExtendedOld.Entries[4].Group = Catalogue.Code
+        let ExtendedURL = Directory.appendingPathComponent("Extended14.json")
+        try Encoder.encode(ExtendedOld).write(to: ExtendedURL)
+        let Migrated = WordRepository(FileURL: ExtendedURL)
+        assert(!Migrated.StorageBlocked && Migrated.Synonyms.Round == nil)
+        assert(Migrated.Groups.first { $0.Code == Catalogue.Code }!.Words.count == 3)
+        assert(tryEqual(try Encoder.encode(Migrated.Data.Bag), OriginalBag))
+        // A malformed old pool must still be rejected without touching the file.
+        ExtendedOld.Synonyms?.Known.append("invalid")
+        let Invalid = try Encoder.encode(ExtendedOld); try Invalid.write(to: ExtendedURL)
+        assert(WordRepository(FileURL: ExtendedURL).StorageBlocked)
+        assert(tryEqual(try Data(contentsOf: ExtendedURL), Invalid))
+        print("1.5 dynamic families, editable meanings, 1.4 migration and ordinary-state preservation passed")
+    }
+
+    static func tryEqual(_ Value: @autoclosure () throws -> Data, _ Expected: Data) -> Bool {
+        (try? Value()) == Expected
+    }
+
     @MainActor static func CheckLegacy(_ Directory: URL) throws {
         let URL = Directory.appendingPathComponent("Legacy.json")
         let WordId = UUID()
@@ -112,7 +181,7 @@ import Foundation
         let Store = WordRepository(FileURL: URL)
         assert(!Store.StorageBlocked && Store.Entries.count >= 513 && Store.Entries[0].Id == WordId)
         assert(Store.History[0].Correct == 12 && Store.Data.RenewalReminderEnabled)
-        let Old = try Data(contentsOf: URL.appendingPathExtension("before-1-4")); assert(Old == Bytes)
+        let Old = try Data(contentsOf: URL.appendingPathExtension("before-1-5")); assert(Old == Bytes)
         assert(WordRepository(FileURL: URL).Entries == Store.Entries)
     }
     @MainActor static func CheckUnsupported(_ Directory: URL) throws {

@@ -8,6 +8,12 @@ struct ImportPreview {
     var Duplicates = 0
     var Errors: [String] = []
     var Added: Int { AddedEntries.count }
+    var NewSynonymFamilies = 0
+
+    func Applying(to Entries: [WordEntry]) -> [WordEntry] {
+        let Updates = Dictionary(uniqueKeysWithValues: UpdatedEntries.map { ($0.Id, $0) })
+        return Entries.map { Updates[$0.Id] ?? $0 } + AddedEntries
+    }
 
     init(Text: String, Existing: [WordEntry], Paste: Bool = false) throws {
         var Rows: [[String]]
@@ -59,5 +65,7 @@ struct ImportPreview {
                 if Word == Old { Unchanged += 1 } else { UpdatedEntries.append(Word) }
             } else { AddedEntries.append(Word) }
         }
+        let Before = Set(VocabularyGroup.Make(Existing).map(\.Code))
+        NewSynonymFamilies = Set(VocabularyGroup.Make(Applying(to: Existing)).map(\.Code)).subtracting(Before).count
     }
 }

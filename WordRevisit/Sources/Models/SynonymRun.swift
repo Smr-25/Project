@@ -81,7 +81,7 @@ struct SynonymBag: Codable {
         Remaining.append(contentsOf: Codes.subtracting(Previous).sorted())
         if let Round, !Round.IsFinished {
             let Changed = Round.Families.contains { Old in
-                !Groups.contains { $0.Code == Old.Code && $0.Words == Old.Words }
+                !Groups.contains { $0.Code == Old.Code && $0.Words == Old.Words && $0.Name == Old.Name }
             }
             if Changed {
                 for Code in Round.Families.map(\.Code) where Codes.contains(Code) && !Remaining.contains(Code) { Remaining.append(Code) }
@@ -107,11 +107,16 @@ struct SynonymBag: Codable {
         guard !Chosen.isEmpty else { return }
         let Mode: SynonymMode = Chosen.count == 1 ? .Easy : PreferredMode
         let AllWords = Groups.flatMap(\.Words)
+        var RelatedTerms: [String: Set<String>] = [:]
+        for Group in Groups {
+            let Members = Set(Group.Words.map { QuizPlanner.Normalize($0.Term) })
+            for Term in Members { RelatedTerms[Term, default: []].formUnion(Members) }
+        }
         let Chips = Chosen.flatMap { Group in
             Group.Words.dropFirst().map { Word in
                 var Seen: Set<String> = [QuizPlanner.Normalize(Word.Term)]
                 let Distractors = AllWords.shuffled().filter { Other in
-                    !Group.Words.contains(where: { SynonymCatalog.Related($0.Term, Other.Term) || QuizPlanner.SharesMeaning($0, Other) }) &&
+                    !Group.Words.contains(where: { SynonymCatalog.Related($0.Term, Other.Term) || RelatedTerms[QuizPlanner.Normalize($0.Term), default: []].contains(QuizPlanner.Normalize(Other.Term)) || QuizPlanner.SharesMeaning($0, Other) }) &&
                     Seen.insert(QuizPlanner.Normalize(Other.Term)).inserted
                 }.prefix(3).map(\.Term)
                 return SynonymChip(Word: Word, Family: Group.Code, Options: (Array(Distractors) + [Word.Term]).shuffled())

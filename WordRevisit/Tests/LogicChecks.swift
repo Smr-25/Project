@@ -6,6 +6,7 @@ import Foundation
         CheckAnswers()
         try CheckCSV()
         CheckGroups()
+        try CheckDynamicFamilies()
         try CheckSynonymCycles()
         print("Practice bag, exact grading, alternatives, CSV and synonym checks passed")
     }
@@ -135,8 +136,70 @@ import Foundation
         assert(VocabularyGroup.Make(Reversed)[0].Words[0].Term == "select")
         let WithoutHead = Array(Family.Words.dropFirst())
         assert(VocabularyGroup.Make(WithoutHead)[0].Words[0].Term == "choose")
-        let Fake = WordEntry(Term: "aquatic", Translation: "suda", Group: Family.Code)
-        assert(!VocabularyGroup.Make(Entries + [Fake]).contains { $0.Words.contains { $0.Id == Fake.Id } })
+        for Group in Groups {
+            assert(Group.Name == SynonymCatalog.Families.first { $0.Code == Group.Code }!.Sense)
+        }
+    }
+
+    static func CheckDynamicFamilies() throws {
+        let CSV = "English,Azerbaijani,Group\nswift,sürətli,rap04999wr\nrapid,tez,rap04999wr\nspeedy,iti,rap04999wr\nquick,cəld,rap04999wr\nfast,sürətlə,rap04999wr\n"
+        let Preview = try ImportPreview(Text: CSV, Existing: [])
+        let Words = Preview.AddedEntries
+        let Group = VocabularyGroup.Make(Words).first!
+        assert(Preview.NewSynonymFamilies == 1 && Group.Words.count == 5)
+        assert(Group.Words[0].Term == "rapid" && Group.Name.isEmpty && !Group.IsCatalogued)
+        assert(VocabularyGroup.Make(Array(Words.prefix(1))).isEmpty)
+        let AddRest = try ImportPreview(Text: CSV, Existing: [Words[0]])
+        assert(AddRest.NewSynonymFamilies == 1 && AddRest.Unchanged == 1)
+        let Again = try ImportPreview(Text: CSV, Existing: Words)
+        assert(Again.NewSynonymFamilies == 0)
+        let Fallback = Words.map { Word -> WordEntry in var Copy = Word; Copy.Group = "zzz04998wr"; return Copy }
+        assert(VocabularyGroup.Make(Fallback)[0].Words[0].Id == Words[0].Id)
+        let Named = VocabularyGroup.Make(Words, Search: "movement", Meanings: [Group.Code: "fast movement"])
+        assert(Named.count == 1 && Named[0].Name == "fast movement")
+        let Two = SynonymCatalog.Families.first { $0.Terms.count == 2 }!
+        let Existing = StarterVocabulary.Entries.filter { Two.Terms.contains($0.Term) }
+        let Extended = try ImportPreview(Text: "English,Azerbaijani,Group\nadded synonym,məna,\(Two.Code)\n", Existing: Existing)
+        let Added = VocabularyGroup.Make(Extended.Applying(to: Existing)).first { $0.Code == Two.Code }!
+        assert(Added.Words.count == 3 && Added.Words[0].Term == Two.Head && Added.Name == Two.Sense)
+        assert(Extended.NewSynonymFamilies == 0)
+        for Mode in SynonymMode.allCases {
+            var Bag = SynonymBag(); Bag.PreferredMode = Mode; Bag.Start([Added])
+            assert(Bag.Round!.Chips.contains { $0.Word.Term == "added synonym" })
+        }
+        // Differing translations must not allow a dynamic family member as an incorrect option.
+        var Overlap = Words
+        Overlap[0].Group += "; fle01997wr"
+        Overlap.append(WordEntry(Term: "fleet", Translation: "çevik", Group: "fle01997wr"))
+        Overlap.append(WordEntry(Term: "calm", Translation: "sakit", Group: "cal01996wr"))
+        Overlap.append(WordEntry(Term: "quiet", Translation: "səssiz", Group: "cal01996wr"))
+        let Families = VocabularyGroup.Make(Overlap)
+        assert(Families.count == 3)
+        for Mode in SynonymMode.allCases {
+            var Bag = SynonymBag(); Bag.PreferredMode = Mode
+            var Seen: Set<String> = []
+            while Seen.count < Families.count {
+                Bag.Start(Families)
+                let Round = Bag.Round!
+                let Terms = Round.Families.flatMap { $0.Words.map(\.Term) }
+                assert(Set(Terms).count == Terms.count)
+                for Family in Round.Families { assert(Seen.insert(Family.Code).inserted) }
+                for Chip in Round.Chips {
+                    let Family = Round.Families.first { $0.Code == Chip.Family }!
+                    for Wrong in Chip.Options where Wrong != Chip.Word.Term {
+                        assert(!Families.contains { Related in
+                            Related.Words.contains { $0.Term == Wrong } && Related.Words.contains { Member in Family.Words.contains { $0.Id == Member.Id } }
+                        })
+                    }
+                }
+                Bag.Round?.IsFinished = true
+            }
+            assert(Seen.count == 3 && Bag.CycleComplete)
+        }
+        let Exported = WordCSV.Encode(Overlap)
+        assert(Exported.components(separatedBy: "\n")[0] == "English,Azerbaijani,Group")
+        let RoundTrip = try ImportPreview(Text: Exported, Existing: Overlap)
+        assert(RoundTrip.Unchanged == Overlap.count && RoundTrip.NewSynonymFamilies == 0)
     }
 
     static func CheckSynonymCycles() throws {
