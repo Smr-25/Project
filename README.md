@@ -17,12 +17,12 @@ Three independent applications in one repository: two ASP.NET Core web apps and 
 
 ### WordRevisit
 
-WordRevisit **1.4.0** offers unlimited word practice, separate synonym grouping and choice rounds, 513 starter words, CSV updates that preserve practice progress, and saved answer history. Each word gets a turn before a new cycle starts. Vocabulary stays on the device.
+WordRevisit **1.5.0** offers unlimited word practice, separate synonym grouping and choice rounds, 513 starter words, automatic synonym families from CSV, editable custom family meanings, and saved answer history. CSV updates preserve ordinary practice progress. Each word gets a turn before a new cycle starts. Vocabulary stays on the device.
 
 <p align="center">
-  <img src="WordRevisit/docs/screenshots/practice-1.4.0.png" alt="WordRevisit 1.4.0 practice cycle" width="205">
-  <img src="WordRevisit/docs/screenshots/answers-1.4.0.png" alt="WordRevisit 1.4.0 answer feedback" width="205">
-  <img src="WordRevisit/docs/screenshots/synonyms-1.4.0.png" alt="WordRevisit 1.4.0 synonym grouping" width="205">
+  <img src="WordRevisit/docs/screenshots/practice-1.5.0.png" alt="WordRevisit 1.5.0 practice cycle" width="205">
+  <img src="WordRevisit/docs/screenshots/answers-1.5.0.png" alt="WordRevisit 1.5.0 answer feedback" width="205">
+  <img src="WordRevisit/docs/screenshots/synonyms-1.5.0.png" alt="WordRevisit 1.5.0 synonym families" width="205">
 </p>
 
 <p align="center"><a href="WordRevisit/README.md">Features and iPhone setup →</a></p>
