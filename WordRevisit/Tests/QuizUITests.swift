@@ -162,6 +162,7 @@ final class QuizUITests: XCTestCase {
             }
         }
         XCTAssertTrue(App.buttons["CheckSynonyms"].isEnabled && App.buttons["CheckSynonyms"].isHittable)
+        XCTAssertLessThanOrEqual(App.buttons["CheckSynonyms"].frame.maxY, App.frame.maxY)
         Capture(App, "synonym-grouping-15")
         App.buttons["CheckSynonyms"].tap()
         XCTAssertTrue(App.buttons["NextSynonym"].isHittable)
@@ -195,7 +196,8 @@ final class QuizUITests: XCTestCase {
         for Term in ["rapid", "swift"] {
             App.buttons["Add word"].tap()
             App.textFields["EditEnglish"].tap(); App.textFields["EditEnglish"].typeText(Term)
-            App.textFields["EditTranslation"].tap(); App.textFields["EditTranslation"].typeText("fast")
+            let Translation = App.textFields["EditTranslation"].exists ? App.textFields["EditTranslation"] : App.textViews["EditTranslation"]
+            Translation.tap(); Translation.typeText("fast")
             App.textFields["EditGroup"].tap(); App.textFields["EditGroup"].typeText("rap01999wr")
             App.buttons["Save word"].tap()
         }
@@ -204,7 +206,8 @@ final class QuizUITests: XCTestCase {
         Search.tap(); Search.typeText("rapid\n")
         let Edit = App.buttons["EditMeaning-rap01999wr"]
         XCTAssertTrue(Edit.waitForExistence(timeout: 5)); Edit.tap()
-        let Meaning = App.textFields["FamilyMeaning"]
+        // iOS 18 exposes multiline SwiftUI fields as text views.
+        let Meaning = App.textFields["FamilyMeaning"].exists ? App.textFields["FamilyMeaning"] : App.textViews["FamilyMeaning"]
         Meaning.tap(); Meaning.typeText("moving quickly")
         XCTAssertTrue(App.buttons["Save meaning"].isHittable)
         App.buttons["Save meaning"].tap()
