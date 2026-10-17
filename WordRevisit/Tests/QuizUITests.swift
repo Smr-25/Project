@@ -9,10 +9,7 @@ final class QuizUITests: XCTestCase {
         return App
     }
     @MainActor private func OpenTab(_ Name: String, In App: XCUIApplication) {
-        let PhoneTab = App.tabBars.buttons[Name]
-        if PhoneTab.exists { PhoneTab.tap() }
-        else if App.buttons[Name].firstMatch.exists { App.buttons[Name].firstMatch.tap() }
-        else { App.cells[Name].firstMatch.tap() }
+        App.tabBars.buttons[Name].tap()
     }
     @MainActor private func Capture(_ App: XCUIApplication, _ Name: String) {
         let Attachment = XCTAttachment(screenshot: App.screenshot())
@@ -44,7 +41,7 @@ final class QuizUITests: XCTestCase {
             XCTAssertTrue(Next.isHittable, "Next must be reachable without scrolling")
             XCTAssertEqual(Prompt.label, Before)
             if Index == 0 {
-                Capture(App, "hard-feedback-14")
+                Capture(App, "hard-feedback-15")
                 App.terminate(); App.launch(); App.buttons["Continue group"].tap()
                 XCTAssertTrue(Next.waitForExistence(timeout: 5)); XCTAssertEqual(Prompt.label, Before)
             }
@@ -58,7 +55,7 @@ final class QuizUITests: XCTestCase {
         XCTAssertTrue(App.staticTexts["0/6"].waitForExistence(timeout: 5))
         App.buttons.containing(.staticText, identifier: "0/6").firstMatch.tap()
         XCTAssertTrue(App.staticTexts["Answer review"].waitForExistence(timeout: 5))
-        Capture(App, "history-14")
+        Capture(App, "history-15")
     }
 
     @MainActor func testEasyMixedDirectionsPinnedNextAndModeSwitch() throws {
@@ -83,7 +80,7 @@ final class QuizUITests: XCTestCase {
             Choice.tap()
             let Next = App.buttons["NextQuestion"]
             XCTAssertTrue(Next.isHittable)
-            if Index == 0 { Capture(App, "easy-feedback-14") }
+            if Index == 0 { Capture(App, "easy-feedback-15") }
             Next.tap()
         }
         XCTAssertEqual(EnglishPrompts, 3)
@@ -101,15 +98,15 @@ final class QuizUITests: XCTestCase {
         let Appearance = App.segmentedControls["AppearancePicker"]
         Appearance.buttons["Dark"].tap()
         OpenTab("Practice", In: App)
-        Capture(App, "home-dark-14")
+        Capture(App, "home-dark-15")
         OpenTab("Settings", In: App); Appearance.buttons["Light"].tap()
         App.terminate(); App.launch()
         OpenTab("Settings", In: App)
         XCTAssertTrue(Appearance.buttons["Light"].isSelected)
-        Capture(App, "settings-light-14")
+        Capture(App, "settings-light-15")
         OpenTab("Synonyms", In: App)
         XCTAssertTrue(App.staticTexts["select"].waitForExistence(timeout: 5))
-        Capture(App, "synonyms-light-14")
+        Capture(App, "synonyms-light-15")
         App.textFields["SearchGroups"].tap(); App.textFields["SearchGroups"].typeText("choose")
         XCTAssertTrue(App.staticTexts["select"].exists && App.staticTexts["choose"].exists)
         XCTAssertFalse(App.staticTexts["obtain"].exists)
@@ -119,7 +116,7 @@ final class QuizUITests: XCTestCase {
         XCTAssertTrue(English.waitForExistence(timeout: 5))
         XCTAssertFalse(App.staticTexts["Pause this word"].exists)
         XCTAssertFalse(App.staticTexts["Definition"].exists)
-        Capture(App, "editor-light-14")
+        Capture(App, "editor-light-15")
         App.buttons["Cancel"].tap()
     }
 
@@ -136,7 +133,7 @@ final class QuizUITests: XCTestCase {
         XCTAssertTrue(App.buttons["Preview import"].isHittable)
         App.buttons["Preview import"].tap()
         XCTAssertTrue(App.buttons["Import 2 words"].isHittable)
-        Capture(App, "import-14")
+        Capture(App, "import-15")
         App.buttons["Import 2 words"].tap()
         XCTAssertTrue(App.buttons.containing(.staticText, identifier: "calm").firstMatch.waitForExistence(timeout: 5))
         OpenTab("Practice", In: App); App.buttons["Start practice"].tap()
@@ -165,7 +162,7 @@ final class QuizUITests: XCTestCase {
             }
         }
         XCTAssertTrue(App.buttons["CheckSynonyms"].isEnabled && App.buttons["CheckSynonyms"].isHittable)
-        Capture(App, "synonym-grouping-14")
+        Capture(App, "synonym-grouping-15")
         App.buttons["CheckSynonyms"].tap()
         XCTAssertTrue(App.buttons["NextSynonym"].isHittable)
         App.buttons["NextSynonym"].tap()
@@ -190,6 +187,35 @@ final class QuizUITests: XCTestCase {
         App.buttons["Start practice"].tap()
         XCTAssertTrue(App.staticTexts["QuizPrompt"].waitForExistence(timeout: 5))
         XCTAssertTrue(App.staticTexts["1/6"].exists)
+    }
+
+    @MainActor func testCustomFamilyMeaningPersists() throws {
+        let App = Launch()
+        OpenTab("My words", In: App)
+        for Term in ["rapid", "swift"] {
+            App.buttons["Add word"].tap()
+            App.textFields["EditEnglish"].tap(); App.textFields["EditEnglish"].typeText(Term)
+            App.textFields["EditTranslation"].tap(); App.textFields["EditTranslation"].typeText("fast")
+            App.textFields["EditGroup"].tap(); App.textFields["EditGroup"].typeText("rap01999wr")
+            App.buttons["Save word"].tap()
+        }
+        OpenTab("Synonyms", In: App)
+        let Search = App.textFields["SearchGroups"]
+        Search.tap(); Search.typeText("rapid\n")
+        let Edit = App.buttons["EditMeaning-rap01999wr"]
+        XCTAssertTrue(Edit.waitForExistence(timeout: 5)); Edit.tap()
+        let Meaning = App.textFields["FamilyMeaning"]
+        Meaning.tap(); Meaning.typeText("moving quickly")
+        XCTAssertTrue(App.buttons["Save meaning"].isHittable)
+        App.buttons["Save meaning"].tap()
+        XCTAssertTrue(App.staticTexts["MOVING QUICKLY"].waitForExistence(timeout: 5))
+        Capture(App, "custom-family-15")
+        App.terminate(); App.launch(); OpenTab("Synonyms", In: App)
+        Search.tap(); Search.typeText("moving quickly\n")
+        XCTAssertTrue(App.staticTexts["rapid"].waitForExistence(timeout: 5))
+        XCTAssertTrue(App.staticTexts["swift"].exists)
+        Edit.tap()
+        XCTAssertEqual(Meaning.value as? String, "moving quickly")
     }
 
 }

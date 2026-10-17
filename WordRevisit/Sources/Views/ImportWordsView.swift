@@ -23,6 +23,7 @@ struct ImportWordsView: View {
                 if let Preview {
                     Section("Import preview") {
                         LabeledContent("New words", value: "\(Preview.Added)")
+                        LabeledContent("New synonym families", value: "\(Preview.NewSynonymFamilies)")
                         LabeledContent("Words to update", value: "\(Preview.Updated)")
                         LabeledContent("Unchanged words", value: "\(Preview.Unchanged)")
                         LabeledContent("Repeated rows combined", value: "\(Preview.Duplicates)")

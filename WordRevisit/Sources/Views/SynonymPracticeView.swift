@@ -6,7 +6,7 @@ struct SynonymPracticeView: View {
     @State private var ShowingRound = false
     @State private var Selected: UUID?
     private var Round: SynonymRound? { ShowingRound ? Store.Synonyms.Round : nil }
-    private var Groups: [VocabularyGroup] { VocabularyGroup.Make(Store.Entries) }
+    private var Groups: [VocabularyGroup] { Store.Groups }
 
     var body: some View {
         NavigationStack {
@@ -51,7 +51,7 @@ struct SynonymPracticeView: View {
             Text("Grouping draws up to three families with no shared words. A single remaining family uses Easy. Every synonym in each selected family is included.")
                 .font(.subheadline).foregroundStyle(Palette.Muted)
             if Groups.isEmpty {
-                Text("Import the supplied vocabulary to add reviewed synonym families. A family needs at least two of its words in My words.")
+                Text("Import words sharing a Group code to create a synonym family. Each family needs at least two words in My words.")
                     .font(.subheadline)
             }
         }
@@ -81,7 +81,7 @@ struct SynonymPracticeView: View {
             ForEach(Round.Families) { Family in
                 VStack(alignment: .leading, spacing: 10) {
                     Text(Family.Words.first?.Term ?? "").font(.title2.bold()).foregroundStyle(Palette.Accent)
-                    Text(Family.Name).font(.caption).foregroundStyle(Palette.Muted)
+                    if !Family.Name.isEmpty { Text(Family.Name).font(.caption).foregroundStyle(Palette.Muted) }
                     let Placed = Round.ActiveChips.filter { Round.Inputs[$0.id.uuidString] == Family.Code }
                     if Placed.isEmpty { Text("Choose a word below to place it here.").font(.caption).foregroundStyle(Palette.Muted) }
                     ForEach(Placed) { Item in Chip(Item, Round) }
@@ -121,7 +121,7 @@ struct SynonymPracticeView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     SectionEyebrow(Title: "Choose a synonym")
                     Text(Family.Words.first?.Term ?? "").font(.largeTitle.bold()).accessibilityIdentifier("SynonymPrompt")
-                    Text(Family.Name).foregroundStyle(Palette.Muted)
+                    if !Family.Name.isEmpty { Text(Family.Name).foregroundStyle(Palette.Muted) }
                 }.frame(maxWidth: .infinity, alignment: .leading).padding(24).FrostedCard()
                 if Item.IsReview {
                     Text("No distinct alternatives are available. Review this synonym; it will not count towards your score.").font(.subheadline).foregroundStyle(Palette.Muted)

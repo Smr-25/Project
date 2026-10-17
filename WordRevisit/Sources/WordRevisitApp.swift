@@ -56,15 +56,15 @@ private struct StorageRecoveryView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 22) {
                     Text("Existing file preserved").font(.largeTitle.bold())
-                    Text(Store.ErrorMessage ?? "This file cannot be opened by version 1.4.")
-                    Text("To bring words from 2.x, export CSV in that version first. You can then start 1.4 and import that CSV. Practice history and schedules from 2.x are not migrated.")
+                    Text(Store.ErrorMessage ?? "This file cannot be opened by version 1.5.")
+                    Text("To bring words from 2.x, export CSV in that version first. You can then start 1.5 and import that CSV. Practice history and schedules from 2.x are not migrated.")
                     Button("Start with the new vocabulary") { Confirm = true }
                         .buttonStyle(PrimaryActionStyle())
                 }.padding(24)
-            }.confirmationDialog("Start a fresh 1.4 vocabulary?", isPresented: $Confirm, titleVisibility: .visible) {
+            }.confirmationDialog("Start a fresh 1.5 vocabulary?", isPresented: $Confirm, titleVisibility: .visible) {
                 Button("Keep old file and start fresh", role: .destructive) { Store.StartFresh() }
                 Button("Cancel", role: .cancel) {}
-            } message: { Text("The old file will be retained separately on this device. Version 1.4 starts with 513 words and an empty practice history. Export CSV from your previous version first if you need its vocabulary.") }
+            } message: { Text("The old file will be retained separately on this device. Version 1.5 starts with 513 words and an empty practice history. Export CSV from your previous version first if you need its vocabulary.") }
         }
     }
 }

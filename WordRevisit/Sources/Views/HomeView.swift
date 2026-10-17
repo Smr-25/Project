@@ -43,7 +43,7 @@ struct HomeView: View {
                             Image(systemName: "rectangle.3.group.fill").font(.title).foregroundStyle(Palette.Accent)
                             VStack(alignment: .leading, spacing: 6) {
                                 Text(Store.Synonyms.Round?.IsFinished == false ? "Continue synonyms" : "Synonym practice").font(.headline)
-                                Text("\(VocabularyGroup.Make(Store.Entries).count) families · a separate cycle")
+                                Text("\(Store.Groups.count) families · a separate cycle")
                                     .font(.subheadline).foregroundStyle(Palette.Muted)
                             }
                             Spacer(minLength: 0)
