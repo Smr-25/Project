@@ -20,7 +20,8 @@ public class HomeController(IDashboardService dashboardService) : Controller
         return View();
     }
 
-    [HttpGet]
+    // Status-code re-execution preserves the original HTTP method and may follow a rejected CSRF token.
+    [IgnoreAntiforgeryToken]
     [AllowAnonymous]
     public IActionResult ErrorStatus(int code)
     {
