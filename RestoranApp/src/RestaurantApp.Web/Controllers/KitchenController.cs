@@ -13,6 +13,7 @@ public sealed class KitchenController(IOrderService orderService) : Controller
     public async Task<IActionResult> Index() => View(await orderService.GetKitchenBoardAsync());
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Advance(int id)
     {
         try
@@ -28,6 +29,7 @@ public sealed class KitchenController(IOrderService orderService) : Controller
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Cancel(int id, string reason)
     {
         try

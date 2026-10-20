@@ -1,0 +1,26 @@
+name: Dependency security audit
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: '25 7 * * 1'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+      - name: Audit direct and transitive packages
+        shell: bash
+        run: |
+          while IFS= read -r -d '' project; do
+            dotnet restore "$project" -p:NuGetAudit=true -p:NuGetAuditMode=all -warnaserror:NU1901,NU1902,NU1903,NU1904
+          done < <(find . -name '*.csproj' -not -path '*/obj/*' -not -path '*/bin/*' -print0)

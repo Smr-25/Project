@@ -1,0 +1,24 @@
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+  - package-ecosystem: nuget
+    directories:
+      - "/HRManagementApp/src/HRManagementApp"
+      - "/HRManagementApp/src/HRManagementApp.Business"
+      - "/HRManagementApp/src/HRManagementApp.DataAccess"
+      - "/HRManagementApp/tests/HRManagementApp.Tests"
+      - "/RestoranApp/src/RestaurantApp.Application"
+      - "/RestoranApp/src/RestaurantApp.Infrastructure"
+      - "/RestoranApp/src/RestaurantApp.Web"
+      - "/RestoranApp/tests/RestaurantApp.IntegrationTests"
+      - "/RestoranApp/tests/RestaurantApp.UnitTests"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly

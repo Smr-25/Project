@@ -686,7 +686,8 @@ $.extend( $.validator, {
 		},
 
 		clean: function( selector ) {
-			return $( selector )[ 0 ];
+			// Resolve existing form fields only; selector strings must never create HTML.
+			return $( this.currentForm ).find( selector )[ 0 ];
 		},
 
 		errors: function() {
@@ -1076,6 +1077,11 @@ $.extend( $.validator, {
 		},
 
 		validationTargetFor: function( element ) {
+
+			element = this.clean( element );
+			if ( !element ) {
+				return;
+			}
 
 			// If radio/checkbox, validate first element in group instead
 			if ( this.checkable( element ) ) {

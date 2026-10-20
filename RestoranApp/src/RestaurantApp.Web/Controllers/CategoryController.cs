@@ -17,6 +17,7 @@ public sealed class CategoryController(ICategoryService categoryService) : Contr
     public IActionResult Create() => View(new CategoryUpsertDto());
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(CategoryUpsertDto dto)
     {
         if (!ModelState.IsValid)
@@ -51,6 +52,7 @@ public sealed class CategoryController(ICategoryService categoryService) : Contr
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, CategoryUpsertDto dto)
     {
         if (!ModelState.IsValid)
@@ -72,6 +74,7 @@ public sealed class CategoryController(ICategoryService categoryService) : Contr
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id)
     {
         try

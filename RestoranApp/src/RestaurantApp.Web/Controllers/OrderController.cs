@@ -30,6 +30,7 @@ public class OrderController(
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(OrderCreateDto dto)
     {
         if (!ModelState.IsValid)
@@ -89,6 +90,7 @@ public class OrderController(
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Delete(int id)
     {
         try

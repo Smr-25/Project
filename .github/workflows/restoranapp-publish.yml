@@ -21,7 +21,12 @@ env:
   IMAGE_NAME: ghcr.io/smr-25/project-restoranapp
 
 jobs:
+  security-tests:
+    uses: ./.github/workflows/restoranapp-tests.yml
+    permissions:
+      contents: read
   publish:
+    needs: security-tests
     runs-on: ubuntu-latest
     timeout-minutes: 30
 

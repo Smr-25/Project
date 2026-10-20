@@ -24,6 +24,7 @@ public class MenuController(IMenuItemService menuService, ICategoryService categ
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(MenuItemCreateDto dto)
     {
         if (!ModelState.IsValid)
@@ -78,6 +79,7 @@ public class MenuController(IMenuItemService menuService, ICategoryService categ
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, MenuItemUpdateDto dto)
     {
         if (!ModelState.IsValid)
@@ -101,6 +103,7 @@ public class MenuController(IMenuItemService menuService, ICategoryService categ
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> SetAvailability(int id, bool isAvailable)
     {
         try

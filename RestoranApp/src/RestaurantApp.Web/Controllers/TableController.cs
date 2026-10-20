@@ -17,6 +17,7 @@ public sealed class TableController(IDiningTableService tableService) : Controll
     public IActionResult Create() => View(new DiningTableUpsertDto());
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(DiningTableUpsertDto dto)
     {
         if (!ModelState.IsValid)
@@ -50,6 +51,7 @@ public sealed class TableController(IDiningTableService tableService) : Controll
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Edit(int id, DiningTableUpsertDto dto)
     {
         if (!ModelState.IsValid)
