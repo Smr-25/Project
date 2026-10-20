@@ -2,5 +2,5 @@
   "name": "smr25-project-security-checks",
   "private": true,
   "scripts": { "test": "node --test tests/security.test.cjs" },
-  "devDependencies": { "jsdom": "26.1.0" }
+  "devDependencies": { "jsdom": "30.1.3" }
 }
